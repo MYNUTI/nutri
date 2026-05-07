@@ -229,6 +229,17 @@
   text-align: right;
 }
 
+.ups-field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #e53935;
+}
+
+.ups-input--error {
+  border-color: #e53935 !important;
+}
+
 /* ── 스테퍼 ────────────────────────────────────────────── */
 .ups-stepper {
   display: flex;
