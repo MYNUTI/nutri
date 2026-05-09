@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon } from '../components/icons'
 import { useProductListQuery } from '../queries/productQueries'
+import { useBrandsQuery } from '../queries/brandsQueries'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import type { Product } from '../types/product'
 import { NUTRIENT_OPTIONS, NUTRIENT_THRESHOLDS, type NutrientOption } from '../constants/nutrientFilters'
@@ -39,7 +40,6 @@ const PAGE_COUNT = Math.ceil(CATEGORIES.length / PAGE_SIZE)
 const FILTER_CHIPS = ['추천순', '브랜드', '성분'] as const
 type ChipKey = typeof FILTER_CHIPS[number]
 
-const BRAND_OPTIONS = ['풀무원', '꼬기닭', '허닭', '하림']
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
 type SortKey = typeof SORT_OPTIONS[number]
 
@@ -63,6 +63,8 @@ function mapToProduct(p: ProductResponse): Product {
 }
 
 export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
+  const { data: brandsData } = useBrandsQuery()
+  const brandOptions = brandsData ?? []
   const [activeCat, setActiveCat] = useState<number | null>(null)
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
@@ -309,15 +311,15 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
             </button>
           </div>
           <div className="home-dropdown-grid">
-            {BRAND_OPTIONS.map(opt => (
-              <label key={opt} className="home-dropdown-item">
+            {brandOptions.map(b => (
+              <label key={b.id} className="home-dropdown-item">
                 <input
                   type="checkbox"
                   className="home-dropdown-check"
-                  checked={selectedBrands.includes(opt)}
-                  onChange={() => setSelectedBrands(prev => toggleInArray(prev, opt))}
+                  checked={selectedBrands.includes(b.name)}
+                  onChange={() => setSelectedBrands(prev => toggleInArray(prev, b.name))}
                 />
-                <span>{opt}</span>
+                <span>{b.name}</span>
               </label>
             ))}
           </div>
