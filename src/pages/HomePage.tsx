@@ -6,6 +6,8 @@ import type { ProductResponse, ProductSearchCondition, SortType } from '../api/p
 import type { Product } from '../types/product'
 
 type HomePageProps = {
+  keyword?: string
+  onClearKeyword?: () => void
   onMoveToFilter: () => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
@@ -65,7 +67,7 @@ function mapToProduct(p: ProductResponse): Product {
   }
 }
 
-export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
+export const HomePage = ({ keyword, onClearKeyword, onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
   const [activeCat, setActiveCat] = useState<number | null>(null)
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
@@ -82,6 +84,7 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoH
       page: 0,
       size: 20,
     }
+    if (keyword?.trim()) c.keyword = keyword.trim()
     if (selectedBrands.length > 0) c.brands = selectedBrands
     if (activeCat != null) c.categories = [CATEGORIES[activeCat].label]
     for (const n of selectedNutrients) {
@@ -89,7 +92,7 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoH
       if (t) Object.assign(c, t)
     }
     return c
-  }, [selectedSort, selectedBrands, selectedNutrients, activeCat])
+  }, [keyword, selectedSort, selectedBrands, selectedNutrients, activeCat])
 
   const { data, isLoading, isError } = useProductListQuery(condition)
   const products = data?.items ?? []
@@ -160,17 +163,32 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoH
         </button>
       </header>
 
-      <button
-        type="button"
-        className="home-search home-search--btn"
-        onClick={() => onMoveToSearch?.()}
-        aria-label="검색 페이지로 이동"
-      >
-        <svg className="home-search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          <path d="M10 2a8 8 0 1 1-5.3 14L1 19.7 2.3 21l3.7-3.7A8 8 0 0 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="#9a9a9a"/>
-        </svg>
-        <span className="home-search-placeholder">검색</span>
-      </button>
+      <div className="home-search">
+        <button
+          type="button"
+          className="home-search--btn"
+          onClick={() => onMoveToSearch?.()}
+          aria-label={keyword ? `검색어: ${keyword}` : '검색 페이지로 이동'}
+        >
+          <svg className="home-search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M10 2a8 8 0 1 1-5.3 14L1 19.7 2.3 21l3.7-3.7A8 8 0 0 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="#9a9a9a"/>
+          </svg>
+          {keyword
+            ? <span className="home-search-keyword">{keyword}</span>
+            : <span className="home-search-placeholder">검색</span>
+          }
+        </button>
+        {keyword && (
+          <button
+            type="button"
+            className="home-search-clear"
+            aria-label="검색어 해제"
+            onClick={(e) => { e.stopPropagation(); onClearKeyword?.() }}
+          >
+            ×
+          </button>
+        )}
+      </div>
 
       <div className="home-cats-wrap">
         <div

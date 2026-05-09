@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useProductListQuery } from '../queries/productQueries'
-import type { ProductResponse } from '../api/products/types'
 import type { Product } from '../types/product'
 
 const RECOMMENDED_KEYWORDS = [
@@ -50,32 +48,16 @@ function formatPopularStamp(d: Date): string {
   return `오늘 ${isPM ? '오후' : '오전'}${h}:${String(d.getMinutes()).padStart(2, '0')} 기준`
 }
 
-function mapToProduct(p: ProductResponse): Product {
-  return {
-    id: p.id,
-    name: p.name,
-    brand: p.brand,
-    image: p.imageUrl,
-    nutritionScore: p.nutritionScore,
-    category: p.category,
-    favorited: p.favorited,
-  }
-}
-
 type SearchPageProps = {
   onBack?: () => void
+  onSubmitKeyword?: (keyword: string) => void
+  /** 호환용 — 더 이상 검색 결과를 페이지 내에서 보여주지 않으므로 미사용 */
   onProductClick?: (product: Product) => void
 }
 
-export const SearchPage = ({ onBack, onProductClick }: SearchPageProps) => {
+export const SearchPage = ({ onBack, onSubmitKeyword }: SearchPageProps) => {
   const [inputValue, setInputValue] = useState('')
-  const [submittedKeyword, setSubmittedKeyword] = useState('')
   const [recent, setRecent] = useState<string[]>(() => loadRecent())
-
-  const { data, isLoading, isError } = useProductListQuery(
-    submittedKeyword ? { keyword: submittedKeyword } : undefined,
-  )
-  const results = data?.items ?? []
 
   const stamp = useMemo(() => formatPopularStamp(new Date()), [])
 
@@ -84,9 +66,8 @@ export const SearchPage = ({ onBack, onProductClick }: SearchPageProps) => {
   const runSearch = (kw: string) => {
     const trimmed = kw.trim()
     if (!trimmed) return
-    setInputValue(trimmed)
-    setSubmittedKeyword(trimmed)
     setRecent(prev => [trimmed, ...prev.filter(k => k !== trimmed)].slice(0, RECENT_MAX))
+    onSubmitKeyword?.(trimmed)
   }
 
   const removeRecent = (kw: string) => setRecent(prev => prev.filter(k => k !== kw))
@@ -119,41 +100,10 @@ export const SearchPage = ({ onBack, onProductClick }: SearchPageProps) => {
         </div>
       </header>
 
-      {/* 검색 결과 */}
-      {submittedKeyword ? (
-        <section className="sp-results" aria-label={`"${submittedKeyword}" 검색 결과`}>
-          <h3 className="sp-section-title">"{submittedKeyword}" 검색 결과</h3>
-          {isLoading && <p className="sp-msg">검색 중...</p>}
-          {isError && <p className="sp-msg sp-msg--err">검색에 실패했습니다.</p>}
-          {!isLoading && !isError && results.length === 0 && <p className="sp-msg">검색 결과가 없습니다.</p>}
-          <ul className="sp-result-list">
-            {results.map(item => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  className="sp-result-row"
-                  onClick={() => onProductClick?.(mapToProduct(item))}
-                >
-                  <div className="sp-result-thumb">
-                    {item.imageUrl
-                      ? <img src={item.imageUrl} alt="" loading="lazy" />
-                      : <div className="sp-result-thumb--ph" />
-                    }
-                  </div>
-                  <div className="sp-result-text">
-                    <p className="sp-result-name">{item.name}</p>
-                    <p className="sp-result-meta">{item.brand?.name ?? '-'} · {item.category?.name ?? '-'}</p>
-                  </div>
-                  <span className="sp-result-score">{item.nutritionScore}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : (
-        <>
-          {/* 최근 검색어 */}
-          <section className="sp-section" aria-label="최근 검색어">
+      {/* 결과는 홈 그리드에서 표시. SearchPage는 키워드 입력 + 추천/인기/최근 패널만 담당 */}
+
+      {/* 최근 검색어 */}
+      <section className="sp-section" aria-label="최근 검색어">
             <div className="sp-section-head">
               <h3 className="sp-section-title">최근 검색어</h3>
               {recent.length > 0 && (
@@ -205,12 +155,10 @@ export const SearchPage = ({ onBack, onProductClick }: SearchPageProps) => {
               </ol>
               <ol className="sp-popular-col" start={6}>
                 {right.map(it => <PopularRow key={it.rank} item={it} onClick={() => runSearch(it.keyword)} />)}
-              </ol>
-            </div>
-          </section>
-        </>
-      )}
+        </ol>
+      </div>
     </section>
+  </section>
   )
 }
 

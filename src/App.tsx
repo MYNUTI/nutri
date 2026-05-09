@@ -57,6 +57,7 @@ function AppShell() {
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
   const [userProfile, setUserProfile] = useState<Profile | null>(null)
   const [showFilter, setShowFilter] = useState(false)
+  const [homeKeyword, setHomeKeyword] = useState('')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [compareProducts, setCompareProducts] = useState<Product[]>([])
   // 신규 OAuth 회원가입 진행 중일 때 임시 보관 (provider, oauthId, email)
@@ -137,6 +138,8 @@ function AppShell() {
       case 'home':
         return (
           <HomePage
+            keyword={homeKeyword}
+            onClearKeyword={() => setHomeKeyword('')}
             onMoveToFilter={() => setShowFilter(true)}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
@@ -156,6 +159,7 @@ function AppShell() {
         return (
           <SearchPage
             onBack={() => navigate('home')}
+            onSubmitKeyword={(kw) => { setHomeKeyword(kw); navigate('home'); window.scrollTo({ top: 0 }) }}
             onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
           />
         )
