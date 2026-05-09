@@ -224,7 +224,7 @@ function AppShell() {
         return null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts])
+  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts, homeKeyword, extraFilter])
 
   return (
     <main className="screen-wrap">
