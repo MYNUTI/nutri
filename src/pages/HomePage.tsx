@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon } from '../components/icons'
 import { useProductListQuery } from '../queries/productQueries'
@@ -13,13 +13,28 @@ type HomePageProps = {
 }
 
 const CATEGORIES = [
-  { id: 'salad',   label: '샐러드',  emoji: '🥗' },
-  { id: 'chicken', label: '닭가슴살', emoji: '🍗' },
-  { id: 'soy',     label: '두유',    emoji: '🫛' },
-  { id: 'konjac',  label: '곤약',    emoji: '🍢' },
+  { id: 'nuts',     label: '견과류',         emoji: '🥜' },
+  { id: 'grain',    label: '곡류,시리얼',    emoji: '🌾' },
+  { id: 'chicken',  label: '닭고기',         emoji: '🍗' },
+  { id: 'plant',    label: '식물성 단백질',  emoji: '🫛' },
+  { id: 'meat',     label: '돼지,소,오리',   emoji: '🥩' },
+  { id: 'noodle',   label: '면류',           emoji: '🍜' },
+  { id: 'rice',     label: '밥,식사류',      emoji: '🍚' },
+  { id: 'seafood',  label: '수산물',         emoji: '🐟' },
+  { id: 'protein',  label: '프로틴,쉐이크',  emoji: '🥤' },
+  { id: 'snack',    label: '스낵,빵',        emoji: '🍞' },
+  { id: 'dairy',    label: '유제품',         emoji: '🧀' },
+  { id: 'sauce',    label: '유지류,소스',    emoji: '🧈' },
+  { id: 'drink',    label: '음료류',         emoji: '🥤' },
 ]
+const PAGE_SIZE = 4
+const PAGE_COUNT = Math.ceil(CATEGORIES.length / PAGE_SIZE)
 
-const FILTER_CHIPS = ['추천순', '브랜드', '성분']
+const FILTER_CHIPS = ['추천순', '브랜드', '성분'] as const
+type ChipKey = typeof FILTER_CHIPS[number]
+
+const BRAND_OPTIONS = ['풀무원', '꼬기닭', '허닭', '하림']
+const NUTRIENT_OPTIONS = ['저당', '고단백']
 
 function mapToProduct(p: ProductResponse): Product {
   return {
@@ -37,7 +52,22 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: Hom
   const { data, isLoading, isError } = useProductListQuery()
   const products = data?.items ?? []
   const [activeCat, setActiveCat] = useState(0)
+  const [activePage, setActivePage] = useState(0)
+  const [openChip, setOpenChip] = useState<ChipKey | null>(null)
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
+  const [selectedNutrients, setSelectedNutrients] = useState<string[]>([])
+  const catsScrollRef = useRef<HTMLDivElement | null>(null)
   const { toggle, isFavorite } = useFavorites()
+
+  const toggleInArray = (arr: string[], v: string) =>
+    arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]
+
+  const handleCatsScroll = () => {
+    const el = catsScrollRef.current
+    if (!el) return
+    const page = Math.round(el.scrollLeft / el.clientWidth)
+    if (page !== activePage) setActivePage(page)
+  }
 
   return (
     <div className="home-page">
@@ -55,23 +85,39 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: Hom
       </div>
 
       <div className="home-cats-wrap">
-        <div className="home-cats" role="list" aria-label="카테고리">
-          {CATEGORIES.map((c, i) => (
-            <button
-              key={c.id}
-              type="button"
-              className={`home-cat${i === activeCat ? ' home-cat--on' : ''}`}
-              role="listitem"
-              onClick={() => setActiveCat(i)}
-            >
-              <span className="home-cat-emoji" aria-hidden="true">{c.emoji}</span>
-              <span className="home-cat-label">{c.label}</span>
-            </button>
-          ))}
+        <div
+          className="home-cats"
+          role="list"
+          aria-label="카테고리"
+          ref={catsScrollRef}
+          onScroll={handleCatsScroll}
+        >
+          {Array.from({ length: PAGE_COUNT }).map((_, pageIdx) => {
+            const slice = CATEGORIES.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
+            return (
+              <div className="home-cats-page" key={pageIdx}>
+                {slice.map((c) => {
+                  const globalIdx = CATEGORIES.indexOf(c)
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      className={`home-cat${globalIdx === activeCat ? ' home-cat--on' : ''}`}
+                      role="listitem"
+                      onClick={() => setActiveCat(globalIdx)}
+                    >
+                      <span className="home-cat-emoji" aria-hidden="true">{c.emoji}</span>
+                      <span className="home-cat-label">{c.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            )
+          })}
         </div>
         <div className="home-cat-dots" aria-hidden="true">
-          {CATEGORIES.map((_, i) => (
-            <span key={i} className={`home-cat-dot${i === activeCat ? ' home-cat-dot--on' : ''}`} />
+          {Array.from({ length: PAGE_COUNT }).map((_, i) => (
+            <span key={i} className={`home-cat-dot${i === activePage ? ' home-cat-dot--on' : ''}`} />
           ))}
         </div>
       </div>
@@ -80,12 +126,81 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: Hom
         <button className="home-chip-icon" type="button" aria-label="필터" onClick={onMoveToFilter}>
           <FilterIcon />
         </button>
-        {FILTER_CHIPS.map(label => (
-          <button key={label} type="button" className="home-chip">
-            {label} <span aria-hidden="true">▾</span>
-          </button>
-        ))}
+        {FILTER_CHIPS.map(label => {
+          const isOpen = openChip === label
+          const count =
+            label === '브랜드' ? selectedBrands.length :
+            label === '성분' ? selectedNutrients.length : 0
+          return (
+            <button
+              key={label}
+              type="button"
+              className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
+              onClick={() => setOpenChip(isOpen ? null : label)}
+            >
+              {label}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">▾</span>
+            </button>
+          )
+        })}
       </div>
+
+      {openChip === '브랜드' && (
+        <div className="home-dropdown" role="dialog" aria-label="브랜드 필터">
+          <div className="home-dropdown-header">
+            <span className="home-dropdown-title">브랜드</span>
+            <button
+              type="button"
+              className="home-dropdown-close"
+              aria-label="닫기"
+              onClick={() => setOpenChip(null)}
+            >
+              <span aria-hidden="true">▾</span>
+            </button>
+          </div>
+          <div className="home-dropdown-grid">
+            {BRAND_OPTIONS.map(opt => (
+              <label key={opt} className="home-dropdown-item">
+                <input
+                  type="checkbox"
+                  className="home-dropdown-check"
+                  checked={selectedBrands.includes(opt)}
+                  onChange={() => setSelectedBrands(prev => toggleInArray(prev, opt))}
+                />
+                <span>{opt}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {openChip === '성분' && (
+        <div className="home-dropdown" role="dialog" aria-label="성분 필터">
+          <div className="home-dropdown-header">
+            <span className="home-dropdown-title">성분</span>
+            <button
+              type="button"
+              className="home-dropdown-close"
+              aria-label="닫기"
+              onClick={() => setOpenChip(null)}
+            >
+              <span aria-hidden="true">▾</span>
+            </button>
+          </div>
+          <div className="home-dropdown-grid">
+            {NUTRIENT_OPTIONS.map(opt => (
+              <label key={opt} className="home-dropdown-item">
+                <input
+                  type="checkbox"
+                  className="home-dropdown-check"
+                  checked={selectedNutrients.includes(opt)}
+                  onChange={() => setSelectedNutrients(prev => toggleInArray(prev, opt))}
+                />
+                <span>{opt}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="home-divider" />
 
