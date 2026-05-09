@@ -8,6 +8,7 @@ import type { Product } from '../types/product'
 type HomePageProps = {
   onMoveToFilter: () => void
   onMoveToMyPage: () => void
+  onMoveToSearch?: () => void
   onGoHome?: () => void
   onProductClick?: (product: Product) => void
   onAddToCompare?: (product: Product) => void
@@ -51,7 +52,7 @@ function mapToProduct(p: ProductResponse): Product {
   }
 }
 
-export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onGoHome, onProductClick }: HomePageProps) => {
+export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
   const { data, isLoading, isError } = useProductListQuery()
   const products = data?.items ?? []
   const [activeCat, setActiveCat] = useState(0)
@@ -73,6 +74,46 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onGoHome, onProductCl
     if (page !== activePage) setActivePage(page)
   }
 
+  const goToPage = (idx: number) => {
+    const el = catsScrollRef.current
+    if (!el) return
+    el.scrollTo({ left: idx * el.clientWidth, behavior: 'smooth' })
+  }
+
+  // 데스크탑 마우스 드래그 → 가로 스크롤
+  const dragStateRef = useRef<{ startX: number; startScroll: number; moved: boolean } | null>(null)
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = catsScrollRef.current
+    if (!el) return
+    dragStateRef.current = { startX: e.clientX, startScroll: el.scrollLeft, moved: false }
+    el.classList.add('home-cats--dragging')
+  }
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = catsScrollRef.current
+    const st = dragStateRef.current
+    if (!el || !st) return
+    const dx = e.clientX - st.startX
+    if (Math.abs(dx) > 4) st.moved = true
+    el.scrollLeft = st.startScroll - dx
+  }
+  const endDrag = () => {
+    const el = catsScrollRef.current
+    const st = dragStateRef.current
+    if (!el || !st) return
+    el.classList.remove('home-cats--dragging')
+    // 가장 가까운 페이지로 스냅
+    const page = Math.round(el.scrollLeft / el.clientWidth)
+    el.scrollTo({ left: page * el.clientWidth, behavior: 'smooth' })
+    dragStateRef.current = null
+  }
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    // 드래그로 이동한 경우 자식 onClick(카테고리 선택) 막기
+    if (dragStateRef.current?.moved) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="home-page">
       <header className="home-header">
@@ -89,12 +130,17 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onGoHome, onProductCl
         </button>
       </header>
 
-      <div className="home-search">
+      <button
+        type="button"
+        className="home-search home-search--btn"
+        onClick={() => onMoveToSearch?.()}
+        aria-label="검색 페이지로 이동"
+      >
         <svg className="home-search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
           <path d="M10 2a8 8 0 1 1-5.3 14L1 19.7 2.3 21l3.7-3.7A8 8 0 0 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="#9a9a9a"/>
         </svg>
-        <input type="text" placeholder="검색" aria-label="상품 검색" />
-      </div>
+        <span className="home-search-placeholder">검색</span>
+      </button>
 
       <div className="home-cats-wrap">
         <div
@@ -103,6 +149,11 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onGoHome, onProductCl
           aria-label="카테고리"
           ref={catsScrollRef}
           onScroll={handleCatsScroll}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={endDrag}
+          onMouseLeave={endDrag}
+          onClickCapture={handleClickCapture}
         >
           {Array.from({ length: PAGE_COUNT }).map((_, pageIdx) => {
             const slice = CATEGORIES.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
@@ -127,9 +178,17 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onGoHome, onProductCl
             )
           })}
         </div>
-        <div className="home-cat-dots" aria-hidden="true">
+        <div className="home-cat-dots" role="tablist" aria-label="카테고리 페이지">
           {Array.from({ length: PAGE_COUNT }).map((_, i) => (
-            <span key={i} className={`home-cat-dot${i === activePage ? ' home-cat-dot--on' : ''}`} />
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={i === activePage}
+              aria-label={`${i + 1}페이지`}
+              className={`home-cat-dot${i === activePage ? ' home-cat-dot--on' : ''}`}
+              onClick={() => goToPage(i)}
+            />
           ))}
         </div>
       </div>

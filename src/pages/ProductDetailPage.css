@@ -13,7 +13,7 @@
 .det-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 14px 16px 10px;
 }
 
@@ -30,21 +30,7 @@
 
 .det-icon-btn svg { width: 22px; height: 22px; }
 
-.det-heart {
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: 0;
-  font-size: 22px;
-  color: #d1d1d4;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  transition: color 0.12s;
-}
-.det-heart.on { color: #ff4444; }
+/* (det-heart, det-share 제거: 즐겨찾기는 별점 옆 .det-fav-toggle로 이동, 공유 버튼은 시안에서 제외) */
 
 /* ── 상품 이미지 ────────────────────────────────── */
 .det-img-wrap {
@@ -68,16 +54,10 @@
 
 /* ── 상품 정보 ─────────────────────────────────── */
 .det-info {
-  padding: 18px 16px 0;
+  padding: 18px 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.det-info-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: 4px;
 }
 
 .det-brand {
@@ -86,8 +66,6 @@
   font-weight: 500;
   letter-spacing: -0.01em;
 }
-
-.det-share svg { width: 20px; height: 20px; }
 
 .det-name {
   margin: 4px 0 0;
@@ -98,8 +76,15 @@
   letter-spacing: -0.01em;
 }
 
+.det-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
 .det-price {
-  margin: 6px 0 0;
   font-size: 18px;
   font-weight: 800;
   color: #111;
@@ -107,11 +92,38 @@
 }
 
 .det-per {
-  margin: 2px 0 0;
   font-size: 12px;
   color: #b0b0b3;
   letter-spacing: -0.01em;
+  font-weight: 500;
 }
+
+.det-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+  color: #d4d4d6;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.det-star {
+  letter-spacing: 1px;
+}
+
+.det-fav-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: 0;
+  font-size: 22px;
+  color: #d1d1d4;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.12s;
+}
+.det-fav-toggle.on { color: #ff4444; }
 
 /* ── 영양점수 카드 ──────────────────────────────── */
 .det-score-card {
@@ -128,7 +140,13 @@
 .det-score-left {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+
+.det-score-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .det-score-crown { font-size: 14px; }
@@ -137,6 +155,7 @@
   font-size: 13px;
   font-weight: 700;
   color: #111;
+  letter-spacing: -0.01em;
 }
 
 .det-score-sub {

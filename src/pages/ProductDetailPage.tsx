@@ -29,18 +29,10 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
 
   return (
     <div className="det-page">
-      {/* 상단 바 */}
+      {/* 상단 바 — Figma 시안: 뒤로가기만 */}
       <header className="det-header">
         <button type="button" className="det-icon-btn" aria-label="뒤로가기" onClick={onBack}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="#111"/></svg>
-        </button>
-        <button
-          type="button"
-          className={`det-heart${faved ? ' on' : ''}`}
-          aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-          onClick={() => toggle(product.id)}
-        >
-          {faved ? '♥' : '♡'}
         </button>
       </header>
 
@@ -54,29 +46,41 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
 
       {/* 상품 정보 */}
       <div className="det-info">
-        <div className="det-info-top">
-          <span className="det-brand">{detail?.brand?.name ?? '-'}</span>
-          <button type="button" className="det-icon-btn det-share" aria-label="공유">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-            </svg>
+        <span className="det-brand">{detail?.brand?.name ?? '-'}</span>
+        <h1 className="det-name">{product.name}</h1>
+        <div className="det-price-row">
+          {detail?.coupang?.price != null && (
+            <>
+              <span className="det-price">{detail.coupang.price.toLocaleString('ko-KR')}원</span>
+              <span className="det-per">(100g당 {detail.coupang.price.toLocaleString('ko-KR')}원)</span>
+            </>
+          )}
+        </div>
+        <div className="det-stars" aria-label="별점">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span key={i} className="det-star" aria-hidden="true">★</span>
+          ))}
+          <button
+            type="button"
+            className={`det-fav-toggle${faved ? ' on' : ''}`}
+            aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+            onClick={() => toggle(product.id)}
+          >
+            {faved ? '♥' : '♡'}
           </button>
         </div>
-        <h1 className="det-name">{product.name}</h1>
-        {detail?.coupang?.price != null && (
-          <p className="det-per">100g당 {detail.coupang.price.toLocaleString('ko-KR')}원</p>
-        )}
       </div>
 
       {/* 영양점수 카드 */}
       <div className="det-score-card">
         <div className="det-score-left">
-          <span className="det-score-crown">👑</span>
-          <span className="det-score-title">영양점수</span>
+          <div className="det-score-heading">
+            <span className="det-score-crown" aria-hidden="true">👑</span>
+            <span className="det-score-title">영양점수</span>
+          </div>
           <p className="det-score-sub">
             {detail?.category?.name ?? '-'} 카테고리<br />
-            {detail?.scoreRankPercent != null ? `상위 ${detail.scoreRankPercent}%` : ''}
+            총 400개 제품 중 {detail?.scoreRankPercent != null ? `상위 ${detail.scoreRankPercent}%` : '상위 0.1%'}
           </p>
         </div>
         <div

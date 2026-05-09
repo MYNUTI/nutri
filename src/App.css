@@ -680,7 +680,8 @@
   pointer-events: none;
 }
 
-.home-search input {
+.home-search input,
+.home-search--btn {
   width: 100%;
   height: 44px;
   border: 1px solid #e5e5e8;
@@ -697,9 +698,24 @@
   font-weight: 400;
 }
 
-.home-search input:focus-visible {
+.home-search input:focus-visible,
+.home-search--btn:focus-visible {
   outline: 2px solid #111;
   outline-offset: 1px;
+}
+
+.home-search--btn {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.home-search-placeholder {
+  color: #b6b6b6;
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .home-cats-wrap {
@@ -715,6 +731,14 @@
   scroll-behavior: smooth;
   scrollbar-width: none;
   margin: 0 -14px;
+  cursor: grab;
+  user-select: none;
+}
+
+.home-cats--dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
 }
 
 .home-cats::-webkit-scrollbar { display: none; }
@@ -739,15 +763,22 @@
 .home-cat-dot {
   width: 6px;
   height: 6px;
+  padding: 0;
+  border: 0;
   border-radius: 999px;
   background: #d8d8d8;
+  cursor: pointer;
   transition: background 0.15s, width 0.15s;
 }
+
+.home-cat-dot:hover { background: #b8b8b8; }
 
 .home-cat-dot--on {
   background: #666;
   width: 16px;
 }
+
+.home-cat-dot--on:hover { background: #444; }
 
 .home-cat {
   width: 100%;
