@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NUTRIENT_OPTIONS } from '../constants/nutrientFilters'
+import { useBrandsQuery } from '../queries/brandsQueries'
 import './FilterPage.css'
 
 type FilterPageProps = {
@@ -23,12 +24,11 @@ const FOOD_CATS = [
   '음료류',
 ]
 
-const BRANDS = ['풀무원', '꼬기닭', '하닭', '하림']
-
-// 성분 강조표시 (식약처 기준 — 자세한 임계값은 constants/nutrientFilters.ts)
 const NUTRIENT_CHIPS = NUTRIENT_OPTIONS
 
 export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
+  const { data: brandsData } = useBrandsQuery()
+  const brandList = brandsData ?? []
   const [catOpen, setCatOpen] = useState(true)
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)
@@ -101,15 +101,15 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
             </button>
             {brandOpen && (
               <div className="fil-grid2">
-                {BRANDS.map(b => (
-                  <label key={b} className="fil-check-label">
+                {brandList.map(b => (
+                  <label key={b.id} className="fil-check-label">
                     <input
                       type="checkbox"
                       className="fil-check"
-                      checked={selectedBrands.has(b)}
-                      onChange={() => setSelectedBrands(toggleSet(selectedBrands, b))}
+                      checked={selectedBrands.has(b.name)}
+                      onChange={() => setSelectedBrands(toggleSet(selectedBrands, b.name))}
                     />
-                    <span>{b}</span>
+                    <span>{b.name}</span>
                   </label>
                 ))}
               </div>
