@@ -1,25 +1,53 @@
-import { useState } from 'react'
-import { Typography } from '../components/Typography'
+import { useEffect, useMemo, useState } from 'react'
 import { useProductListQuery } from '../queries/productQueries'
 import type { ProductResponse } from '../api/products/types'
 import type { Product } from '../types/product'
 
-const popularKeywords = [
-  '닭가슴살',
-  '프로틴바',
-  '그릭요거트',
-  '오트밀',
-  '두유',
-  '샐러드',
-  '고구마',
-  '현미밥',
-  '견과류',
-  '참치캔',
+const RECOMMENDED_KEYWORDS = [
+  '아침 단백질 한 끼',
+  '당 없는 두유',
+  '간편 도시락',
+  '고단백 저지방',
+  '식이섬유 많은',
+  '대용량 닭가슴살',
 ]
 
-type SearchPageProps = {
-  onBack?: () => void
-  onProductClick?: (product: Product) => void
+type Trend = 'up' | 'down' | 'same'
+type PopularItem = { rank: number; keyword: string; trend: Trend }
+
+const POPULAR_KEYWORDS: PopularItem[] = [
+  { rank: 1,  keyword: '닭가슴살',   trend: 'same' },
+  { rank: 2,  keyword: '하림',       trend: 'up'   },
+  { rank: 3,  keyword: '잡곡',       trend: 'up'   },
+  { rank: 4,  keyword: '리코타 치즈', trend: 'up'  },
+  { rank: 5,  keyword: '두부면',     trend: 'same' },
+  { rank: 6,  keyword: '곤약',       trend: 'same' },
+  { rank: 7,  keyword: '두유',       trend: 'up'   },
+  { rank: 8,  keyword: '프로틴',     trend: 'up'   },
+  { rank: 9,  keyword: '저칼로리',   trend: 'up'   },
+  { rank: 10, keyword: '저당',       trend: 'same' },
+]
+
+const RECENT_KEY = 'recentSearchKeywords'
+const RECENT_MAX = 10
+
+function loadRecent(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY)
+    return raw ? (JSON.parse(raw) as string[]) : []
+  } catch {
+    return []
+  }
+}
+
+function saveRecent(list: string[]) {
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))) } catch { /* noop */ }
+}
+
+function formatPopularStamp(d: Date): string {
+  const isPM = d.getHours() >= 12
+  const h = ((d.getHours() + 11) % 12) + 1
+  return `오늘 ${isPM ? '오후' : '오전'}${h}:${String(d.getMinutes()).padStart(2, '0')} 기준`
 }
 
 function mapToProduct(p: ProductResponse): Product {
@@ -34,180 +62,164 @@ function mapToProduct(p: ProductResponse): Product {
   }
 }
 
+type SearchPageProps = {
+  onBack?: () => void
+  onProductClick?: (product: Product) => void
+}
+
 export const SearchPage = ({ onBack, onProductClick }: SearchPageProps) => {
   const [inputValue, setInputValue] = useState('')
   const [submittedKeyword, setSubmittedKeyword] = useState('')
+  const [recent, setRecent] = useState<string[]>(() => loadRecent())
 
   const { data, isLoading, isError } = useProductListQuery(
     submittedKeyword ? { keyword: submittedKeyword } : undefined,
   )
+  const results = data?.items ?? []
 
-  const handleSearch = (keyword: string) => {
-    const trimmed = keyword.trim()
+  const stamp = useMemo(() => formatPopularStamp(new Date()), [])
+
+  useEffect(() => { saveRecent(recent) }, [recent])
+
+  const runSearch = (kw: string) => {
+    const trimmed = kw.trim()
     if (!trimmed) return
     setInputValue(trimmed)
     setSubmittedKeyword(trimmed)
+    setRecent(prev => [trimmed, ...prev.filter(k => k !== trimmed)].slice(0, RECENT_MAX))
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') handleSearch(inputValue)
-  }
+  const removeRecent = (kw: string) => setRecent(prev => prev.filter(k => k !== kw))
+  const clearRecent = () => setRecent([])
 
-  const leftRankKeywords = popularKeywords.slice(0, 5)
-  const rightRankKeywords = popularKeywords.slice(5, 10)
-  const results = data?.items ?? []
+  const left = POPULAR_KEYWORDS.slice(0, 5)
+  const right = POPULAR_KEYWORDS.slice(5, 10)
 
   return (
-    <section className="search-page" aria-label="검색 페이지">
-      <Typography as="h2" className="search-page-title" variant="pageTitle" color="#989898">
-        검색페이지
-      </Typography>
-
-      <div className="search-panel">
-        <div className="search-input-row">
-          <button type="button" className="search-back-btn" aria-label="뒤로 가기" onClick={onBack}>
-            <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
-              <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" />
-            </svg>
-          </button>
-
+    <section className="sp" aria-label="검색 페이지">
+      {/* 상단 검색바 */}
+      <header className="sp-top">
+        <button type="button" className="sp-back" aria-label="뒤로 가기" onClick={onBack}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" />
+          </svg>
+        </button>
+        <div className="sp-input-wrap">
+          <svg className="sp-input-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path d="M10 2a8 8 0 1 1-5.3 14L1 19.7 2.3 21l3.7-3.7A8 8 0 0 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="#9a9a9a"/>
+          </svg>
           <input
-            id="search-input"
-            className="search-input"
-            placeholder="검색"
+            className="sp-input"
+            placeholder="상품을 검색하세요"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onChange={e => setInputValue(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') runSearch(inputValue) }}
+            aria-label="검색어 입력"
           />
-
-          {inputValue && (
-            <button
-              type="button"
-              className="search-back-btn"
-              aria-label="검색 실행"
-              onClick={() => handleSearch(inputValue)}
-              style={{ marginLeft: 4 }}
-            >
-              <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
-                <path d="M10.5 3a7.5 7.5 0 1 0 4.55 13.46l3.75 3.75a1 1 0 1 0 1.4-1.42l-3.74-3.74A7.5 7.5 0 0 0 10.5 3Zm-5.5 7.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" />
-              </svg>
-            </button>
-          )}
         </div>
+      </header>
 
-        {/* 검색 결과 */}
-        {submittedKeyword && (
-          <section className="search-keyword-section" aria-label="검색 결과">
-            <Typography as="h3" variant="sectionTitle">
-              "{submittedKeyword}" 검색 결과
-            </Typography>
-
-            {isLoading && (
-              <p style={{ color: '#888', fontSize: '0.9rem', padding: '1rem 0' }}>검색 중...</p>
-            )}
-            {isError && (
-              <p style={{ color: '#b42318', fontSize: '0.9rem', padding: '1rem 0' }}>검색에 실패했습니다.</p>
-            )}
-            {!isLoading && !isError && results.length === 0 && (
-              <p style={{ color: '#888', fontSize: '0.9rem', padding: '1rem 0' }}>검색 결과가 없습니다.</p>
-            )}
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginTop: 8 }}>
-              {results.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '10px 0',
-                    borderBottom: '1px solid #f0f0f0',
-                    cursor: 'pointer',
-                  }}
+      {/* 검색 결과 */}
+      {submittedKeyword ? (
+        <section className="sp-results" aria-label={`"${submittedKeyword}" 검색 결과`}>
+          <h3 className="sp-section-title">"{submittedKeyword}" 검색 결과</h3>
+          {isLoading && <p className="sp-msg">검색 중...</p>}
+          {isError && <p className="sp-msg sp-msg--err">검색에 실패했습니다.</p>}
+          {!isLoading && !isError && results.length === 0 && <p className="sp-msg">검색 결과가 없습니다.</p>}
+          <ul className="sp-result-list">
+            {results.map(item => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  className="sp-result-row"
                   onClick={() => onProductClick?.(mapToProduct(item))}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && onProductClick?.(mapToProduct(item))}
                 >
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 8, flexShrink: 0, background: '#f5f5f5' }}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontWeight: 600, fontSize: '0.9rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.name}
-                    </p>
-                    <p style={{ fontSize: '0.78rem', color: '#888', margin: '2px 0 0' }}>
-                      {item.brand?.name ?? '-'} · {item.category?.name ?? '-'}
-                    </p>
+                  <div className="sp-result-thumb">
+                    {item.imageUrl
+                      ? <img src={item.imageUrl} alt="" loading="lazy" />
+                      : <div className="sp-result-thumb--ph" />
+                    }
                   </div>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: '#fff',
-                      background: '#ff7f83',
-                      borderRadius: 6,
-                      padding: '2px 7px',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {item.nutritionScore}
+                  <div className="sp-result-text">
+                    <p className="sp-result-name">{item.name}</p>
+                    <p className="sp-result-meta">{item.brand?.name ?? '-'} · {item.category?.name ?? '-'}</p>
+                  </div>
+                  <span className="sp-result-score">{item.nutritionScore}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <>
+          {/* 최근 검색어 */}
+          <section className="sp-section" aria-label="최근 검색어">
+            <div className="sp-section-head">
+              <h3 className="sp-section-title">최근 검색어</h3>
+              {recent.length > 0 && (
+                <button type="button" className="sp-section-action" onClick={clearRecent}>전체삭제</button>
+              )}
+            </div>
+            {recent.length === 0 ? (
+              <p className="sp-empty">최근 검색한 키워드가 없습니다</p>
+            ) : (
+              <div className="sp-chip-row sp-chip-row--scroll">
+                {recent.map(kw => (
+                  <span key={kw} className="sp-chip sp-chip--removable">
+                    <button type="button" className="sp-chip-text" onClick={() => runSearch(kw)}>{kw}</button>
+                    <button
+                      type="button"
+                      className="sp-chip-remove"
+                      aria-label={`${kw} 삭제`}
+                      onClick={() => removeRecent(kw)}
+                    >
+                      ×
+                    </button>
                   </span>
-                </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* 추천 검색어 */}
+          <section className="sp-section" aria-label="추천 검색어">
+            <h3 className="sp-section-title">추천 검색어</h3>
+            <div className="sp-chip-row sp-chip-row--wrap">
+              {RECOMMENDED_KEYWORDS.map(kw => (
+                <button key={kw} type="button" className="sp-chip" onClick={() => runSearch(kw)}>
+                  {kw}
+                </button>
               ))}
             </div>
           </section>
-        )}
 
-        {/* 인기 검색어 - 검색 전에만 표시 */}
-        {!submittedKeyword && (
-          <section className="search-keyword-section" aria-label="인기 검색어">
-            <Typography as="h3" variant="sectionTitle">
-              인기 검색어
-            </Typography>
-
-            <div className="popular-keyword-grid">
-              <ol className="popular-keyword-list">
-                {leftRankKeywords.map((keyword, index) => (
-                  <li key={keyword} className="popular-keyword-item">
-                    <Typography as="span" className="popular-rank" variant="body">
-                      {index + 1}
-                    </Typography>
-                    <button
-                      type="button"
-                      className="popular-term"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
-                      onClick={() => handleSearch(keyword)}
-                    >
-                      {keyword}
-                    </button>
-                  </li>
-                ))}
+          {/* 인기 검색어 */}
+          <section className="sp-section sp-section--popular" aria-label="인기 검색어">
+            <div className="sp-section-head">
+              <h3 className="sp-section-title">인기 검색어</h3>
+              <span className="sp-stamp">{stamp}</span>
+            </div>
+            <div className="sp-popular-grid">
+              <ol className="sp-popular-col" start={1}>
+                {left.map(it => <PopularRow key={it.rank} item={it} onClick={() => runSearch(it.keyword)} />)}
               </ol>
-
-              <ol className="popular-keyword-list" start={6}>
-                {rightRankKeywords.map((keyword, index) => (
-                  <li key={keyword} className="popular-keyword-item">
-                    <Typography as="span" className="popular-rank" variant="body">
-                      {index + 6}
-                    </Typography>
-                    <button
-                      type="button"
-                      className="popular-term"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
-                      onClick={() => handleSearch(keyword)}
-                    >
-                      {keyword}
-                    </button>
-                  </li>
-                ))}
+              <ol className="sp-popular-col" start={6}>
+                {right.map(it => <PopularRow key={it.rank} item={it} onClick={() => runSearch(it.keyword)} />)}
               </ol>
             </div>
           </section>
-        )}
-      </div>
+        </>
+      )}
     </section>
   )
 }
+
+const PopularRow = ({ item, onClick }: { item: PopularItem; onClick: () => void }) => (
+  <li className="sp-popular-row">
+    <span className="sp-popular-rank">{item.rank}</span>
+    <button type="button" className="sp-popular-term" onClick={onClick}>{item.keyword}</button>
+    <span className={`sp-popular-trend sp-popular-trend--${item.trend}`} aria-hidden="true">
+      {item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '–'}
+    </span>
+  </li>
+)
