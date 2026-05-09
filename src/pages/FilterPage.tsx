@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { NUTRIENT_OPTIONS } from '../constants/nutrientFilters'
 import './FilterPage.css'
 
 type FilterPageProps = {
@@ -15,7 +16,8 @@ const FOOD_CATS = [
 
 const BRANDS = ['풀무원', '꼬기닭', '하닭', '하림']
 
-const CALORIE_CHIPS = ['저당', '고단백']
+// 성분 강조표시 (식약처 기준 — 자세한 임계값은 constants/nutrientFilters.ts)
+const NUTRIENT_CHIPS = NUTRIENT_OPTIONS
 
 export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
   const [catOpen, setCatOpen] = useState(true)
@@ -105,15 +107,15 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
             )}
           </div>
 
-          {/* 칼로리 */}
+          {/* 성분 */}
           <div className="fil-section">
             <button type="button" className="fil-section-btn" onClick={() => setCalOpen(v => !v)}>
-              <span>칼로리</span>
+              <span>성분</span>
               <span className="fil-chevron">{calOpen ? '∧' : '∨'}</span>
             </button>
             {calOpen && (
-              <div className="fil-chips">
-                {CALORIE_CHIPS.map(c => (
+              <div className="fil-grid2">
+                {NUTRIENT_CHIPS.map(c => (
                   <label key={c} className="fil-check-label">
                     <input
                       type="checkbox"

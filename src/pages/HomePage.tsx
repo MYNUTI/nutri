@@ -4,10 +4,12 @@ import { FilterIcon, UserIcon } from '../components/icons'
 import { useProductListQuery } from '../queries/productQueries'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import type { Product } from '../types/product'
+import { NUTRIENT_OPTIONS, NUTRIENT_THRESHOLDS, type NutrientOption } from '../constants/nutrientFilters'
 
 type HomePageProps = {
   keyword?: string
   onClearKeyword?: () => void
+  extraFilter?: { categories: string[]; brands: string[]; nutrients: string[] }
   onMoveToFilter: () => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
@@ -38,7 +40,6 @@ const FILTER_CHIPS = ['추천순', '브랜드', '성분'] as const
 type ChipKey = typeof FILTER_CHIPS[number]
 
 const BRAND_OPTIONS = ['풀무원', '꼬기닭', '허닭', '하림']
-const NUTRIENT_OPTIONS = ['저당', '고단백']
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
 type SortKey = typeof SORT_OPTIONS[number]
 
@@ -47,12 +48,6 @@ const SORT_MAP: Record<SortKey, SortType> = {
   '영양점수순': 'SCORE',
   '인기순':     'POPULAR',
   '정확도순':   'ACCURACY',
-}
-
-// 성분 칩 → 임계값 매핑 (백엔드는 단일 임계값 필터만 지원)
-const NUTRIENT_THRESHOLDS: Record<string, Partial<ProductSearchCondition>> = {
-  '저당':   { maxSugar: 10 },
-  '고단백': { minProtein: 15 },
 }
 
 function mapToProduct(p: ProductResponse): Product {
@@ -67,7 +62,7 @@ function mapToProduct(p: ProductResponse): Product {
   }
 }
 
-export const HomePage = ({ keyword, onClearKeyword, onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
+export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
   const [activeCat, setActiveCat] = useState<number | null>(null)
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
@@ -85,14 +80,27 @@ export const HomePage = ({ keyword, onClearKeyword, onMoveToFilter, onMoveToMyPa
       size: 20,
     }
     if (keyword?.trim()) c.keyword = keyword.trim()
-    if (selectedBrands.length > 0) c.brands = selectedBrands
-    if (activeCat != null) c.categories = [CATEGORIES[activeCat].label]
-    for (const n of selectedNutrients) {
-      const t = NUTRIENT_THRESHOLDS[n]
+
+    // 칩 + 사이드 필터 병합
+    const brands = Array.from(new Set([...selectedBrands, ...(extraFilter?.brands ?? [])]))
+    if (brands.length > 0) c.brands = brands
+
+    const cats = Array.from(new Set([
+      ...(activeCat != null ? [CATEGORIES[activeCat].label] : []),
+      ...(extraFilter?.categories ?? []),
+    ]))
+    if (cats.length > 0) c.categories = cats
+
+    const nutrients = Array.from(new Set([
+      ...selectedNutrients,
+      ...(extraFilter?.nutrients ?? []),
+    ]))
+    for (const n of nutrients) {
+      const t = NUTRIENT_THRESHOLDS[n as NutrientOption]
       if (t) Object.assign(c, t)
     }
     return c
-  }, [keyword, selectedSort, selectedBrands, selectedNutrients, activeCat])
+  }, [keyword, selectedSort, selectedBrands, selectedNutrients, activeCat, extraFilter])
 
   const { data, isLoading, isError } = useProductListQuery(condition)
   const products = data?.items ?? []

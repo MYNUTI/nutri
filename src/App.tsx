@@ -58,6 +58,9 @@ function AppShell() {
   const [userProfile, setUserProfile] = useState<Profile | null>(null)
   const [showFilter, setShowFilter] = useState(false)
   const [homeKeyword, setHomeKeyword] = useState('')
+  const [extraFilter, setExtraFilter] = useState<{ categories: string[]; brands: string[]; nutrients: string[] }>({
+    categories: [], brands: [], nutrients: [],
+  })
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [compareProducts, setCompareProducts] = useState<Product[]>([])
   // 신규 OAuth 회원가입 진행 중일 때 임시 보관 (provider, oauthId, email)
@@ -140,6 +143,7 @@ function AppShell() {
           <HomePage
             keyword={homeKeyword}
             onClearKeyword={() => setHomeKeyword('')}
+            extraFilter={extraFilter}
             onMoveToFilter={() => setShowFilter(true)}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
@@ -275,7 +279,10 @@ function AppShell() {
             />
           )}
           {showFilter && (
-            <FilterPage onClose={() => setShowFilter(false)} />
+            <FilterPage
+              onClose={() => setShowFilter(false)}
+              onApply={(sel) => setExtraFilter(sel)}
+            />
           )}
           <section className="page-body">{currentPage}</section>
         </section>
