@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon } from '../components/icons'
 import { useProductListQuery } from '../queries/productQueries'
-import type { ProductResponse } from '../api/products/types'
+import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import type { Product } from '../types/product'
 
 type HomePageProps = {
@@ -40,6 +40,19 @@ const NUTRIENT_OPTIONS = ['저당', '고단백']
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
 type SortKey = typeof SORT_OPTIONS[number]
 
+const SORT_MAP: Record<SortKey, SortType> = {
+  '추천순':     'RECOMMENDED',
+  '영양점수순': 'SCORE',
+  '인기순':     'POPULAR',
+  '정확도순':   'ACCURACY',
+}
+
+// 성분 칩 → 임계값 매핑 (백엔드는 단일 임계값 필터만 지원)
+const NUTRIENT_THRESHOLDS: Record<string, Partial<ProductSearchCondition>> = {
+  '저당':   { maxSugar: 10 },
+  '고단백': { minProtein: 15 },
+}
+
 function mapToProduct(p: ProductResponse): Product {
   return {
     id: p.id,
@@ -53,9 +66,7 @@ function mapToProduct(p: ProductResponse): Product {
 }
 
 export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
-  const { data, isLoading, isError } = useProductListQuery()
-  const products = data?.items ?? []
-  const [activeCat, setActiveCat] = useState(0)
+  const [activeCat, setActiveCat] = useState<number | null>(null)
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
@@ -63,6 +74,25 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoH
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
   const { toggle, isFavorite } = useFavorites()
+
+  // 검색/필터/정렬 → API 조건 빌드
+  const condition = useMemo<ProductSearchCondition>(() => {
+    const c: ProductSearchCondition = {
+      sort: SORT_MAP[selectedSort],
+      page: 0,
+      size: 20,
+    }
+    if (selectedBrands.length > 0) c.brands = selectedBrands
+    if (activeCat != null) c.categories = [CATEGORIES[activeCat].label]
+    for (const n of selectedNutrients) {
+      const t = NUTRIENT_THRESHOLDS[n]
+      if (t) Object.assign(c, t)
+    }
+    return c
+  }, [selectedSort, selectedBrands, selectedNutrients, activeCat])
+
+  const { data, isLoading, isError } = useProductListQuery(condition)
+  const products = data?.items ?? []
 
   const toggleInArray = (arr: string[], v: string) =>
     arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]
@@ -167,7 +197,7 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoH
                       type="button"
                       className={`home-cat${globalIdx === activeCat ? ' home-cat--on' : ''}`}
                       role="listitem"
-                      onClick={() => setActiveCat(globalIdx)}
+                      onClick={() => setActiveCat(prev => prev === globalIdx ? null : globalIdx)}
                     >
                       <span className="home-cat-emoji" aria-hidden="true">{c.emoji}</span>
                       <span className="home-cat-label">{c.label}</span>
