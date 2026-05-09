@@ -3,6 +3,7 @@ import './FilterPage.css'
 
 type FilterPageProps = {
   onClose: () => void
+  onApply?: (selection: { categories: string[]; brands: string[]; nutrients: string[] }) => void
 }
 
 const FOOD_CATS = [
@@ -16,7 +17,7 @@ const BRANDS = ['풀무원', '꼬기닭', '하닭', '하림']
 
 const CALORIE_CHIPS = ['저당', '고단백']
 
-export const FilterPage = ({ onClose }: FilterPageProps) => {
+export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
   const [catOpen, setCatOpen] = useState(true)
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)
@@ -31,6 +32,23 @@ export const FilterPage = ({ onClose }: FilterPageProps) => {
     else next.add(item)
     return next
   }
+
+  const handleReset = () => {
+    setSelectedCats(new Set())
+    setSelectedBrands(new Set())
+    setSelectedCal(new Set())
+  }
+
+  const handleApply = () => {
+    onApply?.({
+      categories: Array.from(selectedCats),
+      brands: Array.from(selectedBrands),
+      nutrients: Array.from(selectedCal),
+    })
+    onClose()
+  }
+
+  const totalSelected = selectedCats.size + selectedBrands.size + selectedCal.size
 
   return (
     <div className="fil-overlay">
@@ -110,6 +128,15 @@ export const FilterPage = ({ onClose }: FilterPageProps) => {
             )}
           </div>
         </div>
+
+        <footer className="fil-footer">
+          <button type="button" className="fil-btn fil-btn--reset" onClick={handleReset}>
+            초기화
+          </button>
+          <button type="button" className="fil-btn fil-btn--apply" onClick={handleApply}>
+            적용하기{totalSelected > 0 ? ` (${totalSelected})` : ''}
+          </button>
+        </footer>
       </div>
     </div>
   )
