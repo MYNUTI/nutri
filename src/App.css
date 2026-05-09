@@ -640,11 +640,30 @@
 .home-header {
   display: flex;
   align-items: center;
-  height: 28px;
+  justify-content: space-between;
+  height: 32px;
 }
 
 .home-header .icon-btn {
   color: #111;
+}
+
+.home-brand {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #111;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.home-brand:hover { opacity: 0.75; }
+
+.home-header-user {
+  margin-left: auto;
 }
 
 .home-search {
@@ -894,6 +913,39 @@
   cursor: pointer;
   flex-shrink: 0;
   margin: 0;
+}
+
+/* ── 정렬 드롭다운 (단일 선택 리스트) ───────────── */
+.home-dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-dropdown-row {
+  width: 100%;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2a2a2a;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.home-dropdown-row:hover {
+  background: #f5f5f7;
+}
+
+.home-dropdown-row--on {
+  background: #ececee;
+  color: #111;
+  font-weight: 600;
 }
 
 .home-divider {

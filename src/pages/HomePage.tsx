@@ -8,6 +8,7 @@ import type { Product } from '../types/product'
 type HomePageProps = {
   onMoveToFilter: () => void
   onMoveToMyPage: () => void
+  onGoHome?: () => void
   onProductClick?: (product: Product) => void
   onAddToCompare?: (product: Product) => void
 }
@@ -35,6 +36,8 @@ type ChipKey = typeof FILTER_CHIPS[number]
 
 const BRAND_OPTIONS = ['풀무원', '꼬기닭', '허닭', '하림']
 const NUTRIENT_OPTIONS = ['저당', '고단백']
+const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
+type SortKey = typeof SORT_OPTIONS[number]
 
 function mapToProduct(p: ProductResponse): Product {
   return {
@@ -48,7 +51,7 @@ function mapToProduct(p: ProductResponse): Product {
   }
 }
 
-export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: HomePageProps) => {
+export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onGoHome, onProductClick }: HomePageProps) => {
   const { data, isLoading, isError } = useProductListQuery()
   const products = data?.items ?? []
   const [activeCat, setActiveCat] = useState(0)
@@ -56,6 +59,7 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: Hom
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [selectedNutrients, setSelectedNutrients] = useState<string[]>([])
+  const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
   const { toggle, isFavorite } = useFavorites()
 
@@ -72,7 +76,15 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: Hom
   return (
     <div className="home-page">
       <header className="home-header">
-        <button className="icon-btn" type="button" aria-label="마이페이지" onClick={onMoveToMyPage}>
+        <button
+          type="button"
+          className="home-brand"
+          onClick={() => onGoHome?.()}
+          aria-label="홈으로"
+        >
+          영양대학
+        </button>
+        <button className="icon-btn home-header-user" type="button" aria-label="마이페이지" onClick={onMoveToMyPage}>
           <UserIcon />
         </button>
       </header>
@@ -131,6 +143,7 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: Hom
           const count =
             label === '브랜드' ? selectedBrands.length :
             label === '성분' ? selectedNutrients.length : 0
+          const display = label === '추천순' ? selectedSort : label
           return (
             <button
               key={label}
@@ -138,11 +151,34 @@ export const HomePage = ({ onMoveToFilter, onMoveToMyPage, onProductClick }: Hom
               className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
               onClick={() => setOpenChip(isOpen ? null : label)}
             >
-              {label}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">▾</span>
+              {display}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">{isOpen ? '▴' : '▾'}</span>
             </button>
           )
         })}
       </div>
+
+      {openChip === '추천순' && (
+        <div className="home-dropdown" role="listbox" aria-label="정렬">
+          <ul className="home-dropdown-list">
+            {SORT_OPTIONS.map(opt => {
+              const isActive = opt === selectedSort
+              return (
+                <li key={opt}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={isActive}
+                    className={`home-dropdown-row${isActive ? ' home-dropdown-row--on' : ''}`}
+                    onClick={() => { setSelectedSort(opt); setOpenChip(null) }}
+                  >
+                    {opt}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
 
       {openChip === '브랜드' && (
         <div className="home-dropdown" role="dialog" aria-label="브랜드 필터">

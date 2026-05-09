@@ -139,6 +139,7 @@ function AppShell() {
           <HomePage
             onMoveToFilter={() => setShowFilter(true)}
             onMoveToMyPage={() => navigate('mypage')}
+            onGoHome={() => { navigate('home'); window.scrollTo({ top: 0 }) }}
             onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
             onAddToCompare={handleAddToCompare}
           />
