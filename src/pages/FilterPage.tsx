@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { NUTRIENT_OPTIONS } from '../constants/nutrientFilters'
 import { useBrandsQuery } from '../queries/brandsQueries'
+import { useCategoriesQuery } from '../queries/categoriesQueries'
+import type { CategoryResponse } from '../api/products/types'
 import './FilterPage.css'
 
 type FilterPageProps = {
@@ -8,27 +10,17 @@ type FilterPageProps = {
   onApply?: (selection: { categories: string[]; brands: string[]; nutrients: string[] }) => void
 }
 
-const FOOD_CATS = [
-  '견과류',
-  '곡류/시리얼',
-  '닭고기',
-  '식물성 단백질',
-  '돼지/소/오리',
-  '면류',
-  '밥/식사류',
-  '수산물',
-  '프로틴/쉐이크',
-  '스낵/빵/디저트',
-  '유제품',
-  '유지류/소스',
-  '음료류',
-]
+function flattenCategories(cats: CategoryResponse[]): CategoryResponse[] {
+  return cats.flatMap(c => [c, ...flattenCategories(c.children ?? [])])
+}
 
 const NUTRIENT_CHIPS = NUTRIENT_OPTIONS
 
 export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandList = brandsData ?? []
+  const { data: categoriesData } = useCategoriesQuery()
+  const categoryList = flattenCategories(categoriesData ?? [])
   const [catOpen, setCatOpen] = useState(true)
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)
@@ -78,15 +70,15 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
             </button>
             {catOpen && (
               <div className="fil-grid2">
-                {FOOD_CATS.map(cat => (
-                  <label key={cat} className="fil-check-label">
+                {categoryList.map(cat => (
+                  <label key={cat.id} className="fil-check-label">
                     <input
                       type="checkbox"
                       className="fil-check"
-                      checked={selectedCats.has(cat)}
-                      onChange={() => setSelectedCats(toggleSet(selectedCats, cat))}
+                      checked={selectedCats.has(cat.name)}
+                      onChange={() => setSelectedCats(toggleSet(selectedCats, cat.name))}
                     />
-                    <span>{cat}</span>
+                    <span>{cat.name}</span>
                   </label>
                 ))}
               </div>
