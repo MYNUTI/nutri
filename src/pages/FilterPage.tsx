@@ -6,9 +6,8 @@ import './FilterPage.css'
 
 type FilterPageProps = {
   onClose: () => void
-  onApply?: (selection: { categories: string[]; brands: string[]; nutrients: string[] }) => void
+  onApply?: (selection: { categoryId: number | null; brandId: number | null; nutrients: string[] }) => void
 }
-
 
 const NUTRIENT_CHIPS = NUTRIENT_OPTIONS
 
@@ -21,8 +20,8 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)
 
-  const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set())
-  const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set())
+  const [selectedCatId, setSelectedCatId] = useState<number | null>(null)
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null)
   const [selectedCal, setSelectedCal] = useState<Set<string>>(new Set())
 
   const toggleSet = (set: Set<string>, item: string): Set<string> => {
@@ -33,21 +32,21 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
   }
 
   const handleReset = () => {
-    setSelectedCats(new Set())
-    setSelectedBrands(new Set())
+    setSelectedCatId(null)
+    setSelectedBrandId(null)
     setSelectedCal(new Set())
   }
 
   const handleApply = () => {
     onApply?.({
-      categories: Array.from(selectedCats),
-      brands: Array.from(selectedBrands),
+      categoryId: selectedCatId,
+      brandId: selectedBrandId,
       nutrients: Array.from(selectedCal),
     })
     onClose()
   }
 
-  const totalSelected = selectedCats.size + selectedBrands.size + selectedCal.size
+  const totalSelected = (selectedCatId != null ? 1 : 0) + (selectedBrandId != null ? 1 : 0) + selectedCal.size
 
   return (
     <div className="fil-overlay">
@@ -69,10 +68,12 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
                 {categoryList.map(cat => (
                   <label key={cat.id} className="fil-check-label">
                     <input
-                      type="checkbox"
+                      type="radio"
+                      name="fil-category"
                       className="fil-check"
-                      checked={selectedCats.has(cat.name)}
-                      onChange={() => setSelectedCats(toggleSet(selectedCats, cat.name))}
+                      checked={selectedCatId === cat.id}
+                      onChange={() => setSelectedCatId(cat.id)}
+                      onClick={() => { if (selectedCatId === cat.id) setSelectedCatId(null) }}
                     />
                     <span>{cat.name}</span>
                   </label>
@@ -92,10 +93,12 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
                 {brandList.map(b => (
                   <label key={b.id} className="fil-check-label">
                     <input
-                      type="checkbox"
+                      type="radio"
+                      name="fil-brand"
                       className="fil-check"
-                      checked={selectedBrands.has(b.name)}
-                      onChange={() => setSelectedBrands(toggleSet(selectedBrands, b.name))}
+                      checked={selectedBrandId === b.id}
+                      onChange={() => setSelectedBrandId(b.id)}
+                      onClick={() => { if (selectedBrandId === b.id) setSelectedBrandId(null) }}
                     />
                     <span>{b.name}</span>
                   </label>

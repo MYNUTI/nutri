@@ -58,8 +58,8 @@ function AppShell() {
   const [userProfile, setUserProfile] = useState<Profile | null>(null)
   const [showFilter, setShowFilter] = useState(false)
   const [homeKeyword, setHomeKeyword] = useState('')
-  const [extraFilter, setExtraFilter] = useState<{ categories: string[]; brands: string[]; nutrients: string[] }>({
-    categories: [], brands: [], nutrients: [],
+  const [extraFilter, setExtraFilter] = useState<{ categoryId: number | null; brandId: number | null; nutrients: string[] }>({
+    categoryId: null, brandId: null, nutrients: [],
   })
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [compareProducts, setCompareProducts] = useState<Product[]>([])

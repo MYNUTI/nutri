@@ -67,10 +67,6 @@ export type ProductSearchCondition = {
   keyword?: string
   categoryId?: number
   brandId?: number
-  // 다중 선택용 (백엔드 호환: 반복 쿼리로 brands=A&brands=B 형태로 전송)
-  brands?: string[]
-  categories?: string[]
-  grades?: string[]
   minCalories?: number
   maxCalories?: number
   minProtein?: number

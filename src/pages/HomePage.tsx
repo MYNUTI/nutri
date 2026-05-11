@@ -11,7 +11,7 @@ import { NUTRIENT_OPTIONS, NUTRIENT_THRESHOLDS, type NutrientOption } from '../c
 type HomePageProps = {
   keyword?: string
   onClearKeyword?: () => void
-  extraFilter?: { categories: string[]; brands: string[]; nutrients: string[] }
+  extraFilter?: { categoryId: number | null; brandId: number | null; nutrients: string[] }
   onMoveToFilter: () => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
@@ -56,7 +56,7 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
   const [activeCat, setActiveCat] = useState<number | null>(null)
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null)
   const [selectedNutrients, setSelectedNutrients] = useState<string[]>([])
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
@@ -71,15 +71,16 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
     }
     if (keyword?.trim()) c.keyword = keyword.trim()
 
-    // 칩 + 사이드 필터 병합
-    const brands = Array.from(new Set([...selectedBrands, ...(extraFilter?.brands ?? [])]))
-    if (brands.length > 0) c.brands = brands
+    // 브랜드: 칩 선택 우선, 없으면 사이드 필터
+    const brandId = selectedBrandId ?? extraFilter?.brandId ?? null
+    if (brandId != null) c.brandId = brandId
 
-    const cats = Array.from(new Set([
-      ...(activeCat != null ? [categories[activeCat]?.name ?? ''] : []),
-      ...(extraFilter?.categories ?? []),
-    ]))
-    if (cats.length > 0) c.categories = cats
+    // 카테고리: 홈 스트립 우선, 없으면 사이드 필터
+    if (activeCat != null && categories[activeCat]) {
+      c.categoryId = categories[activeCat].id
+    } else if (extraFilter?.categoryId != null) {
+      c.categoryId = extraFilter.categoryId
+    }
 
     const nutrients = Array.from(new Set([
       ...selectedNutrients,
@@ -90,7 +91,7 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
       if (t) Object.assign(c, t)
     }
     return c
-  }, [keyword, selectedSort, selectedBrands, selectedNutrients, activeCat, extraFilter, categories])
+  }, [keyword, selectedSort, selectedBrandId, selectedNutrients, activeCat, extraFilter, categories])
 
   const { data, isLoading, isError } = useProductListQuery(condition)
   const products = data?.items ?? []
@@ -245,7 +246,7 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
         {FILTER_CHIPS.map(label => {
           const isOpen = openChip === label
           const count =
-            label === '브랜드' ? selectedBrands.length :
+            label === '브랜드' ? (selectedBrandId != null ? 1 : 0) :
             label === '성분' ? selectedNutrients.length : 0
           const display = label === '추천순' ? selectedSort : label
           return (
@@ -301,10 +302,12 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
             {brandOptions.map(b => (
               <label key={b.id} className="home-dropdown-item">
                 <input
-                  type="checkbox"
+                  type="radio"
+                  name="home-brand"
                   className="home-dropdown-check"
-                  checked={selectedBrands.includes(b.name)}
-                  onChange={() => setSelectedBrands(prev => toggleInArray(prev, b.name))}
+                  checked={selectedBrandId === b.id}
+                  onChange={() => setSelectedBrandId(b.id)}
+                  onClick={() => { if (selectedBrandId === b.id) setSelectedBrandId(null) }}
                 />
                 <span>{b.name}</span>
               </label>
