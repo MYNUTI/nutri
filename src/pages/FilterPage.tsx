@@ -5,13 +5,16 @@ import { useCategoriesQuery } from '../queries/categoriesQueries'
 import './FilterPage.css'
 
 type FilterPageProps = {
+  initialCategoryId?: number | null
+  initialBrandId?: number | null
+  initialNutrients?: string[]
   onClose: () => void
   onApply?: (selection: { categoryId: number | null; brandId: number | null; nutrients: string[] }) => void
 }
 
 const NUTRIENT_CHIPS = NUTRIENT_OPTIONS
 
-export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
+export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, initialNutrients = [], onClose, onApply }: FilterPageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandList = brandsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
@@ -20,9 +23,9 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)
 
-  const [selectedCatId, setSelectedCatId] = useState<number | null>(null)
-  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null)
-  const [selectedCal, setSelectedCal] = useState<Set<string>>(new Set())
+  const [selectedCatId, setSelectedCatId] = useState<number | null>(initialCategoryId)
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(initialBrandId)
+  const [selectedCal, setSelectedCal] = useState<Set<string>>(new Set(initialNutrients))
 
   const toggleSet = (set: Set<string>, item: string): Set<string> => {
     const next = new Set(set)

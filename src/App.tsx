@@ -58,9 +58,9 @@ function AppShell() {
   const [userProfile, setUserProfile] = useState<Profile | null>(null)
   const [showFilter, setShowFilter] = useState(false)
   const [homeKeyword, setHomeKeyword] = useState('')
-  const [extraFilter, setExtraFilter] = useState<{ categoryId: number | null; brandId: number | null; nutrients: string[] }>({
-    categoryId: null, brandId: null, nutrients: [],
-  })
+  const [filterCategoryId, setFilterCategoryId] = useState<number | null>(null)
+  const [filterBrandId, setFilterBrandId] = useState<number | null>(null)
+  const [filterNutrients, setFilterNutrients] = useState<string[]>([])
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [compareProducts, setCompareProducts] = useState<Product[]>([])
   // 신규 OAuth 회원가입 진행 중일 때 임시 보관 (provider, oauthId, email)
@@ -143,7 +143,12 @@ function AppShell() {
           <HomePage
             keyword={homeKeyword}
             onClearKeyword={() => setHomeKeyword('')}
-            extraFilter={extraFilter}
+            selectedCategoryId={filterCategoryId}
+            selectedBrandId={filterBrandId}
+            selectedNutrients={filterNutrients}
+            onCategoryChange={setFilterCategoryId}
+            onBrandChange={setFilterBrandId}
+            onNutrientsChange={setFilterNutrients}
             onMoveToFilter={() => setShowFilter(true)}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
@@ -224,7 +229,7 @@ function AppShell() {
         return null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts, homeKeyword, extraFilter])
+  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts, homeKeyword, filterCategoryId, filterBrandId, filterNutrients])
 
   return (
     <main className="screen-wrap">
@@ -280,8 +285,15 @@ function AppShell() {
           )}
           {showFilter && (
             <FilterPage
+              initialCategoryId={filterCategoryId}
+              initialBrandId={filterBrandId}
+              initialNutrients={filterNutrients}
               onClose={() => setShowFilter(false)}
-              onApply={(sel) => setExtraFilter(sel)}
+              onApply={(sel) => {
+                setFilterCategoryId(sel.categoryId)
+                setFilterBrandId(sel.brandId)
+                setFilterNutrients(sel.nutrients)
+              }}
             />
           )}
           <section className="page-body">{currentPage}</section>

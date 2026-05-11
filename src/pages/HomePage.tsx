@@ -11,7 +11,12 @@ import { NUTRIENT_OPTIONS, NUTRIENT_THRESHOLDS, type NutrientOption } from '../c
 type HomePageProps = {
   keyword?: string
   onClearKeyword?: () => void
-  extraFilter?: { categoryId: number | null; brandId: number | null; nutrients: string[] }
+  selectedCategoryId: number | null
+  selectedBrandId: number | null
+  selectedNutrients: string[]
+  onCategoryChange: (id: number | null) => void
+  onBrandChange: (id: number | null) => void
+  onNutrientsChange: (nutrients: string[]) => void
   onMoveToFilter: () => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
@@ -47,22 +52,23 @@ function mapToProduct(p: ProductResponse): Product {
   }
 }
 
-export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
+export const HomePage = ({
+  keyword, onClearKeyword,
+  selectedCategoryId, selectedBrandId, selectedNutrients,
+  onCategoryChange, onBrandChange, onNutrientsChange,
+  onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick,
+}: HomePageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandOptions = brandsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
   const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
   const pageCount = Math.ceil(categories.length / PAGE_SIZE)
-  const [activeCat, setActiveCat] = useState<number | null>(null)
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
-  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null)
-  const [selectedNutrients, setSelectedNutrients] = useState<string[]>([])
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
   const { toggle, isFavorite } = useFavorites()
 
-  // 검색/필터/정렬 → API 조건 빌드
   const condition = useMemo<ProductSearchCondition>(() => {
     const c: ProductSearchCondition = {
       sort: SORT_MAP[selectedSort],
@@ -70,34 +76,17 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
       size: 20,
     }
     if (keyword?.trim()) c.keyword = keyword.trim()
-
-    // 브랜드: 칩 선택 우선, 없으면 사이드 필터
-    const brandId = selectedBrandId ?? extraFilter?.brandId ?? null
-    if (brandId != null) c.brandId = brandId
-
-    // 카테고리: 홈 스트립 우선, 없으면 사이드 필터
-    if (activeCat != null && categories[activeCat]) {
-      c.categoryId = categories[activeCat].id
-    } else if (extraFilter?.categoryId != null) {
-      c.categoryId = extraFilter.categoryId
-    }
-
-    const nutrients = Array.from(new Set([
-      ...selectedNutrients,
-      ...(extraFilter?.nutrients ?? []),
-    ]))
-    for (const n of nutrients) {
+    if (selectedBrandId != null) c.brandId = selectedBrandId
+    if (selectedCategoryId != null) c.categoryId = selectedCategoryId
+    for (const n of selectedNutrients) {
       const t = NUTRIENT_THRESHOLDS[n as NutrientOption]
       if (t) Object.assign(c, t)
     }
     return c
-  }, [keyword, selectedSort, selectedBrandId, selectedNutrients, activeCat, extraFilter, categories])
+  }, [keyword, selectedSort, selectedBrandId, selectedNutrients, selectedCategoryId])
 
   const { data, isLoading, isError } = useProductListQuery(condition)
   const products = data?.items ?? []
-
-  const toggleInArray = (arr: string[], v: string) =>
-    arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]
 
   const handleCatsScroll = () => {
     const el = catsScrollRef.current
@@ -112,7 +101,6 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
     el.scrollTo({ left: idx * el.clientWidth, behavior: 'smooth' })
   }
 
-  // 데스크탑 마우스 드래그 → 가로 스크롤
   const dragStateRef = useRef<{ startX: number; startScroll: number; moved: boolean } | null>(null)
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = catsScrollRef.current
@@ -133,13 +121,11 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
     const st = dragStateRef.current
     if (!el || !st) return
     el.classList.remove('home-cats--dragging')
-    // 가장 가까운 페이지로 스냅
     const page = Math.round(el.scrollLeft / el.clientWidth)
     el.scrollTo({ left: page * el.clientWidth, behavior: 'smooth' })
     dragStateRef.current = null
   }
   const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
-    // 드래그로 이동한 경우 자식 onClick(카테고리 선택) 막기
     if (dragStateRef.current?.moved) {
       e.stopPropagation()
       e.preventDefault()
@@ -206,20 +192,17 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
             const slice = categories.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
             return (
               <div className="home-cats-page" key={pageIdx}>
-                {slice.map((c) => {
-                  const globalIdx = categories.indexOf(c)
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      className={`home-cat${globalIdx === activeCat ? ' home-cat--on' : ''}`}
-                      role="listitem"
-                      onClick={() => setActiveCat(prev => prev === globalIdx ? null : globalIdx)}
-                    >
-                      <span className="home-cat-label">{c.name}</span>
-                    </button>
-                  )
-                })}
+                {slice.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`home-cat${c.id === selectedCategoryId ? ' home-cat--on' : ''}`}
+                    role="listitem"
+                    onClick={() => onCategoryChange(c.id === selectedCategoryId ? null : c.id)}
+                  >
+                    <span className="home-cat-label">{c.name}</span>
+                  </button>
+                ))}
               </div>
             )
           })}
@@ -306,8 +289,8 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
                   name="home-brand"
                   className="home-dropdown-check"
                   checked={selectedBrandId === b.id}
-                  onChange={() => setSelectedBrandId(b.id)}
-                  onClick={() => { if (selectedBrandId === b.id) setSelectedBrandId(null) }}
+                  onChange={() => onBrandChange(b.id)}
+                  onClick={() => { if (selectedBrandId === b.id) onBrandChange(null) }}
                 />
                 <span>{b.name}</span>
               </label>
@@ -336,7 +319,11 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
                   type="checkbox"
                   className="home-dropdown-check"
                   checked={selectedNutrients.includes(opt)}
-                  onChange={() => setSelectedNutrients(prev => toggleInArray(prev, opt))}
+                  onChange={() => onNutrientsChange(
+                    selectedNutrients.includes(opt)
+                      ? selectedNutrients.filter(n => n !== opt)
+                      : [...selectedNutrients, opt]
+                  )}
                 />
                 <span>{opt}</span>
               </label>
@@ -349,6 +336,9 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
 
       {isLoading && <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>불러오는 중...</p>}
       {isError && <p style={{ textAlign: 'center', color: '#b42318', padding: '2rem' }}>상품을 불러오지 못했습니다.</p>}
+      {!isLoading && !isError && products.length === 0 && (
+        <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>조건에 맞는 상품이 없습니다.</p>
+      )}
 
       <section className="home-grid" aria-label="상품 목록">
         {products.map(item => {
