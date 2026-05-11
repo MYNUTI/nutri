@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { NUTRIENT_OPTIONS } from '../constants/nutrientFilters'
 import { useBrandsQuery } from '../queries/brandsQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
-import type { CategoryResponse } from '../api/products/types'
 import './FilterPage.css'
 
 type FilterPageProps = {
