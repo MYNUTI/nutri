@@ -10,9 +10,6 @@ type FilterPageProps = {
   onApply?: (selection: { categories: string[]; brands: string[]; nutrients: string[] }) => void
 }
 
-function flattenCategories(cats: CategoryResponse[]): CategoryResponse[] {
-  return cats.flatMap(c => [c, ...flattenCategories(c.children ?? [])])
-}
 
 const NUTRIENT_CHIPS = NUTRIENT_OPTIONS
 
@@ -20,7 +17,7 @@ export const FilterPage = ({ onClose, onApply }: FilterPageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandList = brandsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
-  const categoryList = flattenCategories(categoriesData ?? [])
+  const categoryList = (categoriesData ?? []).filter(c => c.depth === 1)
   const [catOpen, setCatOpen] = useState(true)
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)

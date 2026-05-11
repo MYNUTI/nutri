@@ -3,6 +3,7 @@ import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon } from '../components/icons'
 import { useProductListQuery } from '../queries/productQueries'
 import { useBrandsQuery } from '../queries/brandsQueries'
+import { useCategoriesQuery } from '../queries/categoriesQueries'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import type { Product } from '../types/product'
 import { NUTRIENT_OPTIONS, NUTRIENT_THRESHOLDS, type NutrientOption } from '../constants/nutrientFilters'
@@ -19,23 +20,7 @@ type HomePageProps = {
   onAddToCompare?: (product: Product) => void
 }
 
-const CATEGORIES = [
-  { id: 'nuts',     label: '견과류',         emoji: '🥜' },
-  { id: 'grain',    label: '곡류,시리얼',    emoji: '🌾' },
-  { id: 'chicken',  label: '닭고기',         emoji: '🍗' },
-  { id: 'plant',    label: '식물성 단백질',  emoji: '🫛' },
-  { id: 'meat',     label: '돼지,소,오리',   emoji: '🥩' },
-  { id: 'noodle',   label: '면류',           emoji: '🍜' },
-  { id: 'rice',     label: '밥,식사류',      emoji: '🍚' },
-  { id: 'seafood',  label: '수산물',         emoji: '🐟' },
-  { id: 'protein',  label: '프로틴,쉐이크',  emoji: '🥤' },
-  { id: 'snack',    label: '스낵,빵',        emoji: '🍞' },
-  { id: 'dairy',    label: '유제품',         emoji: '🧀' },
-  { id: 'sauce',    label: '유지류,소스',    emoji: '🧈' },
-  { id: 'drink',    label: '음료류',         emoji: '🥤' },
-]
 const PAGE_SIZE = 4
-const PAGE_COUNT = Math.ceil(CATEGORIES.length / PAGE_SIZE)
 
 const FILTER_CHIPS = ['추천순', '브랜드', '성분'] as const
 type ChipKey = typeof FILTER_CHIPS[number]
@@ -65,6 +50,9 @@ function mapToProduct(p: ProductResponse): Product {
 export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick }: HomePageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandOptions = brandsData ?? []
+  const { data: categoriesData } = useCategoriesQuery()
+  const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
+  const pageCount = Math.ceil(categories.length / PAGE_SIZE)
   const [activeCat, setActiveCat] = useState<number | null>(null)
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
@@ -88,7 +76,7 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
     if (brands.length > 0) c.brands = brands
 
     const cats = Array.from(new Set([
-      ...(activeCat != null ? [CATEGORIES[activeCat].label] : []),
+      ...(activeCat != null ? [categories[activeCat]?.name ?? ''] : []),
       ...(extraFilter?.categories ?? []),
     ]))
     if (cats.length > 0) c.categories = cats
@@ -102,7 +90,7 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
       if (t) Object.assign(c, t)
     }
     return c
-  }, [keyword, selectedSort, selectedBrands, selectedNutrients, activeCat, extraFilter])
+  }, [keyword, selectedSort, selectedBrands, selectedNutrients, activeCat, extraFilter, categories])
 
   const { data, isLoading, isError } = useProductListQuery(condition)
   const products = data?.items ?? []
@@ -213,12 +201,12 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
           onMouseLeave={endDrag}
           onClickCapture={handleClickCapture}
         >
-          {Array.from({ length: PAGE_COUNT }).map((_, pageIdx) => {
-            const slice = CATEGORIES.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
+          {Array.from({ length: pageCount }).map((_, pageIdx) => {
+            const slice = categories.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
             return (
               <div className="home-cats-page" key={pageIdx}>
                 {slice.map((c) => {
-                  const globalIdx = CATEGORIES.indexOf(c)
+                  const globalIdx = categories.indexOf(c)
                   return (
                     <button
                       key={c.id}
@@ -227,8 +215,7 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
                       role="listitem"
                       onClick={() => setActiveCat(prev => prev === globalIdx ? null : globalIdx)}
                     >
-                      <span className="home-cat-emoji" aria-hidden="true">{c.emoji}</span>
-                      <span className="home-cat-label">{c.label}</span>
+                      <span className="home-cat-label">{c.name}</span>
                     </button>
                   )
                 })}
@@ -237,7 +224,7 @@ export const HomePage = ({ keyword, onClearKeyword, extraFilter, onMoveToFilter,
           })}
         </div>
         <div className="home-cat-dots" role="tablist" aria-label="카테고리 페이지">
-          {Array.from({ length: PAGE_COUNT }).map((_, i) => (
+          {Array.from({ length: pageCount }).map((_, i) => (
             <button
               key={i}
               type="button"
