@@ -1,5 +1,6 @@
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID as string | undefined
+const NAVER_CLIENT_ID = import.meta.env.VITE_NAVER_CLIENT_ID as string | undefined
 
 const OAUTH_BASE = window.location.hostname === 'localhost'
   ? 'http://localhost:8080'
@@ -22,6 +23,15 @@ function buildOAuthUrl(provider: string): string {
       response_type: 'code',
     })
     return `https://kauth.kakao.com/oauth/authorize?${params}`
+  }
+  if (provider === 'NAVER' && NAVER_CLIENT_ID) {
+    const params = new URLSearchParams({
+      client_id: NAVER_CLIENT_ID,
+      redirect_uri: `${OAUTH_BASE}/auth/oauth/naver`,
+      response_type: 'code',
+      state: Math.random().toString(36).slice(2),
+    })
+    return `https://nid.naver.com/oauth2.0/authorize?${params}`
   }
   return `#login`
 }
