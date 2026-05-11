@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon } from '../components/icons'
 import { useProductListQuery } from '../queries/productQueries'
@@ -66,6 +66,14 @@ export const HomePage = ({
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
+  const [tempBrandId, setTempBrandId] = useState<number | null>(selectedBrandId)
+  const [tempNutrients, setTempNutrients] = useState<string[]>(selectedNutrients)
+
+  useEffect(() => {
+    if (openChip === '브랜드') setTempBrandId(selectedBrandId)
+    if (openChip === '성분') setTempNutrients([...selectedNutrients])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openChip])
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
   const { toggle, isFavorite } = useFavorites()
 
@@ -288,13 +296,17 @@ export const HomePage = ({
                   type="radio"
                   name="home-brand"
                   className="home-dropdown-check"
-                  checked={selectedBrandId === b.id}
-                  onChange={() => onBrandChange(b.id)}
-                  onClick={() => { if (selectedBrandId === b.id) onBrandChange(null) }}
+                  checked={tempBrandId === b.id}
+                  onChange={() => setTempBrandId(b.id)}
+                  onClick={() => { if (tempBrandId === b.id) setTempBrandId(null) }}
                 />
                 <span>{b.name}</span>
               </label>
             ))}
+          </div>
+          <div className="home-dropdown-footer">
+            <button type="button" className="home-dropdown-reset" onClick={() => setTempBrandId(null)}>초기화</button>
+            <button type="button" className="home-dropdown-apply" onClick={() => { onBrandChange(tempBrandId); setOpenChip(null) }}>적용하기</button>
           </div>
         </div>
       )}
@@ -318,16 +330,20 @@ export const HomePage = ({
                 <input
                   type="checkbox"
                   className="home-dropdown-check"
-                  checked={selectedNutrients.includes(opt)}
-                  onChange={() => onNutrientsChange(
-                    selectedNutrients.includes(opt)
-                      ? selectedNutrients.filter(n => n !== opt)
-                      : [...selectedNutrients, opt]
+                  checked={tempNutrients.includes(opt)}
+                  onChange={() => setTempNutrients(
+                    tempNutrients.includes(opt)
+                      ? tempNutrients.filter(n => n !== opt)
+                      : [...tempNutrients, opt]
                   )}
                 />
                 <span>{opt}</span>
               </label>
             ))}
+          </div>
+          <div className="home-dropdown-footer">
+            <button type="button" className="home-dropdown-reset" onClick={() => setTempNutrients([])}>초기화</button>
+            <button type="button" className="home-dropdown-apply" onClick={() => { onNutrientsChange(tempNutrients); setOpenChip(null) }}>적용하기</button>
           </div>
         </div>
       )}
