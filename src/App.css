@@ -1306,9 +1306,8 @@
 .home-dropdown-footer {
   display: flex;
   gap: 8px;
-  padding-top: 4px;
+  padding-top: 12px;
   border-top: 1px solid #ececef;
-  margin-top: 2px;
 }
 
 .home-dropdown-reset {
