@@ -44,6 +44,9 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
         }
       </div>
 
+      {/* 흰색 카드 (이미지 위로 살짝 올라옴) */}
+      <div className="det-body">
+
       {/* 상품 정보 */}
       <div className="det-info">
         <span className="det-brand">{detail?.brand?.name ?? '-'}</span>
@@ -120,6 +123,8 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
           )
         })}
       </section>
+
+      </div>{/* det-body end */}
     </div>
   )
 }
