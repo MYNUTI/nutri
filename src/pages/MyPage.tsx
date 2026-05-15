@@ -136,7 +136,7 @@ const WithdrawModal = ({ phase, reason, onReasonChange, onCancel, onConfirm, onC
 
 export const MyPage = ({ isAuthenticated, onBack, onLogin, onGoFavorites, onGoPasswordChange, onLogout, onEditNutrition, onWithdraw }: MyPageProps) => {
   const myPageQuery = useMyPageQuery(isAuthenticated)
-  const name = myPageQuery.data?.nickname ?? myPageQuery.data?.name ?? '영양대학'
+  const name = myPageQuery.data?.nickname ?? myPageQuery.data?.name ?? ''
   const queryClient = useQueryClient()
   const [logoutPhase, setLogoutPhase] = useState<null | 'confirm' | 'done'>(null)
   const [withdrawPhase, setWithdrawPhase] = useState<null | 'confirm' | 'done'>(null)

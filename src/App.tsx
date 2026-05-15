@@ -105,6 +105,12 @@ function AppShell() {
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
+  useEffect(() => {
+    const handleForceLogout = () => { setIsAuthenticated(false); setIsAdmin(false) }
+    window.addEventListener('auth:logout', handleForceLogout)
+    return () => window.removeEventListener('auth:logout', handleForceLogout)
+  }, [])
+
   const navigate = (r: RouteKey) => { setRoute(r); setHashRoute(r) }
 
   const handleLogin = (nextAdmin = false) => {
