@@ -38,6 +38,7 @@
   height: 300px;
   background: #dcdcdc;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .det-img {
@@ -233,9 +234,9 @@
 }
 
 .det-divider {
-  height: 8px;
+  height: 12px;
   background: #f0f0f0;
-  margin: 16px -14px 0;
+  margin: 16px -14px 16px;
   flex-shrink: 0;
 }
 
