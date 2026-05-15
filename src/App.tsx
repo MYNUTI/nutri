@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { FavoritesProvider } from './contexts/FavoritesContext'
 import { useLikesQuery } from './queries/likesQueries'
+import { useMyPageQuery } from './queries/myPageQueries'
 import { UserProfileSetupModal, type Profile } from './components/UserProfileSetupModal'
 import { postNutrition, putNutrition, type NutritionData } from './api/nutrition'
 import { oauthLogin, register } from './api/auth'
@@ -68,6 +69,8 @@ function AppShell() {
 
   // 로그인 상태일 때 찜 목록을 서버에서 로드해 FavoritesContext 동기화
   useLikesQuery(isAuthenticated)
+  // 앱 시작 시 토큰 유효성 검증 — 만료 시 auth:logout 이벤트로 자동 로그아웃
+  useMyPageQuery(isAuthenticated)
 
   // OAuth 콜백: URL ?code=xxx&provider=PROVIDER 감지 → /auth/oauth 호출
   useEffect(() => {
