@@ -78,7 +78,9 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
       <div className="det-score-card">
         <div className="det-score-left">
           <div className="det-score-heading">
-            <span className="det-score-crown" aria-hidden="true">👑</span>
+            <svg className="det-score-crown" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 18h18M4 18l2-8 5 4 3-7 3 7 5-4 2 8H4z"/>
+            </svg>
             <span className="det-score-title">영양점수</span>
           </div>
           <p className="det-score-sub">
