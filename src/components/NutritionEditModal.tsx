@@ -153,7 +153,7 @@ export const NutritionEditModal = ({ onClose }: Props) => {
         ))}
       </div>
 
-      <h2 className="ups-title">영양정보 변경</h2>
+      <h2 className="ups-title">내 몸에 맞는 영양점수,<br />1분이면 끝나요</h2>
 
       <div className="ups-body">
         {step === 1 && (
