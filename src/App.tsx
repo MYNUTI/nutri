@@ -4,7 +4,8 @@ import { FavoritesProvider, useFavorites } from './contexts/FavoritesContext'
 import { useLikesQuery } from './queries/likesQueries'
 import { useMyPageQuery } from './queries/myPageQueries'
 import { UserProfileSetupModal, type Profile } from './components/UserProfileSetupModal'
-import { postNutrition, putNutrition, type NutritionData } from './api/nutrition'
+import { NutritionEditModal } from './components/NutritionEditModal'
+import { postNutrition, type NutritionData } from './api/nutrition'
 import { oauthLogin, register } from './api/auth'
 import { products as allProducts } from './mocks/products'
 import { AdminPage } from './pages/AdminPage'
@@ -56,7 +57,6 @@ function AppShell() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
-  const [userProfile, setUserProfile] = useState<Profile | null>(null)
   const [showFilter, setShowFilter] = useState(false)
   const [homeKeyword, setHomeKeyword] = useState('')
   const [filterCategoryId, setFilterCategoryId] = useState<number | null>(null)
@@ -142,7 +142,6 @@ function AppShell() {
   const handleWithdraw = () => {
     setIsAuthenticated(false)
     setIsAdmin(false)
-    setUserProfile(null)
     navigate('home')
   }
 
@@ -261,7 +260,6 @@ function AppShell() {
               }
               onClose={() => { setShowProfileSetup(false); setOauthPending(null) }}
               onComplete={async (profile) => {
-                setUserProfile(profile)
                 setShowProfileSetup(false)
                 try {
                   if (oauthPending) {
@@ -287,20 +285,7 @@ function AppShell() {
             />
           )}
           {showNutritionEdit && (
-            <UserProfileSetupModal
-              initialProfile={userProfile ?? undefined}
-              submitLabel="저장하기"
-              onClose={() => setShowNutritionEdit(false)}
-              onComplete={async (profile) => {
-                setUserProfile(profile)
-                setShowNutritionEdit(false)
-                try {
-                  await putNutrition(profileToNutrition(profile))
-                } catch {
-                  // 수정 실패 무시 (추후 에러 토스트 추가 가능)
-                }
-              }}
-            />
+            <NutritionEditModal onClose={() => setShowNutritionEdit(false)} />
           )}
           {showFilter && (
             <FilterPage
