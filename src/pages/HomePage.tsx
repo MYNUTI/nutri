@@ -348,6 +348,8 @@ export const HomePage = ({
         </div>
       )}
 
+      <div className="home-divider" />
+
       {isLoading && <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>불러오는 중...</p>}
       {isError && <p style={{ textAlign: 'center', color: '#b42318', padding: '2rem' }}>상품을 불러오지 못했습니다.</p>}
       {!isLoading && !isError && products.length === 0 && (
