@@ -99,8 +99,8 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
       </div>
 
       {/* 쿠팡 바로가기 */}
-      {detail?.coupang?.landingUrl
-        ? <a href={detail.coupang.landingUrl} target="_blank" rel="noopener noreferrer" className="det-coupang-btn">쿠팡 바로가기</a>
+      {detail?.coupang?.affiliateUrl
+        ? <a href={detail.coupang.affiliateUrl} target="_blank" rel="noopener noreferrer" className="det-coupang-btn">쿠팡 바로가기</a>
         : <button type="button" className="det-coupang-btn" disabled>쿠팡 바로가기</button>
       }
 
