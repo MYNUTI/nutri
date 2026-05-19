@@ -94,7 +94,7 @@ export const HomePage = ({
   }, [keyword, selectedSort, selectedBrandId, selectedNutrients, selectedCategoryId])
 
   const { data, isLoading, isError } = useProductListQuery(condition)
-  const products = data?.items ?? []
+  const products = (data?.items ?? []).filter(p => !!p.imageUrl)
 
   const handleCatsScroll = () => {
     const el = catsScrollRef.current
