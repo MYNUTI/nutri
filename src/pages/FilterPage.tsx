@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { NUTRIENT_OPTIONS } from '../constants/nutrientFilters'
 import { useBrandsQuery } from '../queries/brandsQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
+import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 import './FilterPage.css'
 
 type FilterPageProps = {
@@ -12,13 +12,13 @@ type FilterPageProps = {
   onApply?: (selection: { categoryId: number | null; brandId: number | null; nutrients: string[] }) => void
 }
 
-const NUTRIENT_CHIPS = NUTRIENT_OPTIONS
-
 export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, initialNutrients = [], onClose, onApply }: FilterPageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandList = brandsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
   const categoryList = (categoriesData ?? []).filter(c => c.depth === 1)
+  const { data: claimsData } = useNutrientClaimsQuery()
+  const claimOptions = claimsData ?? []
   const [catOpen, setCatOpen] = useState(true)
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)
@@ -118,15 +118,15 @@ export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, in
             </button>
             {calOpen && (
               <div className="fil-grid2">
-                {NUTRIENT_CHIPS.map(c => (
-                  <label key={c} className="fil-check-label">
+                {claimOptions.map(c => (
+                  <label key={c.code} className="fil-check-label">
                     <input
                       type="checkbox"
                       className="fil-check"
-                      checked={selectedCal.has(c)}
-                      onChange={() => setSelectedCal(toggleSet(selectedCal, c))}
+                      checked={selectedCal.has(c.code)}
+                      onChange={() => setSelectedCal(toggleSet(selectedCal, c.code))}
                     />
-                    <span>{c}</span>
+                    <span>{c.label}</span>
                   </label>
                 ))}
               </div>

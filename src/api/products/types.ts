@@ -67,18 +67,7 @@ export type ProductSearchCondition = {
   keyword?: string
   categoryId?: number
   brandId?: number
-  minCalories?: number
-  maxCalories?: number
-  minProtein?: number
-  maxProtein?: number
-  minFat?: number
-  maxFat?: number
-  minCarbohydrate?: number
-  maxCarbohydrate?: number
-  minSugar?: number
-  maxSugar?: number
-  minSodium?: number
-  maxSodium?: number
+  nutrientClaims?: string[]
   minNutritionScore?: number
   maxNutritionScore?: number
   sort?: SortType

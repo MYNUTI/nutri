@@ -6,7 +6,7 @@ import { useBrandsQuery } from '../queries/brandsQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import type { Product } from '../types/product'
-import { NUTRIENT_OPTIONS, NUTRIENT_THRESHOLDS, type NutrientOption } from '../constants/nutrientFilters'
+import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 
 type HomePageProps = {
   keyword?: string
@@ -60,6 +60,8 @@ export const HomePage = ({
 }: HomePageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandOptions = brandsData ?? []
+  const { data: claimsData } = useNutrientClaimsQuery()
+  const claimOptions = claimsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
   const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
   const pageCount = Math.ceil(categories.length / PAGE_SIZE)
@@ -86,10 +88,7 @@ export const HomePage = ({
     if (keyword?.trim()) c.keyword = keyword.trim()
     if (selectedBrandId != null) c.brandId = selectedBrandId
     if (selectedCategoryId != null) c.categoryId = selectedCategoryId
-    for (const n of selectedNutrients) {
-      const t = NUTRIENT_THRESHOLDS[n as NutrientOption]
-      if (t) Object.assign(c, t)
-    }
+    if (selectedNutrients.length > 0) c.nutrientClaims = selectedNutrients
     return c
   }, [keyword, selectedSort, selectedBrandId, selectedNutrients, selectedCategoryId])
 
@@ -325,19 +324,19 @@ export const HomePage = ({
             </button>
           </div>
           <div className="home-dropdown-grid">
-            {NUTRIENT_OPTIONS.map(opt => (
-              <label key={opt} className="home-dropdown-item">
+            {claimOptions.map(opt => (
+              <label key={opt.code} className="home-dropdown-item">
                 <input
                   type="checkbox"
                   className="home-dropdown-check"
-                  checked={tempNutrients.includes(opt)}
+                  checked={tempNutrients.includes(opt.code)}
                   onChange={() => setTempNutrients(
-                    tempNutrients.includes(opt)
-                      ? tempNutrients.filter(n => n !== opt)
-                      : [...tempNutrients, opt]
+                    tempNutrients.includes(opt.code)
+                      ? tempNutrients.filter(n => n !== opt.code)
+                      : [...tempNutrients, opt.code]
                   )}
                 />
-                <span>{opt}</span>
+                <span>{opt.label}</span>
               </label>
             ))}
           </div>
