@@ -123,6 +123,60 @@ npm run preview
 
 ---
 
+## 상태 관리 구조
+
+### 1. 서버 데이터 — React Query (`src/queries/`)
+
+API에서 가져오는 데이터는 모두 TanStack React Query로 관리합니다. 자동 캐싱, 로딩/에러 상태, 중복 요청 방지를 처리합니다.
+
+| 훅 | 연결 API | 비고 |
+|----|---------|------|
+| `useProductListQuery` | `GET /products` | 필터·정렬 조건 포함 |
+| `useBrandsQuery` | `GET /brands` | 전체 캐시 (`staleTime: Infinity`) |
+| `useCategoriesQuery` | `GET /categories` | 전체 캐시 (`staleTime: Infinity`) |
+| `useNutrientClaimsQuery` | `GET /products/nutrient-claims` | 전체 캐시 (`staleTime: Infinity`) |
+| `useMyPageQuery` | `GET /users/me` | 로그인 상태일 때만 실행 |
+| `useLikesQuery` | `GET /likes` | 로그인 상태일 때만 실행, 결과를 FavoritesContext에 동기화 |
+
+### 2. 전역 UI 상태 — `App.tsx`
+
+여러 페이지에서 공유해야 하는 상태를 `App.tsx`에서 관리하고 props로 하위 컴포넌트에 전달합니다.
+
+| 상태 | 타입 | 설명 |
+|------|------|------|
+| `route` | `string` | 현재 페이지 (`home` / `detail` / `mypage` 등) |
+| `isAuthenticated` | `boolean` | 로그인 여부 |
+| `isAdmin` | `boolean` | 관리자 여부 |
+| `selectedProduct` | `Product \| null` | 상세 페이지에서 보고 있는 상품 |
+| `filterCategoryId` | `number \| null` | 선택된 카테고리 필터 |
+| `filterBrandId` | `number \| null` | 선택된 브랜드 필터 |
+| `filterNutrients` | `string[]` | 선택된 성분 필터 코드 목록 |
+| `homeKeyword` | `string` | 검색어 |
+| `compareProducts` | `Product[]` | 비교 중인 상품 (최대 2개) |
+
+### 3. 공유 상태 — `FavoritesContext` (`src/contexts/FavoritesContext.tsx`)
+
+찜(좋아요) 상태는 홈, 즐겨찾기, 상세 페이지 등 여러 곳에서 동시에 필요하기 때문에 Context로 분리했습니다.
+
+- 앱 시작 시 `GET /likes`로 서버에서 찜 목록을 불러와 초기화
+- 찜 버튼 클릭 시 UI를 즉시 반영(낙관적 업데이트) 후 `POST /likes` / `DELETE /likes/{id}` 호출
+- 서버 요청 실패 시 자동 롤백
+
+### 4. 로컬 상태 — 각 컴포넌트 `useState`
+
+해당 컴포넌트 안에서만 쓰이는 임시 데이터 (드롭다운 열림 여부, 필터 페이지 내 선택값 등)
+
+---
+
+### 인증 흐름
+
+- `accessToken` / `refreshToken`은 `localStorage`에 저장
+- 앱 시작 시 `GET /users/me` 호출로 토큰 유효성 검증 — 만료 시 자동 로그아웃
+- API 응답 401 수신 → `auth:logout` 커스텀 이벤트 발생 → `App.tsx`가 감지하여 로그아웃 처리
+- 로그아웃 시 초기화되는 것: `isAuthenticated`, 찜 목록(메모리), 최근 검색어(`localStorage`)
+
+---
+
 ## 주요 설계 결정
 
 - **해시 라우팅**: React Router 없이 `window.location.hash`로 페이지를 전환합니다. SPA지만 별도 서버 설정 없이 정적 호스팅이 가능합니다.
