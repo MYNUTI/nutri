@@ -40,12 +40,13 @@ export async function register(payload: RegisterPayload): Promise<OAuthResponse>
 }
 
 export async function logout(): Promise<void> {
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('refreshToken')
   try {
     await apiFetch<void>('/auth/logout', { method: 'POST' })
   } catch {
-    // 서버 로그아웃 실패해도 로컬 토큰은 이미 제거됨
+    // 서버 로그아웃 실패해도 로컬 토큰은 제거
+  } finally {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
   }
 }
 

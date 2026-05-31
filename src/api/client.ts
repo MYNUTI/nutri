@@ -1,23 +1,35 @@
 const BASE = '/api'
 
+// 동시 다발 refresh 방지: 진행 중인 refresh가 있으면 같은 Promise 공유
+let refreshingPromise: Promise<string | null> | null = null
+
 async function tryRefresh(): Promise<string | null> {
-  const refreshToken = localStorage.getItem('refreshToken')
-  if (!refreshToken) return null
-  try {
-    const res = await fetch(`${BASE}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    })
-    if (!res.ok) return null
-    const json = await res.json()
-    if (!json.isSuccess) return null
-    const newToken = json.data as string
-    localStorage.setItem('accessToken', newToken)
-    return newToken
-  } catch {
-    return null
-  }
+  if (refreshingPromise) return refreshingPromise
+
+  refreshingPromise = (async () => {
+    const refreshToken = localStorage.getItem('refreshToken')
+    if (!refreshToken) return null
+    try {
+      const res = await fetch(`${BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      })
+      if (!res.ok) return null
+      const json = await res.json()
+      if (!json.isSuccess) return null
+      const { accessToken, refreshToken } = json.data as { accessToken: string; refreshToken: string }
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('refreshToken', refreshToken)
+      return accessToken
+    } catch {
+      return null
+    }
+  })().finally(() => {
+    refreshingPromise = null
+  })
+
+  return refreshingPromise
 }
 
 export async function apiFetch<T>(
