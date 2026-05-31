@@ -170,7 +170,7 @@ function AppShell() {
             onMoveToFilter={() => setShowFilter(true)}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
-            onGoHome={() => { navigate('home'); window.scrollTo({ top: 0 }) }}
+            onGoHome={() => { setHomeKeyword(''); setFilterCategoryId(null); setFilterBrandId(null); setFilterNutrients([]); navigate('home'); window.scrollTo({ top: 0 }) }}
             onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
             onAddToCompare={handleAddToCompare}
           />
