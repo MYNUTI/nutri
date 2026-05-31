@@ -15,9 +15,9 @@ const ArrowLeftIcon = () => (
 )
 
 export const FavoritesPage = ({ onBack, onProductClick }: FavoritesPageProps) => {
-  const { toggle } = useFavorites()
+  const { toggle, isFavorite } = useFavorites()
   const { data, isLoading } = useLikesQuery(true)
-  const items = data?.items ?? []
+  const items = (data?.items ?? []).filter(item => isFavorite(item.productId))
 
   return (
     <div className="fav-page">
