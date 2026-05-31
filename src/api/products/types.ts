@@ -65,8 +65,8 @@ export type SortType = 'POPULAR' | 'SCORE' | 'ACCURACY' | 'RECOMMENDED'
 
 export type ProductSearchCondition = {
   keyword?: string
-  categoryId?: number
-  brandId?: number
+  categoryIds?: number[]
+  brandIds?: number[]
   nutrientClaims?: string[]
   minNutritionScore?: number
   maxNutritionScore?: number

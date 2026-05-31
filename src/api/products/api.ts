@@ -9,8 +9,8 @@ import type {
 function buildParams(condition: ProductSearchCondition): URLSearchParams {
   const p = new URLSearchParams()
   if (condition.keyword)                    p.set('keyword',           condition.keyword)
-  if (condition.categoryId != null)         p.set('categoryId',        String(condition.categoryId))
-  if (condition.brandId != null)            p.set('brandId',           String(condition.brandId))
+  condition.categoryIds?.forEach(id =>      p.append('categoryId',     String(id)))
+  condition.brandIds?.forEach(id =>         p.append('brandId',        String(id)))
   condition.nutrientClaims?.forEach(c =>    p.append('nutrientClaims', c))
   if (condition.minNutritionScore != null)  p.set('minNutritionScore', String(condition.minNutritionScore))
   if (condition.maxNutritionScore != null)  p.set('maxNutritionScore', String(condition.maxNutritionScore))

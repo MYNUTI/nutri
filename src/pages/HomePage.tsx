@@ -11,11 +11,11 @@ import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 type HomePageProps = {
   keyword?: string
   onClearKeyword?: () => void
-  selectedCategoryId: number | null
-  selectedBrandId: number | null
+  selectedCategoryIds: number[]
+  selectedBrandIds: number[]
   selectedNutrients: string[]
-  onCategoryChange: (id: number | null) => void
-  onBrandChange: (id: number | null) => void
+  onCategoryChange: (ids: number[]) => void
+  onBrandChange: (ids: number[]) => void
   onNutrientsChange: (nutrients: string[]) => void
   onMoveToFilter: () => void
   onMoveToMyPage: () => void
@@ -54,7 +54,7 @@ function mapToProduct(p: ProductResponse): Product {
 
 export const HomePage = ({
   keyword, onClearKeyword,
-  selectedCategoryId, selectedBrandId, selectedNutrients,
+  selectedCategoryIds, selectedBrandIds, selectedNutrients,
   onCategoryChange, onBrandChange, onNutrientsChange,
   onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick,
 }: HomePageProps) => {
@@ -68,11 +68,11 @@ export const HomePage = ({
   const [activePage, setActivePage] = useState(0)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
-  const [tempBrandId, setTempBrandId] = useState<number | null>(selectedBrandId)
+  const [tempBrandIds, setTempBrandIds] = useState<number[]>(selectedBrandIds)
   const [tempNutrients, setTempNutrients] = useState<string[]>(selectedNutrients)
 
   useEffect(() => {
-    if (openChip === '브랜드') setTempBrandId(selectedBrandId)
+    if (openChip === '브랜드') setTempBrandIds([...selectedBrandIds])
     if (openChip === '성분') setTempNutrients([...selectedNutrients])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openChip])
@@ -86,11 +86,11 @@ export const HomePage = ({
       size: 20,
     }
     if (keyword?.trim()) c.keyword = keyword.trim()
-    if (selectedBrandId != null) c.brandId = selectedBrandId
-    if (selectedCategoryId != null) c.categoryId = selectedCategoryId
+    if (selectedBrandIds.length > 0) c.brandIds = selectedBrandIds
+    if (selectedCategoryIds.length > 0) c.categoryIds = selectedCategoryIds
     if (selectedNutrients.length > 0) c.nutrientClaims = selectedNutrients
     return c
-  }, [keyword, selectedSort, selectedBrandId, selectedNutrients, selectedCategoryId])
+  }, [keyword, selectedSort, selectedBrandIds, selectedNutrients, selectedCategoryIds])
 
   const { data, isLoading, isError } = useProductListQuery(condition)
   const products = (data?.items ?? []).filter(p => !!p.imageUrl)
@@ -203,9 +203,13 @@ export const HomePage = ({
                   <button
                     key={c.id}
                     type="button"
-                    className={`home-cat${c.id === selectedCategoryId ? ' home-cat--on' : ''}`}
+                    className={`home-cat${selectedCategoryIds.includes(c.id) ? ' home-cat--on' : ''}`}
                     role="listitem"
-                    onClick={() => onCategoryChange(c.id === selectedCategoryId ? null : c.id)}
+                    onClick={() => onCategoryChange(
+                      selectedCategoryIds.includes(c.id)
+                        ? selectedCategoryIds.filter(id => id !== c.id)
+                        : [...selectedCategoryIds, c.id]
+                    )}
                   >
                     <span className="home-cat-label">{c.name}</span>
                   </button>
@@ -236,7 +240,7 @@ export const HomePage = ({
         {FILTER_CHIPS.map(label => {
           const isOpen = openChip === label
           const count =
-            label === '브랜드' ? (selectedBrandId != null ? 1 : 0) :
+            label === '브랜드' ? selectedBrandIds.length :
             label === '성분' ? selectedNutrients.length : 0
           const display = label === '추천순' ? selectedSort : label
           return (
@@ -292,20 +296,22 @@ export const HomePage = ({
             {brandOptions.map(b => (
               <label key={b.id} className="home-dropdown-item">
                 <input
-                  type="radio"
-                  name="home-brand"
+                  type="checkbox"
                   className="home-dropdown-check"
-                  checked={tempBrandId === b.id}
-                  onChange={() => setTempBrandId(b.id)}
-                  onClick={() => { if (tempBrandId === b.id) setTempBrandId(null) }}
+                  checked={tempBrandIds.includes(b.id)}
+                  onChange={() => setTempBrandIds(
+                    tempBrandIds.includes(b.id)
+                      ? tempBrandIds.filter(id => id !== b.id)
+                      : [...tempBrandIds, b.id]
+                  )}
                 />
                 <span>{b.name}</span>
               </label>
             ))}
           </div>
           <div className="home-dropdown-footer">
-            <button type="button" className="home-dropdown-reset" onClick={() => setTempBrandId(null)}>초기화</button>
-            <button type="button" className="home-dropdown-apply" onClick={() => { onBrandChange(tempBrandId); setOpenChip(null) }}>적용하기</button>
+            <button type="button" className="home-dropdown-reset" onClick={() => setTempBrandIds([])}>초기화</button>
+            <button type="button" className="home-dropdown-apply" onClick={() => { onBrandChange(tempBrandIds); setOpenChip(null) }}>적용하기</button>
           </div>
         </div>
       )}
@@ -372,7 +378,6 @@ export const HomePage = ({
                 <div className="home-card-text">
                   <p className="home-card-brand">{item.brand?.name ?? '-'}</p>
                   <p className="home-card-name">{item.name}</p>
-                  <p className="home-card-price">{item.category?.name ?? '-'}</p>
                 </div>
                 <button
                   type="button"

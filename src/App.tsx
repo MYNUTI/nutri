@@ -59,8 +59,8 @@ function AppShell() {
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
   const [homeKeyword, setHomeKeyword] = useState('')
-  const [filterCategoryId, setFilterCategoryId] = useState<number | null>(null)
-  const [filterBrandId, setFilterBrandId] = useState<number | null>(null)
+  const [filterCategoryIds, setFilterCategoryIds] = useState<number[]>([])
+  const [filterBrandIds, setFilterBrandIds] = useState<number[]>([])
   const [filterNutrients, setFilterNutrients] = useState<string[]>([])
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [compareProducts, setCompareProducts] = useState<Product[]>([])
@@ -161,16 +161,16 @@ function AppShell() {
           <HomePage
             keyword={homeKeyword}
             onClearKeyword={() => setHomeKeyword('')}
-            selectedCategoryId={filterCategoryId}
-            selectedBrandId={filterBrandId}
+            selectedCategoryIds={filterCategoryIds}
+            selectedBrandIds={filterBrandIds}
             selectedNutrients={filterNutrients}
-            onCategoryChange={setFilterCategoryId}
-            onBrandChange={setFilterBrandId}
+            onCategoryChange={setFilterCategoryIds}
+            onBrandChange={setFilterBrandIds}
             onNutrientsChange={setFilterNutrients}
             onMoveToFilter={() => setShowFilter(true)}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
-            onGoHome={() => { setHomeKeyword(''); setFilterCategoryId(null); setFilterBrandId(null); setFilterNutrients([]); navigate('home'); window.scrollTo({ top: 0 }) }}
+            onGoHome={() => { setHomeKeyword(''); setFilterCategoryIds([]); setFilterBrandIds([]); setFilterNutrients([]); navigate('home'); window.scrollTo({ top: 0 }) }}
             onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
             onAddToCompare={handleAddToCompare}
           />
@@ -247,7 +247,7 @@ function AppShell() {
         return null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts, homeKeyword, filterCategoryId, filterBrandId, filterNutrients])
+  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts, homeKeyword, filterCategoryIds, filterBrandIds, filterNutrients])
 
   return (
     <main className="screen-wrap">
@@ -289,13 +289,13 @@ function AppShell() {
           )}
           {showFilter && (
             <FilterPage
-              initialCategoryId={filterCategoryId}
-              initialBrandId={filterBrandId}
+              initialCategoryIds={filterCategoryIds}
+              initialBrandIds={filterBrandIds}
               initialNutrients={filterNutrients}
               onClose={() => setShowFilter(false)}
               onApply={(sel) => {
-                setFilterCategoryId(sel.categoryId)
-                setFilterBrandId(sel.brandId)
+                setFilterCategoryIds(sel.categoryIds)
+                setFilterBrandIds(sel.brandIds)
                 setFilterNutrients(sel.nutrients)
               }}
             />

@@ -5,14 +5,14 @@ import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 import './FilterPage.css'
 
 type FilterPageProps = {
-  initialCategoryId?: number | null
-  initialBrandId?: number | null
+  initialCategoryIds?: number[]
+  initialBrandIds?: number[]
   initialNutrients?: string[]
   onClose: () => void
-  onApply?: (selection: { categoryId: number | null; brandId: number | null; nutrients: string[] }) => void
+  onApply?: (selection: { categoryIds: number[]; brandIds: number[]; nutrients: string[] }) => void
 }
 
-export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, initialNutrients = [], onClose, onApply }: FilterPageProps) => {
+export const FilterPage = ({ initialCategoryIds = [], initialBrandIds = [], initialNutrients = [], onClose, onApply }: FilterPageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandList = brandsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
@@ -23,9 +23,16 @@ export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, in
   const [brandOpen, setBrandOpen] = useState(false)
   const [calOpen, setCalOpen] = useState(false)
 
-  const [selectedCatId, setSelectedCatId] = useState<number | null>(initialCategoryId)
-  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(initialBrandId)
+  const [selectedCatIds, setSelectedCatIds] = useState<Set<number>>(new Set(initialCategoryIds))
+  const [selectedBrandIds, setSelectedBrandIds] = useState<Set<number>>(new Set(initialBrandIds))
   const [selectedCal, setSelectedCal] = useState<Set<string>>(new Set(initialNutrients))
+
+  const toggleNumSet = (set: Set<number>, item: number): Set<number> => {
+    const next = new Set(set)
+    if (next.has(item)) next.delete(item)
+    else next.add(item)
+    return next
+  }
 
   const toggleSet = (set: Set<string>, item: string): Set<string> => {
     const next = new Set(set)
@@ -35,21 +42,21 @@ export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, in
   }
 
   const handleReset = () => {
-    setSelectedCatId(null)
-    setSelectedBrandId(null)
+    setSelectedCatIds(new Set())
+    setSelectedBrandIds(new Set())
     setSelectedCal(new Set())
   }
 
   const handleApply = () => {
     onApply?.({
-      categoryId: selectedCatId,
-      brandId: selectedBrandId,
+      categoryIds: Array.from(selectedCatIds),
+      brandIds: Array.from(selectedBrandIds),
       nutrients: Array.from(selectedCal),
     })
     onClose()
   }
 
-  const totalSelected = (selectedCatId != null ? 1 : 0) + (selectedBrandId != null ? 1 : 0) + selectedCal.size
+  const totalSelected = selectedCatIds.size + selectedBrandIds.size + selectedCal.size
 
   return (
     <div className="fil-overlay">
@@ -71,12 +78,10 @@ export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, in
                 {categoryList.map(cat => (
                   <label key={cat.id} className="fil-check-label">
                     <input
-                      type="radio"
-                      name="fil-category"
+                      type="checkbox"
                       className="fil-check"
-                      checked={selectedCatId === cat.id}
-                      onChange={() => setSelectedCatId(cat.id)}
-                      onClick={() => { if (selectedCatId === cat.id) setSelectedCatId(null) }}
+                      checked={selectedCatIds.has(cat.id)}
+                      onChange={() => setSelectedCatIds(toggleNumSet(selectedCatIds, cat.id))}
                     />
                     <span>{cat.name}</span>
                   </label>
@@ -96,12 +101,10 @@ export const FilterPage = ({ initialCategoryId = null, initialBrandId = null, in
                 {brandList.map(b => (
                   <label key={b.id} className="fil-check-label">
                     <input
-                      type="radio"
-                      name="fil-brand"
+                      type="checkbox"
                       className="fil-check"
-                      checked={selectedBrandId === b.id}
-                      onChange={() => setSelectedBrandId(b.id)}
-                      onClick={() => { if (selectedBrandId === b.id) setSelectedBrandId(null) }}
+                      checked={selectedBrandIds.has(b.id)}
+                      onChange={() => setSelectedBrandIds(toggleNumSet(selectedBrandIds, b.id))}
                     />
                     <span>{b.name}</span>
                   </label>
