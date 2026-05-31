@@ -7,20 +7,20 @@ async function tryRefresh(): Promise<string | null> {
   if (refreshingPromise) return refreshingPromise
 
   refreshingPromise = (async () => {
-    const refreshToken = localStorage.getItem('refreshToken')
-    if (!refreshToken) return null
+    const storedRefreshToken = localStorage.getItem('refreshToken')
+    if (!storedRefreshToken) return null
     try {
       const res = await fetch(`${BASE}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify({ refreshToken: storedRefreshToken }),
       })
       if (!res.ok) return null
       const json = await res.json()
       if (!json.isSuccess) return null
-      const { accessToken, refreshToken } = json.data as { accessToken: string; refreshToken: string }
+      const { accessToken, refreshToken: newRefreshToken } = json.data as { accessToken: string; refreshToken: string }
       localStorage.setItem('accessToken', accessToken)
-      localStorage.setItem('refreshToken', refreshToken)
+      localStorage.setItem('refreshToken', newRefreshToken)
       return accessToken
     } catch {
       return null
