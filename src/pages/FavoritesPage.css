@@ -49,6 +49,10 @@
   padding-bottom: 8px;
 }
 
+.fav-grid .home-card {
+  cursor: default;
+}
+
 .fav-empty {
   flex: 1;
   display: flex;
