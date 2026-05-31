@@ -85,7 +85,9 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
           </div>
           <p className="det-score-sub">
             {detail?.category?.name ?? '-'} 카테고리<br />
-            총 400개 제품 중 {detail?.scoreRankPercent != null ? `상위 ${detail.scoreRankPercent}%` : '상위 0.1%'}
+            {detail?.pns != null
+              ? `총 ${detail.pns.categoryTotal}개 제품 중 상위 ${detail.pns.topPercent}%`
+              : '-'}
           </p>
         </div>
         <div

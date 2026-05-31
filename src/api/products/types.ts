@@ -9,6 +9,7 @@ export type ProductResponse = {
   brand: BrandRef
   imageUrl: string
   nutritionScore: number
+  grade: string
   category: CategoryRef
   favorited: boolean
 }
@@ -37,6 +38,15 @@ export type CoupangInfo = {
   lastSyncedAt: string
 }
 
+// ── 영양점수 (PNS) ──────────────────────────────────────────────
+export type PnsResponse = {
+  score: number
+  grade: string
+  percentile: number
+  topPercent: number
+  categoryTotal: number
+}
+
 // ── 상품 상세 ────────────────────────────────────────────────────
 export type ProductDetailResponse = {
   id: number
@@ -44,9 +54,10 @@ export type ProductDetailResponse = {
   brand: BrandRef
   imageUrl: string
   nutritionScore: number
+  grade: string
   category: CategoryRef
   nutrients: NutrientsResponse
-  scoreRankPercent: number
+  pns: PnsResponse
   coupang: CoupangInfo | null
   favorited: boolean
   viewCount: number
