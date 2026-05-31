@@ -37,7 +37,13 @@ export const PasswordChangePage = ({ onBack }: Props) => {
       await queryClient.invalidateQueries({ queryKey: myPageKeys.me })
       setDone(true)
     } catch (e) {
-      setError(e instanceof Error ? e.message : '저장에 실패했습니다.')
+      if (!(e instanceof Error)) {
+        setError('저장에 실패했습니다.')
+      } else if (e.message.includes('유효성 검사')) {
+        setError('이메일 형식이 올바르지 않습니다.')
+      } else {
+        setError(e.message)
+      }
     } finally {
       setSaving(false)
     }
