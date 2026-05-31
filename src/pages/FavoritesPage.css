@@ -5,6 +5,7 @@
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
+  cursor: default;
 }
 
 .fav-header {
@@ -49,9 +50,6 @@
   padding-bottom: 8px;
 }
 
-.fav-grid .home-card {
-  cursor: default;
-}
 
 .fav-empty {
   flex: 1;
