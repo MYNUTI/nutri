@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { searchProducts, getProductDetail } from '../api/products/api'
 import type { ProductSearchCondition } from '../api/products/types'
 
@@ -8,10 +8,16 @@ const productKeys = {
   detail: (id: number) => [...productKeys.all, 'detail', id] as const,
 }
 
-export const useProductListQuery = (condition: ProductSearchCondition = {}) =>
-  useQuery({
+export const useInfiniteProductListQuery = (condition: ProductSearchCondition = {}) =>
+  useInfiniteQuery({
     queryKey: productKeys.list(condition),
-    queryFn: () => searchProducts(condition),
+    queryFn: ({ pageParam }) => searchProducts({ ...condition, page: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      const nextPage = lastPage.page + 1
+      const totalPages = Math.ceil(lastPage.total / lastPage.size)
+      return nextPage < totalPages ? nextPage : undefined
+    },
   })
 
 export const useProductDetailQuery = (id: number) =>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon } from '../components/icons'
-import { useProductListQuery } from '../queries/productQueries'
+import { useInfiniteProductListQuery } from '../queries/productQueries'
 import { useBrandsQuery } from '../queries/brandsQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
@@ -79,10 +79,11 @@ export const HomePage = ({
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
   const { toggle, isFavorite } = useFavorites()
 
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
+
   const condition = useMemo<ProductSearchCondition>(() => {
     const c: ProductSearchCondition = {
       sort: SORT_MAP[selectedSort],
-      page: 0,
       size: 20,
     }
     if (keyword?.trim()) c.keyword = keyword.trim()
@@ -92,8 +93,20 @@ export const HomePage = ({
     return c
   }, [keyword, selectedSort, selectedBrandIds, selectedNutrients, selectedCategoryIds])
 
-  const { data, isLoading, isError } = useProductListQuery(condition)
-  const products = (data?.items ?? []).filter(p => !!p.imageUrl)
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteProductListQuery(condition)
+  const products = (data?.pages.flatMap(p => p.items) ?? []).filter(p => !!p.imageUrl)
+
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && hasNextPage) fetchNextPage() },
+      { threshold: 0.1 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [fetchNextPage, hasNextPage])
 
   const handleCatsScroll = () => {
     const el = catsScrollRef.current
@@ -392,6 +405,11 @@ export const HomePage = ({
           )
         })}
       </section>
+
+      <div ref={sentinelRef} style={{ height: 1 }} />
+      {isFetchingNextPage && (
+        <p style={{ textAlign: 'center', color: '#888', padding: '1rem' }}>불러오는 중...</p>
+      )}
     </div>
   )
 }
