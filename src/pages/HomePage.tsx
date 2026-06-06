@@ -106,22 +106,18 @@ export const HomePage = ({
     return () => observer.disconnect()
   }, [fetchNextPage, hasNextPage])
 
-  const selectedCategory = categories.find(c => selectedCategoryIds.includes(c.id))
-  const catLabel = selectedCategory?.name ?? '카테고리'
-  const catIsActive = catOpen || selectedCategoryIds.length > 0
+  const handleCatSelect = (id: number) => {
+    onCategoryChange(selectedCategoryIds[0] === id ? [] : [id])
+    setCatOpen(false)
+  }
 
-  const handleCatChipClick = () => {
+  const handleExpandClick = () => {
     if (!catOpen) {
       const el = homePageRef.current
       if (el) el.scrollTop = 0
       setOpenChip(null)
     }
     setCatOpen(prev => !prev)
-  }
-
-  const handleCatSelect = (id: number) => {
-    onCategoryChange(selectedCategoryIds[0] === id ? [] : [id])
-    setCatOpen(false)
   }
 
   const handleFilterChipClick = (label: ChipKey) => {
@@ -175,40 +171,38 @@ export const HomePage = ({
         )}
       </div>
 
-      <div className="home-chips-area">
-        <div className="home-chips">
-          <button className="home-chip-icon" type="button" aria-label="필터" onClick={onMoveToFilter}>
-            <FilterIcon />
-          </button>
-
+      {/* 카테고리 가로 스크롤 바 */}
+      <div className="home-cats-area">
+        <div className="home-cats-scroll" role="list" aria-label="카테고리">
           <button
             type="button"
-            className={`home-chip${catIsActive ? ' home-chip--on' : ''}`}
-            onClick={handleCatChipClick}
-            aria-expanded={catOpen}
+            role="listitem"
+            className={`home-cat-chip${selectedCategoryIds.length === 0 ? ' home-cat-chip--on' : ''}`}
+            onClick={() => onCategoryChange([])}
           >
-            {catLabel} <span aria-hidden="true">{catOpen ? '▴' : '▾'}</span>
+            전체
           </button>
-
-          {FILTER_CHIPS.map(label => {
-            const isOpen = openChip === label
-            const count =
-              label === '브랜드' ? selectedBrandIds.length :
-              label === '성분' ? selectedNutrients.length : 0
-            const display = label === '추천순' ? selectedSort : label
-            return (
-              <button
-                key={label}
-                type="button"
-                className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
-                onClick={() => handleFilterChipClick(label)}
-                aria-expanded={isOpen}
-              >
-                {display}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">{isOpen ? '▴' : '▾'}</span>
-              </button>
-            )
-          })}
+          {categories.map(c => (
+            <button
+              key={c.id}
+              type="button"
+              role="listitem"
+              className={`home-cat-chip${selectedCategoryIds.includes(c.id) ? ' home-cat-chip--on' : ''}`}
+              onClick={() => onCategoryChange(selectedCategoryIds.includes(c.id) ? [] : [c.id])}
+            >
+              {c.name}
+            </button>
+          ))}
         </div>
+        <button
+          type="button"
+          className={`home-cats-expand${catOpen ? ' home-cats-expand--on' : ''}`}
+          aria-label={catOpen ? '카테고리 전체보기 닫기' : '카테고리 전체보기'}
+          aria-expanded={catOpen}
+          onClick={handleExpandClick}
+        >
+          <span aria-hidden="true">{catOpen ? '▴' : '▾'}</span>
+        </button>
 
         {catOpen && (
           <div className="home-cat-panel" role="dialog" aria-label="카테고리 전체보기">
@@ -235,6 +229,33 @@ export const HomePage = ({
             </div>
           </div>
         )}
+      </div>
+
+      {/* 필터 칩 */}
+      <div className="home-chips-wrap">
+        <div className="home-chips">
+          <button className="home-chip-icon" type="button" aria-label="필터" onClick={onMoveToFilter}>
+            <FilterIcon />
+          </button>
+          {FILTER_CHIPS.map(label => {
+            const isOpen = openChip === label
+            const count =
+              label === '브랜드' ? selectedBrandIds.length :
+              label === '성분' ? selectedNutrients.length : 0
+            const display = label === '추천순' ? selectedSort : label
+            return (
+              <button
+                key={label}
+                type="button"
+                className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
+                onClick={() => handleFilterChipClick(label)}
+                aria-expanded={isOpen}
+              >
+                {display}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">{isOpen ? '▴' : '▾'}</span>
+              </button>
+            )
+          })}
+        </div>
 
         {openChip === '추천순' && (
           <div className="home-dropdown" role="listbox" aria-label="정렬">
@@ -263,12 +284,7 @@ export const HomePage = ({
           <div className="home-dropdown" role="dialog" aria-label="브랜드 필터">
             <div className="home-dropdown-header">
               <span className="home-dropdown-title">브랜드</span>
-              <button
-                type="button"
-                className="home-dropdown-close"
-                aria-label="닫기"
-                onClick={() => setOpenChip(null)}
-              >
+              <button type="button" className="home-dropdown-close" aria-label="닫기" onClick={() => setOpenChip(null)}>
                 <span aria-hidden="true">▾</span>
               </button>
             </div>
@@ -300,12 +316,7 @@ export const HomePage = ({
           <div className="home-dropdown" role="dialog" aria-label="성분 필터">
             <div className="home-dropdown-header">
               <span className="home-dropdown-title">성분</span>
-              <button
-                type="button"
-                className="home-dropdown-close"
-                aria-label="닫기"
-                onClick={() => setOpenChip(null)}
-              >
+              <button type="button" className="home-dropdown-close" aria-label="닫기" onClick={() => setOpenChip(null)}>
                 <span aria-hidden="true">▾</span>
               </button>
             </div>
@@ -334,58 +345,61 @@ export const HomePage = ({
         )}
       </div>
 
-      {catOpen && (
-        <div
-          className="home-cat-dim"
-          onClick={() => setCatOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {/* 상품 목록 영역 — catOpen 시 딤 처리 */}
+      <div className="home-body">
+        {catOpen && (
+          <div
+            className="home-cat-dim"
+            onClick={() => setCatOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
-      <div className="home-divider" />
+        <div className="home-divider" />
 
-      {isLoading && <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>불러오는 중...</p>}
-      {isError && <p style={{ textAlign: 'center', color: '#b42318', padding: '2rem' }}>상품을 불러오지 못했습니다.</p>}
-      {!isLoading && !isError && products.length === 0 && (
-        <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>조건에 맞는 상품이 없습니다.</p>
-      )}
+        {isLoading && <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>불러오는 중...</p>}
+        {isError && <p style={{ textAlign: 'center', color: '#b42318', padding: '2rem' }}>상품을 불러오지 못했습니다.</p>}
+        {!isLoading && !isError && products.length === 0 && (
+          <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>조건에 맞는 상품이 없습니다.</p>
+        )}
 
-      <section className="home-grid" aria-label="상품 목록">
-        {products.map(item => {
-          const product = mapToProduct(item)
-          const faved = isFavorite(item.id)
-          return (
-            <article key={item.id} className="home-card" onClick={() => onProductClick?.(product)}>
-              <div className="home-card-img-wrap">
-                {item.imageUrl
-                  ? <img className="home-card-img" src={item.imageUrl} alt={item.name} loading="lazy" />
-                  : <div className="home-card-img home-card-img--placeholder" />
-                }
-                <span className="home-card-grade">{item.grade ?? item.nutritionScore}</span>
-              </div>
-              <div className="home-card-bottom">
-                <div className="home-card-text">
-                  <p className="home-card-brand">{item.brand?.name ?? '-'}</p>
-                  <p className="home-card-name">{item.name}</p>
+        <section className="home-grid" aria-label="상품 목록">
+          {products.map(item => {
+            const product = mapToProduct(item)
+            const faved = isFavorite(item.id)
+            return (
+              <article key={item.id} className="home-card" onClick={() => onProductClick?.(product)}>
+                <div className="home-card-img-wrap">
+                  {item.imageUrl
+                    ? <img className="home-card-img" src={item.imageUrl} alt={item.name} loading="lazy" />
+                    : <div className="home-card-img home-card-img--placeholder" />
+                  }
+                  <span className="home-card-grade">{item.grade ?? item.nutritionScore}</span>
                 </div>
-                <button
-                  type="button"
-                  className={`home-card-heart${faved ? ' on' : ''}`}
-                  aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-                  onClick={e => { e.stopPropagation(); toggle(item.id) }}
-                >
-                  {faved ? '♥' : '♡'}
-                </button>
-              </div>
-            </article>
-          )
-        })}
-      </section>
+                <div className="home-card-bottom">
+                  <div className="home-card-text">
+                    <p className="home-card-brand">{item.brand?.name ?? '-'}</p>
+                    <p className="home-card-name">{item.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className={`home-card-heart${faved ? ' on' : ''}`}
+                    aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                    onClick={e => { e.stopPropagation(); toggle(item.id) }}
+                  >
+                    {faved ? '♥' : '♡'}
+                  </button>
+                </div>
+              </article>
+            )
+          })}
+        </section>
 
-      <div ref={sentinelRef} style={{ height: 1 }} />
-      {isFetchingNextPage && (
-        <p style={{ textAlign: 'center', color: '#888', padding: '1rem' }}>불러오는 중...</p>
-      )}
+        <div ref={sentinelRef} style={{ height: 1 }} />
+        {isFetchingNextPage && (
+          <p style={{ textAlign: 'center', color: '#888', padding: '1rem' }}>불러오는 중...</p>
+        )}
+      </div>
     </div>
   )
 }

@@ -989,8 +989,6 @@
   align-items: center;
   justify-content: space-between;
   height: 32px;
-  position: relative;
-  z-index: 11;
 }
 
 .home-header .icon-btn {
@@ -1097,7 +1095,7 @@
 }
 .home-search-clear:hover { background: #d9d9dd; color: #111; }
 
-.home-search { position: relative; z-index: 11; }
+.home-search { position: relative; }
 
 .home-cats-wrap {
   display: flex;
@@ -1208,17 +1206,81 @@
   color: #111;
 }
 
-/* ── 카테고리 드롭다운 오버레이 ─────────────────── */
-.home-chips-area {
+/* ── 카테고리 가로 스크롤 바 ─────────────────────── */
+.home-cats-area {
   position: relative;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 -14px;
+  padding: 0 14px;
 }
 
+.home-cats-scroll {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.home-cats-scroll::-webkit-scrollbar { display: none; }
+
+.home-cat-chip {
+  flex-shrink: 0;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid #e3e3e6;
+  background: #fff;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #3a3a3f;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.home-cat-chip:hover { border-color: #111; color: #111; }
+
+.home-cat-chip--on {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.home-cats-expand {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid #e3e3e6;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 10px;
+  color: #444;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.home-cats-expand:hover { border-color: #111; color: #111; }
+
+.home-cats-expand--on {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+/* 카테고리 전체보기 패널 */
 .home-cat-panel {
   position: absolute;
-  left: -14px;
-  right: -14px;
-  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
   background: #fff;
   box-shadow: 0 8px 24px rgba(0,0,0,0.14);
   border-radius: 0 0 16px 16px;
@@ -1247,9 +1309,7 @@
   min-width: 0;
 }
 
-.home-cat-panel-item:hover .home-cat-panel-icon {
-  background: #e8e8eb;
-}
+.home-cat-panel-item:hover .home-cat-panel-icon { background: #e8e8eb; }
 
 .home-cat-panel-icon {
   width: 44px;
@@ -1289,12 +1349,10 @@
   font-weight: 700;
 }
 
-.home-cat-dim {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.2);
-  z-index: 5;
-  cursor: pointer;
+/* ── 필터 칩 행 ───────────────────────────────── */
+.home-chips-wrap {
+  position: relative;
+  z-index: 9;
 }
 
 .home-chips {
@@ -1310,6 +1368,24 @@
 }
 
 .home-chips::-webkit-scrollbar { display: none; }
+
+/* ── 상품 목록 영역 (딤 컨테이너) ─────────────── */
+.home-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.home-cat-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 5;
+  cursor: pointer;
+}
 
 .home-chip-icon {
   width: 34px;
