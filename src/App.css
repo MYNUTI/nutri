@@ -977,6 +977,11 @@
   background: #fff;
   margin: -14px;
   padding: 14px;
+  position: relative;
+}
+
+.home-page--catopen {
+  overflow-y: hidden;
 }
 
 .home-header {
@@ -984,6 +989,8 @@
   align-items: center;
   justify-content: space-between;
   height: 32px;
+  position: relative;
+  z-index: 11;
 }
 
 .home-header .icon-btn {
@@ -1090,7 +1097,7 @@
 }
 .home-search-clear:hover { background: #d9d9dd; color: #111; }
 
-.home-search { position: relative; }
+.home-search { position: relative; z-index: 11; }
 
 .home-cats-wrap {
   display: flex;
@@ -1201,12 +1208,108 @@
   color: #111;
 }
 
+/* ── 카테고리 드롭다운 오버레이 ─────────────────── */
+.home-chips-area {
+  position: relative;
+  z-index: 10;
+}
+
+.home-cat-panel {
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  top: calc(100% + 4px);
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  border-radius: 0 0 16px 16px;
+  z-index: 20;
+  padding: 12px 14px 20px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.home-cat-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px 4px;
+}
+
+.home-cat-panel-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 0;
+  padding: 6px 2px;
+  cursor: pointer;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.home-cat-panel-item:hover .home-cat-panel-icon {
+  background: #e8e8eb;
+}
+
+.home-cat-panel-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #f2f3f5;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #3a3a3f;
+  border: 1.5px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+}
+
+.home-cat-panel-item--on .home-cat-panel-icon {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.home-cat-panel-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #3a3a3f;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  letter-spacing: -0.02em;
+}
+
+.home-cat-panel-item--on .home-cat-panel-label {
+  color: #111;
+  font-weight: 700;
+}
+
+.home-cat-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 5;
+  cursor: pointer;
+}
+
 .home-chips {
   display: flex;
   gap: 6px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -14px;
+  padding: 0 14px;
 }
+
+.home-chips::-webkit-scrollbar { display: none; }
 
 .home-chip-icon {
   width: 34px;

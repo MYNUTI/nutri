@@ -25,8 +25,6 @@ type HomePageProps = {
   onAddToCompare?: (product: Product) => void
 }
 
-const PAGE_SIZE = 4
-
 const FILTER_CHIPS = ['추천순', '브랜드', '성분'] as const
 type ChipKey = typeof FILTER_CHIPS[number]
 
@@ -64,22 +62,22 @@ export const HomePage = ({
   const claimOptions = claimsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
   const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
-  const pageCount = Math.ceil(categories.length / PAGE_SIZE)
-  const [activePage, setActivePage] = useState(0)
+
+  const [catOpen, setCatOpen] = useState(false)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
   const [tempBrandIds, setTempBrandIds] = useState<number[]>(selectedBrandIds)
   const [tempNutrients, setTempNutrients] = useState<string[]>(selectedNutrients)
+
+  const homePageRef = useRef<HTMLDivElement | null>(null)
+  const { toggle, isFavorite } = useFavorites()
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (openChip === '브랜드') setTempBrandIds([...selectedBrandIds])
     if (openChip === '성분') setTempNutrients([...selectedNutrients])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openChip])
-  const catsScrollRef = useRef<HTMLDivElement | null>(null)
-  const { toggle, isFavorite } = useFavorites()
-
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   const condition = useMemo<ProductSearchCondition>(() => {
     const c: ProductSearchCondition = {
@@ -108,52 +106,34 @@ export const HomePage = ({
     return () => observer.disconnect()
   }, [fetchNextPage, hasNextPage])
 
-  const handleCatsScroll = () => {
-    const el = catsScrollRef.current
-    if (!el) return
-    const page = Math.round(el.scrollLeft / el.clientWidth)
-    if (page !== activePage) setActivePage(page)
-  }
+  const selectedCategory = categories.find(c => selectedCategoryIds.includes(c.id))
+  const catLabel = selectedCategory?.name ?? '카테고리'
+  const catIsActive = catOpen || selectedCategoryIds.length > 0
 
-  const goToPage = (idx: number) => {
-    const el = catsScrollRef.current
-    if (!el) return
-    el.scrollTo({ left: idx * el.clientWidth, behavior: 'smooth' })
-  }
-
-  const dragStateRef = useRef<{ startX: number; startScroll: number; moved: boolean } | null>(null)
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = catsScrollRef.current
-    if (!el) return
-    dragStateRef.current = { startX: e.clientX, startScroll: el.scrollLeft, moved: false }
-    el.classList.add('home-cats--dragging')
-  }
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = catsScrollRef.current
-    const st = dragStateRef.current
-    if (!el || !st) return
-    const dx = e.clientX - st.startX
-    if (Math.abs(dx) > 4) st.moved = true
-    el.scrollLeft = st.startScroll - dx
-  }
-  const endDrag = () => {
-    const el = catsScrollRef.current
-    const st = dragStateRef.current
-    if (!el || !st) return
-    el.classList.remove('home-cats--dragging')
-    const page = Math.round(el.scrollLeft / el.clientWidth)
-    el.scrollTo({ left: page * el.clientWidth, behavior: 'smooth' })
-    dragStateRef.current = null
-  }
-  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (dragStateRef.current?.moved) {
-      e.stopPropagation()
-      e.preventDefault()
+  const handleCatChipClick = () => {
+    if (!catOpen) {
+      const el = homePageRef.current
+      if (el) el.scrollTop = 0
+      setOpenChip(null)
     }
+    setCatOpen(prev => !prev)
+  }
+
+  const handleCatSelect = (id: number) => {
+    onCategoryChange(selectedCategoryIds[0] === id ? [] : [id])
+    setCatOpen(false)
+  }
+
+  const handleFilterChipClick = (label: ChipKey) => {
+    if (openChip !== label) setCatOpen(false)
+    setOpenChip(openChip === label ? null : label)
   }
 
   return (
-    <div className="home-page">
+    <div
+      className={`home-page${catOpen ? ' home-page--catopen' : ''}`}
+      ref={homePageRef}
+    >
       <header className="home-header">
         <button
           type="button"
@@ -195,175 +175,171 @@ export const HomePage = ({
         )}
       </div>
 
-      <div className="home-cats-wrap">
-        <div
-          className="home-cats"
-          role="list"
-          aria-label="카테고리"
-          ref={catsScrollRef}
-          onScroll={handleCatsScroll}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={endDrag}
-          onMouseLeave={endDrag}
-          onClickCapture={handleClickCapture}
-        >
-          {Array.from({ length: pageCount }).map((_, pageIdx) => {
-            const slice = categories.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
+      <div className="home-chips-area">
+        <div className="home-chips">
+          <button className="home-chip-icon" type="button" aria-label="필터" onClick={onMoveToFilter}>
+            <FilterIcon />
+          </button>
+
+          <button
+            type="button"
+            className={`home-chip${catIsActive ? ' home-chip--on' : ''}`}
+            onClick={handleCatChipClick}
+            aria-expanded={catOpen}
+          >
+            {catLabel} <span aria-hidden="true">{catOpen ? '▴' : '▾'}</span>
+          </button>
+
+          {FILTER_CHIPS.map(label => {
+            const isOpen = openChip === label
+            const count =
+              label === '브랜드' ? selectedBrandIds.length :
+              label === '성분' ? selectedNutrients.length : 0
+            const display = label === '추천순' ? selectedSort : label
             return (
-              <div className="home-cats-page" key={pageIdx}>
-                {slice.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    className={`home-cat${selectedCategoryIds.includes(c.id) ? ' home-cat--on' : ''}`}
-                    role="listitem"
-                    onClick={() => onCategoryChange(
-                      selectedCategoryIds.includes(c.id)
-                        ? selectedCategoryIds.filter(id => id !== c.id)
-                        : [...selectedCategoryIds, c.id]
-                    )}
-                  >
-                    <span className="home-cat-label">{c.name}</span>
-                  </button>
-                ))}
-              </div>
+              <button
+                key={label}
+                type="button"
+                className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
+                onClick={() => handleFilterChipClick(label)}
+                aria-expanded={isOpen}
+              >
+                {display}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">{isOpen ? '▴' : '▾'}</span>
+              </button>
             )
           })}
         </div>
-        <div className="home-cat-dots" role="tablist" aria-label="카테고리 페이지">
-          {Array.from({ length: pageCount }).map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={i === activePage}
-              aria-label={`${i + 1}페이지`}
-              className={`home-cat-dot${i === activePage ? ' home-cat-dot--on' : ''}`}
-              onClick={() => goToPage(i)}
-            />
-          ))}
-        </div>
+
+        {catOpen && (
+          <div className="home-cat-panel" role="dialog" aria-label="카테고리 전체보기">
+            <div className="home-cat-panel-grid">
+              <button
+                type="button"
+                className={`home-cat-panel-item${selectedCategoryIds.length === 0 ? ' home-cat-panel-item--on' : ''}`}
+                onClick={() => { onCategoryChange([]); setCatOpen(false) }}
+              >
+                <span className="home-cat-panel-icon">전체</span>
+                <span className="home-cat-panel-label">전체</span>
+              </button>
+              {categories.map(c => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className={`home-cat-panel-item${selectedCategoryIds.includes(c.id) ? ' home-cat-panel-item--on' : ''}`}
+                  onClick={() => handleCatSelect(c.id)}
+                >
+                  <span className="home-cat-panel-icon">{c.name.slice(0, 2)}</span>
+                  <span className="home-cat-panel-label">{c.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {openChip === '추천순' && (
+          <div className="home-dropdown" role="listbox" aria-label="정렬">
+            <ul className="home-dropdown-list">
+              {SORT_OPTIONS.map(opt => {
+                const isActive = opt === selectedSort
+                return (
+                  <li key={opt}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      className={`home-dropdown-row${isActive ? ' home-dropdown-row--on' : ''}`}
+                      onClick={() => { setSelectedSort(opt); setOpenChip(null) }}
+                    >
+                      {opt}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )}
+
+        {openChip === '브랜드' && (
+          <div className="home-dropdown" role="dialog" aria-label="브랜드 필터">
+            <div className="home-dropdown-header">
+              <span className="home-dropdown-title">브랜드</span>
+              <button
+                type="button"
+                className="home-dropdown-close"
+                aria-label="닫기"
+                onClick={() => setOpenChip(null)}
+              >
+                <span aria-hidden="true">▾</span>
+              </button>
+            </div>
+            <div className="home-dropdown-grid">
+              {brandOptions.map(b => (
+                <label key={b.id} className="home-dropdown-item">
+                  <input
+                    type="checkbox"
+                    className="home-dropdown-check"
+                    checked={tempBrandIds.includes(b.id)}
+                    onChange={() => setTempBrandIds(
+                      tempBrandIds.includes(b.id)
+                        ? tempBrandIds.filter(id => id !== b.id)
+                        : [...tempBrandIds, b.id]
+                    )}
+                  />
+                  <span>{b.name}</span>
+                </label>
+              ))}
+            </div>
+            <div className="home-dropdown-footer">
+              <button type="button" className="home-dropdown-reset" onClick={() => setTempBrandIds([])}>초기화</button>
+              <button type="button" className="home-dropdown-apply" onClick={() => { onBrandChange(tempBrandIds); setOpenChip(null) }}>적용하기</button>
+            </div>
+          </div>
+        )}
+
+        {openChip === '성분' && (
+          <div className="home-dropdown" role="dialog" aria-label="성분 필터">
+            <div className="home-dropdown-header">
+              <span className="home-dropdown-title">성분</span>
+              <button
+                type="button"
+                className="home-dropdown-close"
+                aria-label="닫기"
+                onClick={() => setOpenChip(null)}
+              >
+                <span aria-hidden="true">▾</span>
+              </button>
+            </div>
+            <div className="home-dropdown-grid">
+              {claimOptions.map(opt => (
+                <label key={opt.code} className="home-dropdown-item">
+                  <input
+                    type="checkbox"
+                    className="home-dropdown-check"
+                    checked={tempNutrients.includes(opt.code)}
+                    onChange={() => setTempNutrients(
+                      tempNutrients.includes(opt.code)
+                        ? tempNutrients.filter(n => n !== opt.code)
+                        : [...tempNutrients, opt.code]
+                    )}
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            <div className="home-dropdown-footer">
+              <button type="button" className="home-dropdown-reset" onClick={() => setTempNutrients([])}>초기화</button>
+              <button type="button" className="home-dropdown-apply" onClick={() => { onNutrientsChange(tempNutrients); setOpenChip(null) }}>적용하기</button>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="home-chips">
-        <button className="home-chip-icon" type="button" aria-label="필터" onClick={onMoveToFilter}>
-          <FilterIcon />
-        </button>
-        {FILTER_CHIPS.map(label => {
-          const isOpen = openChip === label
-          const count =
-            label === '브랜드' ? selectedBrandIds.length :
-            label === '성분' ? selectedNutrients.length : 0
-          const display = label === '추천순' ? selectedSort : label
-          return (
-            <button
-              key={label}
-              type="button"
-              className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
-              onClick={() => setOpenChip(isOpen ? null : label)}
-            >
-              {display}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">{isOpen ? '▴' : '▾'}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {openChip === '추천순' && (
-        <div className="home-dropdown" role="listbox" aria-label="정렬">
-          <ul className="home-dropdown-list">
-            {SORT_OPTIONS.map(opt => {
-              const isActive = opt === selectedSort
-              return (
-                <li key={opt}>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={isActive}
-                    className={`home-dropdown-row${isActive ? ' home-dropdown-row--on' : ''}`}
-                    onClick={() => { setSelectedSort(opt); setOpenChip(null) }}
-                  >
-                    {opt}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      )}
-
-      {openChip === '브랜드' && (
-        <div className="home-dropdown" role="dialog" aria-label="브랜드 필터">
-          <div className="home-dropdown-header">
-            <span className="home-dropdown-title">브랜드</span>
-            <button
-              type="button"
-              className="home-dropdown-close"
-              aria-label="닫기"
-              onClick={() => setOpenChip(null)}
-            >
-              <span aria-hidden="true">▾</span>
-            </button>
-          </div>
-          <div className="home-dropdown-grid">
-            {brandOptions.map(b => (
-              <label key={b.id} className="home-dropdown-item">
-                <input
-                  type="checkbox"
-                  className="home-dropdown-check"
-                  checked={tempBrandIds.includes(b.id)}
-                  onChange={() => setTempBrandIds(
-                    tempBrandIds.includes(b.id)
-                      ? tempBrandIds.filter(id => id !== b.id)
-                      : [...tempBrandIds, b.id]
-                  )}
-                />
-                <span>{b.name}</span>
-              </label>
-            ))}
-          </div>
-          <div className="home-dropdown-footer">
-            <button type="button" className="home-dropdown-reset" onClick={() => setTempBrandIds([])}>초기화</button>
-            <button type="button" className="home-dropdown-apply" onClick={() => { onBrandChange(tempBrandIds); setOpenChip(null) }}>적용하기</button>
-          </div>
-        </div>
-      )}
-
-      {openChip === '성분' && (
-        <div className="home-dropdown" role="dialog" aria-label="성분 필터">
-          <div className="home-dropdown-header">
-            <span className="home-dropdown-title">성분</span>
-            <button
-              type="button"
-              className="home-dropdown-close"
-              aria-label="닫기"
-              onClick={() => setOpenChip(null)}
-            >
-              <span aria-hidden="true">▾</span>
-            </button>
-          </div>
-          <div className="home-dropdown-grid">
-            {claimOptions.map(opt => (
-              <label key={opt.code} className="home-dropdown-item">
-                <input
-                  type="checkbox"
-                  className="home-dropdown-check"
-                  checked={tempNutrients.includes(opt.code)}
-                  onChange={() => setTempNutrients(
-                    tempNutrients.includes(opt.code)
-                      ? tempNutrients.filter(n => n !== opt.code)
-                      : [...tempNutrients, opt.code]
-                  )}
-                />
-                <span>{opt.label}</span>
-              </label>
-            ))}
-          </div>
-          <div className="home-dropdown-footer">
-            <button type="button" className="home-dropdown-reset" onClick={() => setTempNutrients([])}>초기화</button>
-            <button type="button" className="home-dropdown-apply" onClick={() => { onNutrientsChange(tempNutrients); setOpenChip(null) }}>적용하기</button>
-          </div>
-        </div>
+      {catOpen && (
+        <div
+          className="home-cat-dim"
+          onClick={() => setCatOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
       <div className="home-divider" />
