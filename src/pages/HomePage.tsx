@@ -69,7 +69,6 @@ export const HomePage = ({
   const [tempBrandIds, setTempBrandIds] = useState<number[]>(selectedBrandIds)
   const [tempNutrients, setTempNutrients] = useState<string[]>(selectedNutrients)
 
-  const homePageRef = useRef<HTMLDivElement | null>(null)
   const { toggle, isFavorite } = useFavorites()
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
@@ -112,11 +111,7 @@ export const HomePage = ({
   }
 
   const handleExpandClick = () => {
-    if (!catOpen) {
-      const el = homePageRef.current
-      if (el) el.scrollTop = 0
-      setOpenChip(null)
-    }
+    if (!catOpen) setOpenChip(null)
     setCatOpen(prev => !prev)
   }
 
@@ -128,7 +123,7 @@ export const HomePage = ({
   return (
     <div
       className={`home-page${catOpen ? ' home-page--catopen' : ''}`}
-      ref={homePageRef}
+
     >
       <header className="home-header">
         <button
