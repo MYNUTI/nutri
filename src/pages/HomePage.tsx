@@ -71,6 +71,13 @@ export const HomePage = ({
 
   const { toggle, isFavorite } = useFavorites()
   const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const catsScrollRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (catOpen || !catsScrollRef.current) return
+    const selected = catsScrollRef.current.querySelector<HTMLElement>('.home-cat-chip--on')
+    if (selected) selected.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
+  }, [catOpen])
 
   useEffect(() => {
     if (openChip === '브랜드') setTempBrandIds([...selectedBrandIds])
@@ -168,7 +175,7 @@ export const HomePage = ({
 
       {/* 카테고리 가로 스크롤 바 */}
       <div className="home-cats-area">
-        <div className="home-cats-scroll" role="list" aria-label="카테고리">
+        <div className="home-cats-scroll" role="list" aria-label="카테고리" ref={catsScrollRef}>
           {catOpen ? (
             <span className="home-cats-open-label">카테고리 전체보기</span>
           ) : (
