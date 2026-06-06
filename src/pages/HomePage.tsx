@@ -169,25 +169,31 @@ export const HomePage = ({
       {/* 카테고리 가로 스크롤 바 */}
       <div className="home-cats-area">
         <div className="home-cats-scroll" role="list" aria-label="카테고리">
-          <button
-            type="button"
-            role="listitem"
-            className={`home-cat-chip${selectedCategoryIds.length === 0 ? ' home-cat-chip--on' : ''}`}
-            onClick={() => onCategoryChange([])}
-          >
-            전체
-          </button>
-          {categories.map(c => (
-            <button
-              key={c.id}
-              type="button"
-              role="listitem"
-              className={`home-cat-chip${selectedCategoryIds.includes(c.id) ? ' home-cat-chip--on' : ''}`}
-              onClick={() => onCategoryChange(selectedCategoryIds.includes(c.id) ? [] : [c.id])}
-            >
-              {c.name}
-            </button>
-          ))}
+          {catOpen ? (
+            <span className="home-cats-open-label">카테고리 전체보기</span>
+          ) : (
+            <>
+              <button
+                type="button"
+                role="listitem"
+                className={`home-cat-chip${selectedCategoryIds.length === 0 ? ' home-cat-chip--on' : ''}`}
+                onClick={() => onCategoryChange([])}
+              >
+                전체
+              </button>
+              {categories.map(c => (
+                <button
+                  key={c.id}
+                  type="button"
+                  role="listitem"
+                  className={`home-cat-chip${selectedCategoryIds.includes(c.id) ? ' home-cat-chip--on' : ''}`}
+                  onClick={() => onCategoryChange(selectedCategoryIds.includes(c.id) ? [] : [c.id])}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </>
+          )}
         </div>
         <button
           type="button"
@@ -201,7 +207,6 @@ export const HomePage = ({
 
         {catOpen && (
           <div className="home-cat-panel" role="dialog" aria-label="카테고리 전체보기">
-            <div className="home-cat-panel-title">카테고리 전체보기</div>
             <div className="home-cat-panel-grid">
               <button
                 type="button"
