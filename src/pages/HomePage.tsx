@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFavorites } from '../contexts/FavoritesContext'
-import { FilterIcon, UserIcon } from '../components/icons'
+import { FilterIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '../components/icons'
 import { useInfiniteProductListQuery } from '../queries/productQueries'
 import { useBrandsQuery } from '../queries/brandsQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
@@ -196,11 +196,12 @@ export const HomePage = ({
           aria-expanded={catOpen}
           onClick={handleExpandClick}
         >
-          <span aria-hidden="true">{catOpen ? '▴' : '▾'}</span>
+          {catOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </button>
 
         {catOpen && (
           <div className="home-cat-panel" role="dialog" aria-label="카테고리 전체보기">
+            <div className="home-cat-panel-title">카테고리 전체보기</div>
             <div className="home-cat-panel-grid">
               <button
                 type="button"
@@ -246,7 +247,10 @@ export const HomePage = ({
                 onClick={() => handleFilterChipClick(label)}
                 aria-expanded={isOpen}
               >
-                {display}{count > 0 ? ` ${count}` : ''} <span aria-hidden="true">{isOpen ? '▴' : '▾'}</span>
+                {display}{count > 0 ? ` ${count}` : ''}
+          <span className="home-chip-chevron" aria-hidden="true">
+            {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+          </span>
               </button>
             )
           })}
