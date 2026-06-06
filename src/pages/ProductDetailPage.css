@@ -128,13 +128,13 @@
   background: transparent;
   border: 0;
   font-size: 22px;
-  color: #d1d1d4;
+  color: #b0b8c1;
   cursor: pointer;
   padding: 0;
   line-height: 1;
   transition: color 0.12s;
 }
-.det-fav-toggle.on { color: #ff4444; }
+.det-fav-toggle.on { color: #ea4335; }
 
 /* ── 영양점수 카드 ──────────────────────────────── */
 .det-score-card {
@@ -215,11 +215,11 @@
   justify-content: center;
   margin: 16px 16px 0;
   width: calc(100% - 32px);
-  height: 48px;
-  background: #4a5060;
+  height: 52px;
+  background: #525760;
   color: #fff;
   border: 0;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;

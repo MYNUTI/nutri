@@ -148,7 +148,7 @@
   justify-content: space-between;
   width: 100%;
   min-height: 52px;
-  border-top: 1px solid #f1f1f2;
+  border-top: 1px solid #e8eaec;
   padding: 0 2px;
   background: transparent;
 }
@@ -160,7 +160,7 @@
 
 .mypage-row--btn {
   border: 0;
-  border-top: 1px solid #f1f1f2;
+  border-top: 1px solid #e8eaec;
   text-align: left;
   cursor: pointer;
   font: inherit;
@@ -185,7 +185,7 @@
 }
 
 .mypage-pill {
-  border: 1px solid #e3e3e6;
+  border: 1px solid #e8eaec;
   background: #f4f4f6;
   border-radius: 999px;
   height: 26px;
@@ -296,7 +296,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid #e3e3e6;
+  border: 1px solid #e8eaec;
   letter-spacing: -0.01em;
 }
 

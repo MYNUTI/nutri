@@ -177,8 +177,8 @@
 .ups-gender-btn:hover { border-color: #888; }
 
 .ups-gender-btn.on {
-  border-color: #111;
-  background: #111;
+  border-color: #525760;
+  background: #525760;
   color: #fff;
 }
 
@@ -207,8 +207,8 @@
 .ups-opt-btn:hover { border-color: #888; }
 
 .ups-opt-btn.on {
-  border-color: #111;
-  background: #111;
+  border-color: #525760;
+  background: #525760;
   color: #fff;
 }
 
@@ -322,11 +322,11 @@
 }
 
 .ups-submit--on {
-  background: #111;
+  background: #525760;
   color: #fff;
   cursor: pointer;
 }
 
 .ups-submit--on:hover {
-  background: #000;
+  background: #666a74;
 }

@@ -50,7 +50,7 @@ const GuestIllustration = () => (
     <line x1="74" y1="140" x2="66" y2="180" stroke="#ff5722" strokeWidth="12" strokeLinecap="round" />
     <line x1="102" y1="140" x2="106" y2="182" stroke="#ff5722" strokeWidth="12" strokeLinecap="round" />
     {/* 하트 */}
-    <path d="M175 50 C175 44 168 40 163 45 C158 40 151 44 151 50 C151 56 163 66 163 66 C163 66 175 56 175 50Z" fill="#ff4444" />
+    <path d="M175 50 C175 44 168 40 163 45 C158 40 151 44 151 50 C151 56 163 66 163 66 C163 66 175 56 175 50Z" fill="#ea4335" />
     {/* 달력 아이콘 */}
     <rect x="38" y="100" width="24" height="22" rx="4" fill="#5c6bc0" />
     <rect x="38" y="100" width="24" height="7" rx="4" fill="#3949ab" />
