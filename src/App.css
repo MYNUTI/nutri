@@ -1291,9 +1291,8 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 100%;
+  top: calc(100% + 1px);
   background: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
   border-radius: 0 0 16px 16px;
   z-index: 20;
   padding: 10px 14px 20px;
