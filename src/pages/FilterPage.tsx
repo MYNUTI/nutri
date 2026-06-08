@@ -1,6 +1,5 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useBrandsQuery } from '../queries/brandsQueries'
-import { useCategoriesQuery } from '../queries/categoriesQueries'
 import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 import './FilterPage.css'
 
@@ -11,6 +10,8 @@ type FilterPageProps = {
   onClose: () => void
   onApply?: (selection: { categoryIds: number[]; brandIds: number[]; nutrients: string[] }) => void
 }
+
+const PRICE_OPTIONS = ['1만원 이하', '1~3만원', '3~5만원', '5만원 이상'] as const
 
 const ChevronIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#777F8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -33,20 +34,16 @@ export const FilterPage = ({
 }: FilterPageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandList = brandsData ?? []
-  const { data: categoriesData } = useCategoriesQuery()
-  const categoryList = (categoriesData ?? []).filter(c => c.depth === 1)
   const { data: claimsData } = useNutrientClaimsQuery()
   const claimOptions = claimsData ?? []
 
-  const [selectedCatIds, setSelectedCatIds] = useState<Set<number>>(new Set(initialCategoryIds))
   const [selectedBrandIds, setSelectedBrandIds] = useState<Set<number>>(new Set(initialBrandIds))
   const [selectedNutrients, setSelectedNutrients] = useState<Set<string>>(new Set(initialNutrients))
+  const [selectedPrices, setSelectedPrices] = useState<Set<string>>(new Set())
 
-  const [catOpen, setCatOpen] = useState(true)
-  const [brandOpen, setBrandOpen] = useState(true)
   const [nutrientOpen, setNutrientOpen] = useState(true)
-
-  const bodyRef = useRef<HTMLDivElement>(null)
+  const [brandOpen, setBrandOpen] = useState(true)
+  const [priceOpen, setPriceOpen] = useState(true)
 
   const toggleNum = (set: Set<number>, item: number): Set<number> => {
     const next = new Set(set)
@@ -61,25 +58,21 @@ export const FilterPage = ({
   }
 
   const handleReset = () => {
-    setSelectedCatIds(new Set())
     setSelectedBrandIds(new Set())
     setSelectedNutrients(new Set())
+    setSelectedPrices(new Set())
   }
 
   const handleApply = () => {
     onApply?.({
-      categoryIds: Array.from(selectedCatIds),
+      categoryIds: initialCategoryIds,
       brandIds: Array.from(selectedBrandIds),
       nutrients: Array.from(selectedNutrients),
     })
     onClose()
   }
 
-  const totalSelected = selectedCatIds.size + selectedBrandIds.size + selectedNutrients.size
-
-  const scrollToId = (id: string) => {
-    bodyRef.current?.querySelector(`#${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  const totalSelected = selectedBrandIds.size + selectedNutrients.size + selectedPrices.size
 
   return (
     <div className="fil-page">
@@ -90,35 +83,29 @@ export const FilterPage = ({
         </button>
       </header>
 
-      <div className="fil-nav" aria-label="섹션 이동">
-        <button type="button" className="fil-nav-chip" onClick={() => scrollToId('fil-sec-cat')}>카테고리</button>
-        <button type="button" className="fil-nav-chip" onClick={() => scrollToId('fil-sec-brand')}>브랜드</button>
-        <button type="button" className="fil-nav-chip" onClick={() => scrollToId('fil-sec-nutrient')}>영양 성분</button>
-      </div>
-
-      <div className="fil-body" ref={bodyRef}>
-        <section className="fil-section" id="fil-sec-cat">
-          <button type="button" className="fil-section-head" onClick={() => setCatOpen(v => !v)}>
-            <span className="fil-section-label">식품 카테고리</span>
-            <ChevronIcon className={`fil-chevron${catOpen ? ' fil-chevron--up' : ''}`} />
+      <div className="fil-body">
+        <section className="fil-section">
+          <button type="button" className="fil-section-head" onClick={() => setNutrientOpen(v => !v)}>
+            <span className="fil-section-label">성분</span>
+            <ChevronIcon className={`fil-chevron${nutrientOpen ? ' fil-chevron--up' : ''}`} />
           </button>
-          {catOpen && (
+          {nutrientOpen && (
             <div className="fil-chips">
-              {categoryList.map(cat => (
+              {claimOptions.map(c => (
                 <button
-                  key={cat.id}
+                  key={c.code}
                   type="button"
-                  className={`fil-chip${selectedCatIds.has(cat.id) ? ' fil-chip--on' : ''}`}
-                  onClick={() => setSelectedCatIds(toggleNum(selectedCatIds, cat.id))}
+                  className={`fil-chip${selectedNutrients.has(c.code) ? ' fil-chip--on' : ''}`}
+                  onClick={() => setSelectedNutrients(toggleStr(selectedNutrients, c.code))}
                 >
-                  {cat.name}
+                  {c.label}
                 </button>
               ))}
             </div>
           )}
         </section>
 
-        <section className="fil-section" id="fil-sec-brand">
+        <section className="fil-section">
           <button type="button" className="fil-section-head" onClick={() => setBrandOpen(v => !v)}>
             <span className="fil-section-label">브랜드</span>
             <ChevronIcon className={`fil-chevron${brandOpen ? ' fil-chevron--up' : ''}`} />
@@ -139,21 +126,21 @@ export const FilterPage = ({
           )}
         </section>
 
-        <section className="fil-section" id="fil-sec-nutrient">
-          <button type="button" className="fil-section-head" onClick={() => setNutrientOpen(v => !v)}>
-            <span className="fil-section-label">영양 성분</span>
-            <ChevronIcon className={`fil-chevron${nutrientOpen ? ' fil-chevron--up' : ''}`} />
+        <section className="fil-section">
+          <button type="button" className="fil-section-head" onClick={() => setPriceOpen(v => !v)}>
+            <span className="fil-section-label">가격</span>
+            <ChevronIcon className={`fil-chevron${priceOpen ? ' fil-chevron--up' : ''}`} />
           </button>
-          {nutrientOpen && (
+          {priceOpen && (
             <div className="fil-chips">
-              {claimOptions.map(c => (
+              {PRICE_OPTIONS.map(p => (
                 <button
-                  key={c.code}
+                  key={p}
                   type="button"
-                  className={`fil-chip${selectedNutrients.has(c.code) ? ' fil-chip--on' : ''}`}
-                  onClick={() => setSelectedNutrients(toggleStr(selectedNutrients, c.code))}
+                  className={`fil-chip${selectedPrices.has(p) ? ' fil-chip--on' : ''}`}
+                  onClick={() => setSelectedPrices(toggleStr(selectedPrices, p))}
                 >
-                  {c.label}
+                  {p}
                 </button>
               ))}
             </div>

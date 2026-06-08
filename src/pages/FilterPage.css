@@ -42,38 +42,6 @@
 
 .fil-close:hover { opacity: 0.7; }
 
-/* ── 섹션 이동 칩 바 ────────────────────────── */
-.fil-nav {
-  display: flex;
-  gap: 8px;
-  padding: 10px 20px;
-  border-top: 1px solid #E8EAEC;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex-shrink: 0;
-  background: #fff;
-}
-
-.fil-nav::-webkit-scrollbar { display: none; }
-
-.fil-nav-chip {
-  flex-shrink: 0;
-  height: 32px;
-  padding: 0 14px;
-  border-radius: 16px;
-  border: 1px solid #E8EAEC;
-  background: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  color: #777F8A;
-  cursor: pointer;
-  white-space: nowrap;
-  letter-spacing: -0.01em;
-  font-family: inherit;
-}
-
-.fil-nav-chip:hover { background: #f5f5f7; }
-
 /* ── 스크롤 바디 ─────────────────────────────── */
 .fil-body {
   flex: 1;
