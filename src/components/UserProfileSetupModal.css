@@ -97,6 +97,8 @@
   font-size: 14px;
   color: #111;
   background: #fff;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .ups-text-input::placeholder {
