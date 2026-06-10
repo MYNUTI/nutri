@@ -25,6 +25,8 @@
   height: 100%;
   background: #f6f6f6;
   padding: 14px;
+  padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   overflow: hidden;
