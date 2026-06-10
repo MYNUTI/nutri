@@ -17,20 +17,13 @@
 
 .screen-wrap {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  background: #cfcfcf;
-  padding: 20px 12px;
 }
 
 .mobile-page {
   position: relative;
   width: 100%;
-  max-width: 380px;
-  height: min(800px, calc(100vh - 40px));
+  height: 100vh;
   background: #f6f6f6;
-  border: 1px solid #d5d5d5;
-  border-radius: 14px;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -1731,16 +1724,14 @@
    ───────────────────────────────────────────── */
 @media (min-width: 768px) {
   .screen-wrap {
-    background: linear-gradient(135deg, #f4f5f7 0%, #e8eaef 100%);
+    display: grid;
+    place-items: center;
     padding: 40px 12px;
   }
 
   .mobile-page {
     max-width: 420px;
     height: min(860px, calc(100vh - 80px));
-    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.25), 0 10px 25px -10px rgba(0, 0, 0, 0.15);
-    border-radius: 28px;
-    border: 1px solid #e0e0e0;
   }
 }
 
