@@ -1724,14 +1724,13 @@
    ───────────────────────────────────────────── */
 @media (min-width: 768px) {
   .screen-wrap {
-    display: grid;
-    place-items: center;
-    padding: 40px 12px;
+    display: flex;
+    justify-content: center;
   }
 
   .mobile-page {
     max-width: 420px;
-    height: min(860px, calc(100vh - 80px));
+    height: 100vh;
   }
 }
 
