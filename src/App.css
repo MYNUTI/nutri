@@ -32,6 +32,18 @@
   overflow: hidden;
 }
 
+.mobile-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(env(safe-area-inset-top, 0px) + 24px);
+  background: linear-gradient(to bottom, #fff 40%, transparent 100%);
+  z-index: 50;
+  pointer-events: none;
+}
+
 .app-shell {
   gap: 12px;
 }
