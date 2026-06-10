@@ -12,17 +12,17 @@
 }
 
 #root {
-  height: 100vh;
+  height: 100%;
 }
 
 .screen-wrap {
-  min-height: 100vh;
+  height: 100%;
 }
 
 .mobile-page {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background: #f6f6f6;
   padding: 14px;
   display: flex;
@@ -1730,7 +1730,6 @@
 
   .mobile-page {
     max-width: 420px;
-    height: 100vh;
   }
 }
 
