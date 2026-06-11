@@ -46,6 +46,30 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
     setErrors(e => { const n = { ...e }; delete n[k as string]; return n })
   }
 
+  const isStepValid = (): boolean => {
+    if (step === 1) {
+      return !!(
+        profile.name && /^[가-힣a-zA-Z]{2,}$/.test(profile.name) &&
+        profile.email && /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(profile.email) &&
+        profile.gender &&
+        profile.birth_date && profile.birth_date <= TODAY
+      )
+    }
+    if (step === 2) {
+      const h = Number(profile.height)
+      const w = Number(profile.weight)
+      return !!(profile.height && !isNaN(h) && h >= 50 && h <= 250 &&
+        profile.weight && !isNaN(w) && w >= 10 && w <= 200)
+    }
+    if (step === 3) {
+      return !!(profile.activity_type && profile.weekly_exercise_count && profile.exercise_intensity)
+    }
+    if (step === 4) {
+      return !!profile.diet_purpose
+    }
+    return false
+  }
+
   const validate = (): Record<string, string> => {
     const e: Record<string, string> = {}
     if (step === 1) {
@@ -218,7 +242,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
         )}
       </div>
 
-      <button type="button" className="ups-submit ups-submit--on" onClick={handleNext}>
+      <button type="button" className={`ups-submit${isStepValid() ? ' ups-submit--on' : ''}`} onClick={handleNext}>
         {step === TOTAL_STEPS ? (submitLabel ?? '완료하기') : '다음'}
       </button>
     </div>

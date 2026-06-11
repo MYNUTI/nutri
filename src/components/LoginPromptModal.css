@@ -1,0 +1,62 @@
+.lpm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lpm-card {
+  width: 305px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
+  padding: 28px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lpm-msg {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.lpm-btns {
+  display: flex;
+  gap: 7px;
+}
+
+.lpm-btn {
+  flex: 1;
+  height: 36px;
+  border: 0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lpm-btn--cancel {
+  background: #F2F3F5;
+  color: #777F8A;
+}
+
+.lpm-btn--cancel:hover {
+  background: #e5e7ea;
+}
+
+.lpm-btn--login {
+  background: #525760;
+  color: #fff;
+}
+
+.lpm-btn--login:hover {
+  background: #666a74;
+}

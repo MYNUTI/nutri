@@ -173,6 +173,8 @@ function AppShell() {
             onGoHome={() => { setHomeKeyword(''); setFilterCategoryIds([]); setFilterBrandIds([]); setFilterNutrients([]); navigate('home'); window.scrollTo({ top: 0 }) }}
             onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
             onAddToCompare={handleAddToCompare}
+            isAuthenticated={isAuthenticated}
+            onNeedLogin={() => navigate('login')}
           />
         )
       case 'detail':

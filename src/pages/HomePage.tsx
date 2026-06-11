@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '../components/icons'
 import { useInfiniteProductListQuery } from '../queries/productQueries'
@@ -23,6 +24,8 @@ type HomePageProps = {
   onGoHome?: () => void
   onProductClick?: (product: Product) => void
   onAddToCompare?: (product: Product) => void
+  isAuthenticated?: boolean
+  onNeedLogin?: () => void
 }
 
 const FILTER_CHIPS = ['추천순', '브랜드', '성분'] as const
@@ -55,6 +58,7 @@ export const HomePage = ({
   selectedCategoryIds, selectedBrandIds, selectedNutrients,
   onCategoryChange, onBrandChange, onNutrientsChange,
   onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick,
+  isAuthenticated, onNeedLogin,
 }: HomePageProps) => {
   const { data: brandsData } = useBrandsQuery()
   const brandOptions = brandsData ?? []
@@ -70,6 +74,7 @@ export const HomePage = ({
   const [tempNutrients, setTempNutrients] = useState<string[]>(selectedNutrients)
 
   const { toggle, isFavorite } = useFavorites()
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
 
@@ -396,7 +401,11 @@ export const HomePage = ({
                     type="button"
                     className={`home-card-heart${faved ? ' on' : ''}`}
                     aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-                    onClick={e => { e.stopPropagation(); toggle(item.id) }}
+                    onClick={e => {
+                      e.stopPropagation()
+                      if (!isAuthenticated) { setShowLoginPrompt(true); return }
+                      toggle(item.id)
+                    }}
                   >
                     {faved ? '♥' : '♡'}
                   </button>
@@ -411,6 +420,12 @@ export const HomePage = ({
           <p style={{ textAlign: 'center', color: '#888', padding: '1rem' }}>불러오는 중...</p>
         )}
       </div>
+      {showLoginPrompt && (
+        <LoginPromptModal
+          onClose={() => setShowLoginPrompt(false)}
+          onLogin={() => { setShowLoginPrompt(false); onNeedLogin?.() }}
+        />
+      )}
     </div>
   )
 }
