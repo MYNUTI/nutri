@@ -182,6 +182,8 @@ function AppShell() {
           <ProductDetailPage
             product={selectedProduct}
             onBack={() => { setSelectedProduct(null); navigate('home') }}
+            isAuthenticated={isAuthenticated}
+            onNeedLogin={() => navigate('login')}
           />
         ) : null
       case 'search':

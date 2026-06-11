@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useProductDetailQuery } from '../queries/productQueries'
 import type { NutrientsResponse } from '../api/products/types'
@@ -7,6 +9,8 @@ import './ProductDetailPage.css'
 type ProductDetailPageProps = {
   product: Product
   onBack: () => void
+  isAuthenticated?: boolean
+  onNeedLogin?: () => void
 }
 
 const NUTRITION_DEFS: { key: keyof NutrientsResponse; label: string; unit: string; max: number }[] = [
@@ -21,9 +25,10 @@ const NUTRITION_DEFS: { key: keyof NutrientsResponse; label: string; unit: strin
   { key: 'protein',       label: '단백질',    unit: 'g',    max: 55   },
 ]
 
-export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) => {
+export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogin }: ProductDetailPageProps) => {
   const { isFavorite, toggle } = useFavorites()
   const faved = isFavorite(product.id)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const detailQuery = useProductDetailQuery(product.id)
   const detail = detailQuery.data
 
@@ -67,7 +72,10 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
             type="button"
             className={`det-fav-toggle${faved ? ' on' : ''}`}
             aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-            onClick={() => toggle(product.id)}
+            onClick={() => {
+              if (!isAuthenticated) { setShowLoginPrompt(true); return }
+              toggle(product.id)
+            }}
           >
             {faved ? '♥' : '♡'}
           </button>
@@ -129,6 +137,12 @@ export const ProductDetailPage = ({ product, onBack }: ProductDetailPageProps) =
       </section>
 
       </div>{/* det-body end */}
+      {showLoginPrompt && (
+        <LoginPromptModal
+          onClose={() => setShowLoginPrompt(false)}
+          onLogin={() => { setShowLoginPrompt(false); onNeedLogin?.() }}
+        />
+      )}
     </div>
   )
 }
