@@ -7,9 +7,10 @@
   z-index: 200;
   display: flex;
   flex-direction: column;
-  padding: 22px 22px 24px;
-  overflow-x: hidden;
-  overflow-y: auto;
+  padding: 22px;
+  padding-top: calc(22px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
 }
 
 /* ── 상단 뒤로가기 ─────────────────────────────────────── */
@@ -35,11 +36,11 @@
 }
 
 .ups-step {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
-  background: #ececec;
-  color: #888;
+  background: #F2F3F5;
+  color: #777F8A;
   font-size: 11px;
   font-weight: 700;
   display: grid;
@@ -65,9 +66,11 @@
 /* ── 본문 ──────────────────────────────────────────────── */
 .ups-body {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 34px;
 }
 
 .ups-grid-2 {
@@ -86,7 +89,7 @@
 .ups-field-label {
   font-size: 13px;
   font-weight: 600;
-  color: #666;
+  color: #525760;
 }
 
 .ups-text-input {
@@ -196,15 +199,15 @@
 .ups-opt-btn {
   flex: 0 0 auto;
   height: 44px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid #E8EAEC;
   background: #fff;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
-  color: #555;
+  color: #A1A9B1;
   cursor: pointer;
   transition: border-color 0.12s, color 0.12s, background 0.12s;
-  padding: 0 14px;
+  padding: 0 20px;
   white-space: nowrap;
 }
 
@@ -248,33 +251,46 @@
 .ups-stepper {
   display: flex;
   align-items: center;
-  gap: 0;
-  border: 1px solid #e2e2e2;
-  border-radius: 10px;
-  overflow: hidden;
-  height: 44px;
+  gap: 8px;
 }
 
 .ups-stepper-btn {
-  width: 48px;
-  height: 100%;
-  border: 0;
-  background: #f8f8f8;
-  font-size: 20px;
-  font-weight: 400;
-  color: #555;
-  cursor: pointer;
   flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 8px;
+  background: #F2F3F5;
+  font-size: 22px;
+  font-weight: 300;
+  color: #A1A9B1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.12s;
 }
 
-.ups-stepper-btn:hover { background: #f0f0f0; }
+.ups-stepper-btn:last-child {
+  background: #fff;
+  border: 1px solid #E8EAEC;
+  color: #525760;
+}
+
+.ups-stepper-btn:hover { background: #E8EAEC; }
+.ups-stepper-btn:last-child:hover { background: #f8f8f8; }
 
 .ups-stepper-val {
   flex: 1;
-  text-align: center;
+  height: 52px;
+  border: 1px solid #E8EAEC;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 16px;
   font-weight: 600;
-  color: #888;
+  color: #111;
 }
 
 /* ── 드롭다운 ──────────────────────────────────────────── */
@@ -284,10 +300,10 @@
 
 .ups-select {
   width: 100%;
-  height: 44px;
-  border: 1px solid #e2e2e2;
-  border-radius: 10px;
-  padding: 0 36px 0 14px;
+  height: 52px;
+  border: 1px solid #E8EAEC;
+  border-radius: 8px;
+  padding: 0 36px 0 20px;
   font-size: 14px;
   color: #111;
   background: #fff;
@@ -307,18 +323,19 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 12px;
-  color: #888;
+  color: #B0B8C1;
   pointer-events: none;
 }
 
 /* ── 제출 버튼 ─────────────────────────────────────────── */
 .ups-submit {
-  margin-top: 24px;
+  flex-shrink: 0;
+  margin-top: 16px;
   height: 52px;
-  border-radius: 14px;
+  border-radius: 8px;
   border: 0;
-  background: #ececec;
-  color: #b6b6b6;
+  background: #F2F3F5;
+  color: #777F8A;
   font-size: 15px;
   font-weight: 700;
   cursor: not-allowed;
