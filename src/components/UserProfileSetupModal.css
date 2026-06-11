@@ -194,8 +194,7 @@
 }
 
 .ups-opt-btn {
-  flex: 1;
-  min-width: 70px;
+  flex: 0 0 auto;
   height: 44px;
   border: 1px solid #e2e2e2;
   background: #fff;
@@ -206,6 +205,7 @@
   cursor: pointer;
   transition: border-color 0.12s, color 0.12s, background 0.12s;
   padding: 0 14px;
+  white-space: nowrap;
 }
 
 .ups-opt-btn:hover { border-color: #888; }

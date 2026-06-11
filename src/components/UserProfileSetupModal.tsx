@@ -171,15 +171,15 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
             <OptionGroup
               label="직업 형태"
               options={['SITTING', 'STANDING', 'PHYSICAL']}
-              labels={['사무직', '서비스·판매직', '현장직']}
+              labels={['앉아서', '서서', '육체노동']}
               value={profile.activity_type}
               onChange={set('activity_type')}
               error={errors.activity_type}
             />
             <OptionGroup
               label="운동 빈도"
-              options={['1-2', '3-4', '5+']}
-              labels={['주 1-2회', '주 3-4회', '주 5회 이상']}
+              options={['1', '2-4', '5+']}
+              labels={['주 1회', '주 2~4회', '주 5회 이상']}
               value={profile.weekly_exercise_count}
               onChange={set('weekly_exercise_count')}
               error={errors.weekly_exercise_count}
@@ -187,7 +187,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
             <OptionGroup
               label="운동 강도"
               options={['LOW', 'MEDIUM', 'HIGH']}
-              labels={['가볍게', '보통으로', '격렬하게']}
+              labels={['약하게', '중간', '강하게']}
               value={profile.exercise_intensity}
               onChange={set('exercise_intensity')}
               error={errors.exercise_intensity}
