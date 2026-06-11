@@ -168,9 +168,30 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
 
         {step === 3 && (
           <>
-            <OptionGroup label="활동 유형" options={['SITTING', 'STANDING', 'PHYSICAL']} value={profile.activity_type} onChange={set('activity_type')} error={errors.activity_type} />
-            <OptionGroup label="주간 운동 횟수" options={['1', '2', '3', '4', '5', '6', '7']} value={profile.weekly_exercise_count} onChange={set('weekly_exercise_count')} error={errors.weekly_exercise_count} />
-            <OptionGroup label="운동 강도" options={['LOW', 'MEDIUM', 'HIGH']} value={profile.exercise_intensity} onChange={set('exercise_intensity')} error={errors.exercise_intensity} />
+            <OptionGroup
+              label="직업 형태"
+              options={['SITTING', 'STANDING', 'PHYSICAL']}
+              labels={['사무직', '서비스·판매직', '현장직']}
+              value={profile.activity_type}
+              onChange={set('activity_type')}
+              error={errors.activity_type}
+            />
+            <OptionGroup
+              label="운동 빈도"
+              options={['1-2', '3-4', '5+']}
+              labels={['주 1-2회', '주 3-4회', '주 5회 이상']}
+              value={profile.weekly_exercise_count}
+              onChange={set('weekly_exercise_count')}
+              error={errors.weekly_exercise_count}
+            />
+            <OptionGroup
+              label="운동 강도"
+              options={['LOW', 'MEDIUM', 'HIGH']}
+              labels={['가볍게', '보통으로', '격렬하게']}
+              value={profile.exercise_intensity}
+              onChange={set('exercise_intensity')}
+              error={errors.exercise_intensity}
+            />
           </>
         )}
 
@@ -239,14 +260,14 @@ const StepperField = ({ label, value, min, max, onChange }: StepperFieldProps) =
   </div>
 )
 
-type OptionGroupProps = { label: string; options: string[]; value: string; onChange: (v: string) => void; error?: string }
-const OptionGroup = ({ label, options, value, onChange, error }: OptionGroupProps) => (
+type OptionGroupProps = { label: string; options: string[]; labels?: string[]; value: string; onChange: (v: string) => void; error?: string }
+const OptionGroup = ({ label, options, labels, value, onChange, error }: OptionGroupProps) => (
   <div className="ups-field">
     <span className="ups-field-label">{label}</span>
     <div className="ups-options">
-      {options.map(opt => (
+      {options.map((opt, i) => (
         <button key={opt} type="button" className={`ups-opt-btn${value === opt ? ' on' : ''}`} onClick={() => onChange(opt)}>
-          {opt}
+          {labels?.[i] ?? opt}
         </button>
       ))}
     </div>

@@ -54,8 +54,9 @@
 /* ── 큰 제목 ───────────────────────────────────────────── */
 .ups-title {
   margin: 0 0 30px;
-  font-size: 22px;
-  font-weight: 800;
+  font-family: 'Paperlogy', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
   color: #111;
   line-height: 1.35;
   letter-spacing: -0.02em;
@@ -195,7 +196,7 @@
 .ups-opt-btn {
   flex: 1;
   min-width: 70px;
-  height: 40px;
+  height: 44px;
   border: 1px solid #e2e2e2;
   background: #fff;
   border-radius: 999px;
@@ -204,7 +205,7 @@
   color: #555;
   cursor: pointer;
   transition: border-color 0.12s, color 0.12s, background 0.12s;
-  padding: 0 12px;
+  padding: 0 14px;
 }
 
 .ups-opt-btn:hover { border-color: #888; }
