@@ -396,6 +396,11 @@ export const HomePage = ({
                   <div className="home-card-text">
                     <p className="home-card-brand">{item.brand?.name ?? '-'}</p>
                     <p className="home-card-name">{item.name}</p>
+                    {item.price != null && (
+                      <p className="home-card-price">
+                        ₩{Number(item.price).toLocaleString('ko-KR')}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"

@@ -10,6 +10,7 @@ export type ProductResponse = {
   imageUrl: string
   nutritionScore: number
   grade: string
+  price: string | null
   category: CategoryRef
   favorited: boolean
 }
