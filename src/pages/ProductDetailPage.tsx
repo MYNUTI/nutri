@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useProductDetailQuery } from '../queries/productQueries'
+import { useProductReviewsQuery } from '../queries/reviewsQueries'
 import type { NutrientsResponse } from '../api/products/types'
 import type { Product } from '../types/product'
 import './ProductDetailPage.css'
+
+type Tab = 'nutrition' | 'review'
 
 type ProductDetailPageProps = {
   product: Product
@@ -14,129 +17,272 @@ type ProductDetailPageProps = {
 }
 
 const NUTRITION_DEFS: { key: keyof NutrientsResponse; label: string; unit: string; max: number }[] = [
-  { key: 'calories',      label: '열량',      unit: 'kcal', max: 2000 },
-  { key: 'sodium',        label: '나트륨',    unit: 'mg',   max: 2000 },
-  { key: 'carbohydrate',  label: '탄수화물',  unit: 'g',    max: 324  },
-  { key: 'sugar',         label: '당류',      unit: 'g',    max: 100  },
-  { key: 'fat',           label: '지방',      unit: 'g',    max: 54   },
-  { key: 'transFat',      label: '트랜스지방', unit: 'g',   max: 2.2  },
-  { key: 'saturatedFat',  label: '포화지방',  unit: 'g',    max: 15   },
-  { key: 'cholesterol',   label: '콜레스테롤', unit: 'mg',  max: 300  },
-  { key: 'protein',       label: '단백질',    unit: 'g',    max: 55   },
+  { key: 'calories',     label: '열량',      unit: 'kcal', max: 2000 },
+  { key: 'carbohydrate', label: '탄수화물',  unit: 'g',    max: 324  },
+  { key: 'sugar',        label: '당류',      unit: 'g',    max: 100  },
+  { key: 'protein',      label: '단백질',    unit: 'g',    max: 55   },
+  { key: 'fat',          label: '지방',      unit: 'g',    max: 54   },
+  { key: 'saturatedFat', label: '포화지방',  unit: 'g',    max: 15   },
+  { key: 'transFat',     label: '트랜스지방', unit: 'g',   max: 2.2  },
+  { key: 'cholesterol',  label: '콜레스테롤', unit: 'mg',  max: 300  },
+  { key: 'sodium',       label: '나트륨',    unit: 'mg',   max: 2000 },
 ]
+
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
+}
+
+function StarRow({ score, size = 14 }: { score: number; size?: number }) {
+  return (
+    <div className="det-star-row" style={{ gap: 2 }}>
+      {[1, 2, 3, 4, 5].map(i => (
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            fill={i <= Math.round(score) ? '#facc15' : '#e0e0e0'}
+          />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
+function gradeColor(grade: string): string {
+  switch (grade[0]?.toUpperCase()) {
+    case 'A': return '#10b981'
+    case 'B': return '#3b82f6'
+    case 'C': return '#f59e0b'
+    case 'D': return '#f97316'
+    case 'E': return '#ef4444'
+    default:  return '#8a8a8e'
+  }
+}
+
+const RING_R = 30
+const RING_CIRC = 2 * Math.PI * RING_R
 
 export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogin }: ProductDetailPageProps) => {
   const { isFavorite, toggle } = useFavorites()
   const faved = isFavorite(product.id)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const [tab, setTab] = useState<Tab>('nutrition')
+
   const detailQuery = useProductDetailQuery(product.id)
   const detail = detailQuery.data
 
+  const reviewQuery = useProductReviewsQuery(product.id, tab === 'review')
+  const reviewData = reviewQuery.data
+
+  const pns    = detail?.pns
+  const grade  = pns?.grade ?? detail?.grade ?? '-'
+  const color  = gradeColor(grade)
+  const score  = pns?.score ?? 0
+  const dashOff = RING_CIRC * (1 - Math.min(score / 10, 1))
+
+  const handleFav = () => {
+    if (!isAuthenticated) { setShowLoginPrompt(true); return }
+    toggle(product.id)
+  }
+
   return (
     <div className="det-page">
-      {/* 상단 바 — Figma 시안: 뒤로가기만 */}
-      <header className="det-header">
-        <button type="button" className="det-icon-btn" aria-label="뒤로가기" onClick={onBack}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="#111"/></svg>
-        </button>
-      </header>
 
-      {/* 상품 이미지 */}
-      <div className="det-img-wrap">
-        {product.image
-          ? <img className="det-img" src={product.image} alt={product.name} />
-          : <div className="det-img det-img--placeholder" />
-        }
+      {/* 히어로: 이미지 + 헤더 오버레이 */}
+      <div className="det-hero">
+        <header className="det-header">
+          <button type="button" className="det-icon-btn" aria-label="뒤로가기" onClick={onBack}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="#fff"/>
+            </svg>
+          </button>
+          <div className="det-header-right">
+            <button
+              type="button"
+              className="det-icon-btn"
+              aria-label="공유"
+              onClick={() => navigator.share?.({ title: product.name })}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="18" cy="5"  r="3" stroke="#fff" strokeWidth="1.8"/>
+                <circle cx="6"  cy="12" r="3" stroke="#fff" strokeWidth="1.8"/>
+                <circle cx="18" cy="19" r="3" stroke="#fff" strokeWidth="1.8"/>
+                <line x1="8.59"  y1="13.51" x2="15.42" y2="17.49" stroke="#fff" strokeWidth="1.8"/>
+                <line x1="15.41" y1="6.51"  x2="8.59"  y2="10.49" stroke="#fff" strokeWidth="1.8"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={`det-icon-btn${faved ? ' det-fav-on' : ''}`}
+              aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+              onClick={handleFav}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                {faved
+                  ? <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ea4335"/>
+                  : <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z" fill="#fff"/>
+                }
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <div className="det-img-wrap">
+          {product.image
+            ? <img className="det-img" src={product.image} alt={product.name} />
+            : <div className="det-img det-img--placeholder" />
+          }
+        </div>
       </div>
 
-      {/* 흰색 카드 (이미지 위로 살짝 올라옴) */}
+      {/* 본문 카드 */}
       <div className="det-body">
 
-      {/* 상품 정보 */}
-      <div className="det-info">
-        <span className="det-brand">{detail?.brand?.name ?? '-'}</span>
-        <h1 className="det-name">{product.name}</h1>
-        <div className="det-price-row">
-          {detail?.coupang?.price != null && (
-            <>
-              <span className="det-price">{detail.coupang.price.toLocaleString('ko-KR')}원</span>
-              <span className="det-per">(100g당 {detail.coupang.price.toLocaleString('ko-KR')}원)</span>
-            </>
-          )}
+        {/* 상품 정보 */}
+        <div className="det-info">
+          <span className="det-brand">{detail?.brand?.name ?? product.brand.name}</span>
+          <h1 className="det-name">{product.name}</h1>
+          <div className="det-meta-row">
+            <span className="det-grade-chip" style={{ background: color }}>{grade}</span>
+            {detail?.coupang?.price != null && (
+              <span className="det-price">₩{detail.coupang.price.toLocaleString('ko-KR')}</span>
+            )}
+          </div>
         </div>
-        <div className="det-stars" aria-label="별점">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <span key={i} className="det-star" aria-hidden="true">★</span>
-          ))}
+
+        {/* 영양점수 카드 */}
+        <div className="det-score-card">
+          <div className="det-score-left">
+            <span className="det-score-title">영양점수</span>
+            <span className="det-score-grade" style={{ color, borderColor: color }}>{grade}</span>
+            {pns != null && (
+              <>
+                <p className="det-score-pct">상위 {pns.topPercent}%</p>
+                <p className="det-score-total">{detail?.category?.name} 총 {pns.categoryTotal}개 중</p>
+              </>
+            )}
+          </div>
+          <div className="det-score-ring-wrap">
+            <svg viewBox="0 0 72 72" className="det-score-ring-svg" aria-hidden="true">
+              <circle cx="36" cy="36" r={RING_R} fill="none" stroke="#e8e8e8" strokeWidth="6"/>
+              <circle
+                cx="36" cy="36" r={RING_R}
+                fill="none"
+                stroke={color}
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray={RING_CIRC}
+                strokeDashoffset={dashOff}
+                transform="rotate(-90 36 36)"
+              />
+            </svg>
+            <div className="det-score-inner">
+              <span className="det-score-num">{score.toFixed(1)}</span>
+              <span className="det-score-denom">/10</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 쿠팡 구매 버튼 */}
+        {detail?.coupang?.affiliateUrl
+          ? <a href={detail.coupang.affiliateUrl} target="_blank" rel="noopener noreferrer" className="det-coupang-btn">쿠팡에서 구매하기</a>
+          : <button type="button" className="det-coupang-btn" disabled>쿠팡에서 구매하기</button>
+        }
+
+        {/* 탭 */}
+        <div className="det-tabs" role="tablist">
           <button
             type="button"
-            className={`det-fav-toggle${faved ? ' on' : ''}`}
-            aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-            onClick={() => {
-              if (!isAuthenticated) { setShowLoginPrompt(true); return }
-              toggle(product.id)
-            }}
-          >
-            {faved ? '♥' : '♡'}
-          </button>
+            role="tab"
+            aria-selected={tab === 'nutrition'}
+            className={`det-tab${tab === 'nutrition' ? ' active' : ''}`}
+            onClick={() => setTab('nutrition')}
+          >영양성분</button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'review'}
+            className={`det-tab${tab === 'review' ? ' active' : ''}`}
+            onClick={() => setTab('review')}
+          >리뷰</button>
         </div>
+
+        {/* 영양성분 탭 */}
+        {tab === 'nutrition' && (
+          <section className="det-nutrition" aria-label="영양 성분">
+            {detail?.nutrients?.servingSize != null && (
+              <p className="det-nut-serving">1회 제공량 {detail.nutrients.servingSize}g 기준</p>
+            )}
+            {NUTRITION_DEFS.map(({ key, label, unit, max }) => {
+              const val = detail?.nutrients?.[key] ?? 0
+              const pct = Math.min(100, (val / max) * 100)
+              return (
+                <div key={key} className="det-nut-row">
+                  <div className="det-nut-row-top">
+                    <span className="det-nut-label">{label}</span>
+                    <span className="det-nut-value">{val}{unit}</span>
+                    <span className="det-nut-pct">{Math.round(pct)}%</span>
+                  </div>
+                  <div className="det-nut-bar-wrap">
+                    <div className="det-nut-bar" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              )
+            })}
+          </section>
+        )}
+
+        {/* 리뷰 탭 */}
+        {tab === 'review' && (
+          <div className="det-review">
+            {reviewQuery.isLoading && (
+              <p className="det-review-loading">불러오는 중...</p>
+            )}
+
+            {!reviewQuery.isLoading && reviewData && reviewData.total > 0 && (
+              <>
+                <div className="det-review-summary">
+                  <span className="det-review-avg-num">{reviewData.avgScoreOverall.toFixed(1)}</span>
+                  <div className="det-review-summary-right">
+                    <StarRow score={reviewData.avgScoreOverall} size={16} />
+                    <span className="det-review-total">리뷰 {reviewData.total}개</span>
+                  </div>
+                </div>
+
+                <div className="det-review-list">
+                  {reviewData.items.map(review => (
+                    <div key={review.reviewId} className="det-review-item">
+                      <div className="det-review-item-header">
+                        <span className="det-review-nickname">{review.nickname}</span>
+                        <span className="det-review-date">{formatDate(review.createdAt)}</span>
+                      </div>
+                      <StarRow score={review.scoreOverall} size={13} />
+                      {review.content && (
+                        <p className="det-review-content">{review.content}</p>
+                      )}
+                      {review.images.length > 0 && (
+                        <div className="det-review-images">
+                          {review.images.map((src, i) => (
+                            <img key={i} src={src} alt="" className="det-review-img" loading="lazy" />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {!reviewQuery.isLoading && (!reviewData || reviewData.total === 0) && (
+              <div className="det-review-empty">
+                <p>아직 리뷰가 없어요</p>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
 
-      {/* 영양점수 카드 */}
-      <div className="det-score-card">
-        <div className="det-score-left">
-          <div className="det-score-heading">
-            <svg className="det-score-crown" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
-              <path d="M3 18h18M4 18l2-8 5 4 3-7 3 7 5-4 2 8H4z"/>
-            </svg>
-            <span className="det-score-title">영양점수</span>
-          </div>
-          <p className="det-score-sub">
-            {detail?.category?.name ?? '-'} 카테고리<br />
-            {detail?.pns != null
-              ? `총 ${detail.pns.categoryTotal}개 제품 중 상위 ${detail.pns.topPercent}%`
-              : '-'}
-          </p>
-        </div>
-        <div
-          className="det-score-ring"
-          style={{ background: `conic-gradient(#555 0deg ${(product.nutritionScore / 100) * 360}deg, #e8e8e8 ${(product.nutritionScore / 100) * 360}deg 360deg)` }}
-        >
-          <div className="det-score-inner">
-            <span className="det-score-num">{product.nutritionScore}점</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 쿠팡 바로가기 */}
-      {detail?.coupang?.affiliateUrl
-        ? <a href={detail.coupang.affiliateUrl} target="_blank" rel="noopener noreferrer" className="det-coupang-btn">쿠팡 바로가기</a>
-        : <button type="button" className="det-coupang-btn" disabled>쿠팡 바로가기</button>
-      }
-
-      <div className="det-divider" />
-
-      {/* 영양 성분 바 */}
-      <section className="det-nutrition" aria-label="영양 성분">
-        {NUTRITION_DEFS.map(({ key, label, unit, max }) => {
-          const val = detail?.nutrients?.[key] ?? 0
-          const pct = Math.min(100, (val / max) * 100)
-          return (
-            <div key={key} className="det-nut-row">
-              <span className="det-nut-label">{label}</span>
-              <div className="det-nut-bar-wrap">
-                <div className="det-nut-bar" style={{ width: `${pct}%` }} />
-              </div>
-              <div className="det-nut-vals">
-                <span>{val}{unit}</span>
-                <span>{max}{unit}</span>
-              </div>
-            </div>
-          )
-        })}
-      </section>
-
-      </div>{/* det-body end */}
       {showLoginPrompt && (
         <LoginPromptModal
           onClose={() => setShowLoginPrompt(false)}

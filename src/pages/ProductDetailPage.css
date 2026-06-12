@@ -1,3 +1,4 @@
+/* ── 페이지 컨테이너 ──────────────────────────────── */
 .det-page {
   flex: 1;
   min-height: 0;
@@ -10,36 +11,53 @@
   border-radius: 14px;
 }
 
-/* ── 상단 헤더 ─────────────────────────────────── */
+/* ── 히어로 (이미지 + 헤더 오버레이) ────────────────── */
+.det-hero {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .det-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 8px 16px 6px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.det-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .det-icon-btn {
-  width: 32px;
-  height: 32px;
-  background: transparent;
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.28);
   border: 0;
+  border-radius: 50%;
   padding: 0;
   display: grid;
   place-items: center;
   cursor: pointer;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  flex-shrink: 0;
 }
-
-.det-icon-btn svg { width: 22px; height: 22px; }
-
-/* (det-heart, det-share 제거: 즐겨찾기는 별점 옆 .det-fav-toggle로 이동, 공유 버튼은 시안에서 제외) */
+.det-icon-btn svg { width: 20px; height: 20px; }
+.det-fav-on { background: rgba(234, 67, 53, 0.3); }
 
 /* ── 상품 이미지 ────────────────────────────────── */
 .det-img-wrap {
   width: 100%;
-  height: 300px;
+  height: 280px;
   background: #dcdcdc;
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .det-img {
@@ -54,22 +72,23 @@
   background: #e0e0e0;
 }
 
-/* ── 흰색 카드 (이미지 아래, 위 모서리 둥글게) ─────── */
+/* ── 본문 카드 ──────────────────────────────────── */
 .det-body {
   background: #fff;
   border-radius: 20px 20px 0 0;
   margin-top: -20px;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  padding-bottom: 24px;
+  padding-bottom: 32px;
 }
 
 /* ── 상품 정보 ─────────────────────────────────── */
 .det-info {
-  padding: 18px 20px 0;
+  padding: 20px 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .det-brand {
@@ -80,69 +99,48 @@
 }
 
 .det-name {
-  margin: 4px 0 0;
-  font-size: 16px;
-  font-weight: 500;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
   color: #1f1f22;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
 }
 
-.det-price-row {
+.det-meta-row {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin-top: 6px;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
+.det-grade-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
 .det-price {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   color: #111;
   letter-spacing: -0.02em;
 }
 
-.det-per {
-  font-size: 12px;
-  color: #b0b0b3;
-  letter-spacing: -0.01em;
-  font-weight: 500;
-}
-
-.det-stars {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-top: 6px;
-  color: #d4d4d6;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.det-star {
-  letter-spacing: 1px;
-}
-
-.det-fav-toggle {
-  margin-left: auto;
-  background: transparent;
-  border: 0;
-  font-size: 22px;
-  color: #b0b8c1;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  transition: color 0.12s;
-}
-.det-fav-toggle.on { color: #ea4335; }
-
 /* ── 영양점수 카드 ──────────────────────────────── */
 .det-score-card {
   margin: 16px 16px 0;
-  background: #f3f4f6;
-  border-radius: 14px;
-  padding: 18px 20px;
+  background: #f5f6f8;
+  border-radius: 16px;
+  padding: 20px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -152,61 +150,86 @@
 .det-score-left {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.det-score-heading {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.det-score-crown {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .det-score-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #111;
   letter-spacing: -0.01em;
 }
 
-.det-score-sub {
-  margin: 0;
-  font-size: 13px;
-  color: #7d7d83;
-  line-height: 1.5;
-}
-
-.det-score-ring {
-  flex-shrink: 0;
-  width: 72px;
-  height: 72px;
-  border-radius: 999px;
-  border: 0;
-  display: flex;
+.det-score-grade {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  align-self: flex-start;
+  min-width: 36px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 2px solid;
+  font-size: 14px;
+  font-weight: 800;
+  background: transparent;
+  letter-spacing: 0.02em;
+}
+
+.det-score-pct {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.det-score-total {
+  margin: 0;
+  font-size: 12px;
+  color: #8a8a8e;
+  letter-spacing: -0.01em;
+}
+
+/* ── 원형 점수 게이지 ────────────────────────────── */
+.det-score-ring-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.det-score-ring-svg {
+  width: 72px;
+  height: 72px;
 }
 
 .det-score-inner {
-  width: 54px;
-  height: 54px;
-  border-radius: 999px;
-  background: #f3f4f6;
+  position: absolute;
+  inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0;
 }
 
 .det-score-num {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 800;
   color: #111;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.det-score-denom {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8a8a8e;
+  letter-spacing: -0.01em;
 }
 
 /* ── 쿠팡 버튼 ─────────────────────────────────── */
@@ -217,57 +240,107 @@
   margin: 16px 16px 0;
   width: calc(100% - 32px);
   height: 52px;
-  background: #525760;
+  background: #1a1a1a;
   color: #fff;
   border: 0;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
   cursor: pointer;
   text-decoration: none;
   flex-shrink: 0;
+  transition: background 0.15s;
 }
-
+.det-coupang-btn:not(:disabled):hover { background: #333; }
 .det-coupang-btn:disabled {
-  opacity: 0.5;
+  background: #c0c0c5;
   cursor: not-allowed;
 }
 
-.det-divider {
-  height: 12px;
-  background: #f0f0f0;
-  margin: 16px -14px 16px;
+/* ── 탭 바 ─────────────────────────────────────── */
+.det-tabs {
+  display: flex;
+  margin-top: 20px;
+  border-bottom: 1px solid #ececec;
   flex-shrink: 0;
 }
 
-/* ── 영양 성분 바 (흰 카드 래퍼) ───────────────────── */
+.det-tab {
+  flex: 1;
+  height: 44px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #b0b0b3;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.det-tab.active {
+  color: #111;
+  border-bottom-color: #111;
+}
+
+/* ── 영양성분 탭 ─────────────────────────────────── */
 .det-nutrition {
-  margin: 0 16px 24px;
-  padding: 20px 18px;
-  background: #fff;
-  border: 1px solid #ececec;
-  border-radius: 14px;
+  padding: 20px 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 0;
+}
+
+.det-nut-serving {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: #8a8a8e;
+  letter-spacing: -0.01em;
 }
 
 .det-nut-row {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f3f5;
+}
+.det-nut-row:last-child { border-bottom: 0; }
+
+.det-nut-row-top {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
 }
 
 .det-nut-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f1f22;
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+
+.det-nut-value {
   font-size: 13px;
   font-weight: 600;
-  color: #2a2a2a;
+  color: #111;
   letter-spacing: -0.01em;
 }
 
+.det-nut-pct {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8a8a8e;
+  letter-spacing: -0.01em;
+  min-width: 36px;
+  text-align: right;
+}
+
 .det-nut-bar-wrap {
-  height: 6px;
+  height: 5px;
   background: #ececec;
   border-radius: 999px;
   overflow: hidden;
@@ -275,14 +348,123 @@
 
 .det-nut-bar {
   height: 100%;
-  background: #6e737c;
+  background: #525760;
   border-radius: 999px;
+  transition: width 0.4s ease;
 }
 
-.det-nut-vals {
+/* ── 리뷰 탭 ────────────────────────────────────── */
+.det-review {
+  padding: 20px 20px 0;
   display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.det-review-loading {
+  padding: 32px 0;
+  text-align: center;
+  font-size: 14px;
+  color: #b0b0b3;
+}
+
+.det-review-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  background: #f5f6f8;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.det-review-avg-num {
+  font-size: 36px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.det-review-summary-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.det-review-total {
+  font-size: 12px;
+  color: #8a8a8e;
+  letter-spacing: -0.01em;
+}
+
+.det-star-row {
+  display: flex;
+  align-items: center;
+}
+
+.det-review-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.det-review-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #f3f3f5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.det-review-item:last-child { border-bottom: 0; }
+
+.det-review-item-header {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+}
+
+.det-review-nickname {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f1f22;
+  letter-spacing: -0.01em;
+}
+
+.det-review-date {
   font-size: 11px;
-  color: #a6a6ac;
-  font-weight: 500;
+  color: #b0b0b3;
+  letter-spacing: -0.01em;
+}
+
+.det-review-content {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #444;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+
+.det-review-images {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.det-review-img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #ececec;
+}
+
+.det-review-empty {
+  padding: 48px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0b0b3;
+  font-size: 14px;
+  letter-spacing: -0.01em;
 }
