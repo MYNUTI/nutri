@@ -234,14 +234,14 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                     </span>
                   </div>
                   <div className="det-cal-bar">
-                    <div className="det-cal-seg det-cal-seg--carb" />
-                    <div className="det-cal-seg det-cal-seg--protein" />
-                    <div className="det-cal-seg det-cal-seg--fat" />
+                    <div className="det-cal-seg det-cal-seg--carb"    style={{ flex: carbCal || 1 }} />
+                    <div className="det-cal-seg det-cal-seg--protein" style={{ flex: proteinCal || 1 }} />
+                    <div className="det-cal-seg det-cal-seg--fat"     style={{ flex: fatCal || 1 }} />
                   </div>
                   <div className="det-cal-name-row">
-                    <span className="det-cal-name-text">탄 {pct(carbCal)}%</span>
-                    <span className="det-cal-name-text">단 {pct(proteinCal)}%</span>
-                    <span className="det-cal-name-text">지 {pct(fatCal)}%</span>
+                    <span className="det-cal-name-text" style={{ flex: carbCal || 1 }}>탄 {pct(carbCal)}%</span>
+                    <span className="det-cal-name-text" style={{ flex: proteinCal || 1 }}>단 {pct(proteinCal)}%</span>
+                    <span className="det-cal-name-text" style={{ flex: fatCal || 1 }}>지 {pct(fatCal)}%</span>
                   </div>
                 </div>
               )

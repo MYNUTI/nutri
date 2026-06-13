@@ -325,10 +325,6 @@
   overflow: hidden;
 }
 
-.det-cal-seg {
-  flex: 1;
-}
-
 .det-cal-seg--carb    { background: #A1A9B1; }
 .det-cal-seg--protein { background: #777F8A; }
 .det-cal-seg--fat     { background: #111; }
@@ -338,11 +334,11 @@
 }
 
 .det-cal-name-text {
-  flex: 1;
   font-size: 11px;
   font-weight: 500;
   color: #A1A9B1;
   letter-spacing: -0.01em;
+  overflow: hidden;
 }
 
 /* ── 영양성분 탭 ─────────────────────────────────── */
