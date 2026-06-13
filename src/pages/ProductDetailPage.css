@@ -328,6 +328,9 @@
 .det-cal-seg--carb    { background: #A1A9B1; }
 .det-cal-seg--protein { background: #777F8A; }
 .det-cal-seg--fat     { background: #111; }
+/* 극단적 비율에서도 세그먼트가 사라지지 않도록 최소 너비 보장 */
+.det-cal-seg,
+.det-cal-name-text { min-width: 32px; }
 
 .det-cal-name-row {
   display: flex;
