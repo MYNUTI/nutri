@@ -211,39 +211,34 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
         {tab === 'nutrition' && (
           <section className="det-nutrition" aria-label="영양 성분">
             {(() => {
+              const totalCal   = Math.round(detail?.nutrients?.calories ?? 0)
               const carbCal    = Math.round((detail?.nutrients?.carbohydrate ?? 0) * 4)
               const fatCal     = Math.round((detail?.nutrients?.fat ?? 0) * 9)
               const proteinCal = Math.round((detail?.nutrients?.protein ?? 0) * 4)
-              const segs = [
-                { label: '탄수화물', cal: carbCal,    color: '#A1A9B1' },
-                { label: '지방',     cal: fatCal,     color: '#777F8A' },
-                { label: '단백질',   cal: proteinCal, color: '#111'    },
-              ]
+              const totalMacro = carbCal + fatCal + proteinCal
+              const pct = (cal: number) => totalMacro > 0 ? Math.round((cal / totalMacro) * 100) : 0
               return (
                 <div className="det-cal-section">
-                  <div className="det-cal-kcal-row">
-                    {segs.map(({ cal }, i) => (
-                      <div key={i} className="det-cal-kcal-col" style={{ flex: cal || 1 }}>
-                        <span className="det-cal-num">{cal}</span>
-                        <span className="det-cal-kunit">kcal</span>
-                      </div>
-                    ))}
+                  <div className="det-cal-top">
+                    <span className="det-cal-total-num">{totalCal}</span>
+                    <span className="det-cal-total-unit">kcal</span>
+                    <span className="det-cal-macro-list">
+                      <span className="det-cal-macro">탄 {carbCal}kcal</span>
+                      <span className="det-cal-dot">·</span>
+                      <span className="det-cal-macro">지 {fatCal}kcal</span>
+                      <span className="det-cal-dot">·</span>
+                      <span className="det-cal-macro">단 {proteinCal}kcal</span>
+                    </span>
                   </div>
                   <div className="det-cal-bar">
-                    {segs.map(({ cal, color }, i) => (
-                      <div
-                        key={i}
-                        style={{ flex: cal || 1, background: color }}
-                        className={`det-cal-seg${i === 0 ? ' det-cal-seg--first' : i === segs.length - 1 ? ' det-cal-seg--last' : ''}`}
-                      />
-                    ))}
+                    <div className="det-cal-seg det-cal-seg--carb" />
+                    <div className="det-cal-seg det-cal-seg--fat" />
+                    <div className="det-cal-seg det-cal-seg--protein" />
                   </div>
                   <div className="det-cal-name-row">
-                    {segs.map(({ label, cal }, i) => (
-                      <div key={i} className="det-cal-name-col" style={{ flex: cal || 1 }}>
-                        <span className="det-cal-name-text">{label}</span>
-                      </div>
-                    ))}
+                    <span className="det-cal-name-text">탄 {pct(carbCal)}%</span>
+                    <span className="det-cal-name-text">지 {pct(fatCal)}%</span>
+                    <span className="det-cal-name-text">단 {pct(proteinCal)}%</span>
                   </div>
                 </div>
               )
@@ -341,7 +336,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                 rel="noopener noreferrer"
                 className="det-coupang-btn"
               >
-                쿠팡에서 구매하기
+                쿠팡 바로가기
               </a>
             </div>
           </>

@@ -263,7 +263,7 @@
 /* ── 칼로리 분해 바 ──────────────────────────────── */
 .det-cal-section {
   height: 123px;
-  padding: 28px 24px;
+  padding: 28px 24px 27px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -271,30 +271,51 @@
   background: #fff;
 }
 
-.det-cal-kcal-row {
-  display: flex;
-  gap: 0;
-}
-
-.det-cal-kcal-col {
+.det-cal-top {
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 4px;
+  flex-wrap: nowrap;
   overflow: hidden;
 }
 
-.det-cal-num {
-  font-size: 11px;
-  font-weight: 600;
-  color: #1f1f22;
-  letter-spacing: -0.02em;
+.det-cal-total-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.03em;
+  flex-shrink: 0;
 }
 
-.det-cal-kunit {
-  font-size: 9px;
+.det-cal-total-unit {
+  font-size: 11px;
   font-weight: 400;
+  color: #111;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.det-cal-macro-list {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 2px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.det-cal-macro {
+  font-size: 11px;
   color: #A1A9B1;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.det-cal-dot {
+  font-size: 11px;
+  color: #A1A9B1;
+  flex-shrink: 0;
 }
 
 .det-cal-bar {
@@ -304,21 +325,21 @@
   overflow: hidden;
 }
 
-.det-cal-seg { }
-.det-cal-seg--first { border-radius: 6px 0 0 6px; }
-.det-cal-seg--last  { border-radius: 0 6px 6px 0; }
+.det-cal-seg {
+  flex: 1;
+}
+
+.det-cal-seg--carb    { background: #A1A9B1; }
+.det-cal-seg--fat     { background: #777F8A; }
+.det-cal-seg--protein { background: #111; }
 
 .det-cal-name-row {
   display: flex;
-  gap: 0;
-}
-
-.det-cal-name-col {
-  overflow: hidden;
 }
 
 .det-cal-name-text {
-  font-size: 10px;
+  flex: 1;
+  font-size: 11px;
   font-weight: 500;
   color: #A1A9B1;
   letter-spacing: -0.01em;
@@ -440,6 +461,7 @@
   line-height: 1.6;
   letter-spacing: -0.01em;
   word-break: keep-all;
+  text-align: center;
 }
 
 /* ── 쿠팡 버튼 바 (페이지 하단) ─────────────────── */
