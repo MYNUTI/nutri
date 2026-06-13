@@ -79,16 +79,17 @@
 
 /* ── 상품 정보 ─────────────────────────────────── */
 .det-info {
-  padding: 20px 20px 0;
+  padding: 20px 24px 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0;
 }
 
 .det-info-brand-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 7px;
 }
 
 .det-brand {
@@ -112,7 +113,7 @@
 .det-share-btn svg { width: 20px; height: 20px; }
 
 .det-name {
-  margin: 0;
+  margin: 0 0 2px;
   font-size: 17px;
   font-weight: 600;
   color: #1f1f22;
@@ -120,19 +121,34 @@
   letter-spacing: -0.02em;
 }
 
+.det-info-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.det-info-rating-num {
+  font-size: 11px;
+  font-weight: 500;
+  color: #525760;
+  letter-spacing: -0.01em;
+}
+
 .det-price {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
   letter-spacing: -0.02em;
+  margin-bottom: 3px;
 }
 
 /* ── 영양점수 카드 ──────────────────────────────── */
 .det-score-card {
-  margin: 16px 16px 0;
+  margin: 18px 24px 0;
   background: #f2f3f5;
   border-radius: 16px;
-  padding: 20px 20px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -223,14 +239,14 @@
 /* ── 탭 바 ─────────────────────────────────────── */
 .det-tabs {
   display: flex;
-  margin-top: 20px;
+  margin-top: 16px;
   border-bottom: 1px solid #E8EAEC;
   flex-shrink: 0;
 }
 
 .det-tab {
   flex: 1;
-  height: 44px;
+  height: 38px;
   background: transparent;
   border: 0;
   border-bottom: 2px solid #E8EAEC;
@@ -246,6 +262,70 @@
   color: #111;
   border-bottom-color: #111;
   border-bottom-width: 2px;
+}
+
+/* ── 칼로리 분해 바 ──────────────────────────────── */
+.det-cal-section {
+  height: 123px;
+  padding: 28px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #fff;
+}
+
+.det-cal-kcal-row {
+  display: flex;
+  gap: 0;
+}
+
+.det-cal-kcal-col {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.det-cal-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1f1f22;
+  letter-spacing: -0.02em;
+}
+
+.det-cal-kunit {
+  font-size: 9px;
+  font-weight: 400;
+  color: #A1A9B1;
+  letter-spacing: -0.01em;
+}
+
+.det-cal-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.det-cal-seg { }
+.det-cal-seg--first { border-radius: 6px 0 0 6px; }
+.det-cal-seg--last  { border-radius: 0 6px 6px 0; }
+
+.det-cal-name-row {
+  display: flex;
+  gap: 0;
+}
+
+.det-cal-name-col {
+  overflow: hidden;
+}
+
+.det-cal-name-text {
+  font-size: 10px;
+  font-weight: 500;
+  color: #A1A9B1;
+  letter-spacing: -0.01em;
 }
 
 /* ── 영양성분 탭 ─────────────────────────────────── */

@@ -45,14 +45,14 @@ function formatDate(iso: string): string {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 }
 
-function StarRow({ score, size = 14 }: { score: number; size?: number }) {
+function StarRow({ score, size = 14, filledColor = '#facc15' }: { score: number; size?: number; filledColor?: string }) {
   return (
     <div className="det-star-row" style={{ gap: 2 }}>
       {[1, 2, 3, 4, 5].map(i => (
         <svg key={i} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-            fill={i <= Math.round(score) ? '#facc15' : '#e0e0e0'}
+            fill={i <= Math.round(score) ? filledColor : '#e0e0e0'}
           />
         </svg>
       ))}
@@ -72,7 +72,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
   const detailQuery = useProductDetailQuery(product.id)
   const detail = detailQuery.data
 
-  const reviewQuery = useProductReviewsQuery(product.id, tab === 'review')
+  const reviewQuery = useProductReviewsQuery(product.id)
   const reviewData = reviewQuery.data
 
   const pns    = detail?.pns
@@ -144,6 +144,12 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
           {detail?.coupang?.price != null && (
             <span className="det-price">₩{detail.coupang.price.toLocaleString('ko-KR')}</span>
           )}
+          {reviewQuery.data && reviewQuery.data.total > 0 && (
+            <div className="det-info-rating-row">
+              <StarRow score={reviewQuery.data.avgScoreOverall} size={22} filledColor="#525760" />
+              <span className="det-info-rating-num">{reviewQuery.data.avgScoreOverall.toFixed(1)}</span>
+            </div>
+          )}
         </div>
 
         {/* 영양점수 카드 */}
@@ -204,6 +210,45 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
         {/* 영양성분 탭 */}
         {tab === 'nutrition' && (
           <section className="det-nutrition" aria-label="영양 성분">
+            {detail?.nutrients && (() => {
+              const { carbohydrate = 0, fat = 0, protein = 0 } = detail.nutrients
+              const carbCal  = Math.round(carbohydrate * 4)
+              const fatCal   = Math.round(fat * 9)
+              const proteinCal = Math.round(protein * 4)
+              const segs = [
+                { label: '탄수화물', cal: carbCal,    color: '#A1A9B1' },
+                { label: '지방',     cal: fatCal,     color: '#777F8A' },
+                { label: '단백질',   cal: proteinCal, color: '#111'    },
+              ]
+              return (
+                <div className="det-cal-section">
+                  <div className="det-cal-kcal-row">
+                    {segs.map(({ cal }, i) => (
+                      <div key={i} className="det-cal-kcal-col" style={{ flex: cal || 1 }}>
+                        <span className="det-cal-num">{cal}</span>
+                        <span className="det-cal-kunit">kcal</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="det-cal-bar">
+                    {segs.map(({ cal, color }, i) => (
+                      <div
+                        key={i}
+                        style={{ flex: cal || 1, background: color }}
+                        className={`det-cal-seg${i === 0 ? ' det-cal-seg--first' : i === segs.length - 1 ? ' det-cal-seg--last' : ''}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="det-cal-name-row">
+                    {segs.map(({ label, cal }, i) => (
+                      <div key={i} className="det-cal-name-col" style={{ flex: cal || 1 }}>
+                        <span className="det-cal-name-text">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
             {detail?.nutrients?.servingSize != null && (
               <p className="det-nut-serving">1회 제공량 {detail.nutrients.servingSize}g 기준</p>
             )}
