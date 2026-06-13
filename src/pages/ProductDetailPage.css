@@ -29,12 +29,6 @@
   padding: 14px 16px;
 }
 
-.det-header-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .det-icon-btn {
   width: 36px;
   height: 36px;
@@ -55,8 +49,8 @@
 /* ── 상품 이미지 ────────────────────────────────── */
 .det-img-wrap {
   width: 100%;
-  height: 280px;
-  background: #dcdcdc;
+  height: 302px;
+  background: #f2f3f5;
   overflow: hidden;
 }
 
@@ -69,7 +63,7 @@
 .det-img--placeholder {
   width: 100%;
   height: 100%;
-  background: #e0e0e0;
+  background: #f2f3f5;
 }
 
 /* ── 본문 카드 ──────────────────────────────────── */
@@ -80,7 +74,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding-bottom: 32px;
+  padding-bottom: 0;
 }
 
 /* ── 상품 정보 ─────────────────────────────────── */
@@ -91,12 +85,31 @@
   gap: 6px;
 }
 
+.det-info-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .det-brand {
   font-size: 12px;
-  color: #8a8a8e;
+  color: #A1A9B1;
   font-weight: 500;
   letter-spacing: -0.01em;
 }
+
+.det-share-btn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.det-share-btn svg { width: 20px; height: 20px; }
 
 .det-name {
   margin: 0;
@@ -105,27 +118,6 @@
   color: #1f1f22;
   line-height: 1.35;
   letter-spacing: -0.02em;
-}
-
-.det-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.det-grade-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.02em;
 }
 
 .det-price {
@@ -138,7 +130,7 @@
 /* ── 영양점수 카드 ──────────────────────────────── */
 .det-score-card {
   margin: 16px 16px 0;
-  background: #f5f6f8;
+  background: #f2f3f5;
   border-radius: 16px;
   padding: 20px 20px;
   display: flex;
@@ -155,6 +147,18 @@
   min-width: 0;
 }
 
+.det-score-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.det-score-trophy {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .det-score-title {
   font-size: 14px;
   font-weight: 700;
@@ -162,35 +166,19 @@
   letter-spacing: -0.01em;
 }
 
-.det-score-grade {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  min-width: 36px;
-  height: 26px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 2px solid;
-  font-size: 14px;
-  font-weight: 800;
-  background: transparent;
-  letter-spacing: 0.02em;
-}
-
 .det-score-pct {
   margin: 0;
-  font-size: 22px;
-  font-weight: 800;
-  color: #111;
-  letter-spacing: -0.03em;
-  line-height: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #777F8A;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
 }
 
 .det-score-total {
   margin: 0;
   font-size: 12px;
-  color: #8a8a8e;
+  color: #A1A9B1;
   letter-spacing: -0.01em;
 }
 
@@ -220,7 +208,7 @@
 .det-score-num {
   font-size: 18px;
   font-weight: 800;
-  color: #111;
+  color: #525760;
   letter-spacing: -0.03em;
   line-height: 1;
 }
@@ -232,37 +220,11 @@
   letter-spacing: -0.01em;
 }
 
-/* ── 쿠팡 버튼 ─────────────────────────────────── */
-.det-coupang-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 16px 16px 0;
-  width: calc(100% - 32px);
-  height: 52px;
-  background: #1a1a1a;
-  color: #fff;
-  border: 0;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  text-decoration: none;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
-.det-coupang-btn:not(:disabled):hover { background: #333; }
-.det-coupang-btn:disabled {
-  background: #c0c0c5;
-  cursor: not-allowed;
-}
-
 /* ── 탭 바 ─────────────────────────────────────── */
 .det-tabs {
   display: flex;
   margin-top: 20px;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid #E8EAEC;
   flex-shrink: 0;
 }
 
@@ -271,10 +233,10 @@
   height: 44px;
   background: transparent;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: 2px solid #E8EAEC;
   font-size: 14px;
   font-weight: 600;
-  color: #b0b0b3;
+  color: #A1A9B1;
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
@@ -283,18 +245,18 @@
 .det-tab.active {
   color: #111;
   border-bottom-color: #111;
+  border-bottom-width: 2px;
 }
 
 /* ── 영양성분 탭 ─────────────────────────────────── */
 .det-nutrition {
-  padding: 20px 20px 0;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
 .det-nut-serving {
-  margin: 0 0 16px;
+  margin: 12px 22px 4px;
   font-size: 12px;
   color: #8a8a8e;
   letter-spacing: -0.01em;
@@ -302,56 +264,134 @@
 
 .det-nut-row {
   display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 14px 0;
-  border-bottom: 1px solid #f3f3f5;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 0 22px;
+  height: 86px;
+  border-bottom: 1px solid #F3F3F5;
+  flex-shrink: 0;
 }
 .det-nut-row:last-child { border-bottom: 0; }
 
-.det-nut-row-top {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
+.det-nut-circle {
+  width: 36px;
+  height: 36px;
+  background: #F2F3F5;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
 }
 
-.det-nut-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f1f22;
+.det-nut-circle-char {
+  font-size: 11px;
+  font-weight: 700;
+  color: #777F8A;
   letter-spacing: -0.01em;
+}
+
+.det-nut-body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
-.det-nut-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111;
-  letter-spacing: -0.01em;
+.det-nut-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.det-nut-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #D9DCE0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.det-nut-bar-fill {
+  height: 100%;
+  background: #777F8A;
+  border-radius: 4px;
+  transition: width 0.4s ease;
 }
 
 .det-nut-pct {
   font-size: 12px;
   font-weight: 500;
-  color: #8a8a8e;
-  letter-spacing: -0.01em;
-  min-width: 36px;
+  color: #A1A9B1;
+  min-width: 40px;
   text-align: right;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
 }
 
-.det-nut-bar-wrap {
-  height: 5px;
-  background: #ececec;
-  border-radius: 999px;
-  overflow: hidden;
+.det-nut-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.det-nut-bar {
-  height: 100%;
+.det-nut-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #A1A9B1;
+  letter-spacing: -0.01em;
+}
+
+.det-nut-value {
+  font-size: 12px;
+  color: #A1A9B1;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* ── 파트너스 고지 ────────────────────────────── */
+.det-partners-notice {
+  background: #F2F3F5;
+  padding: 18px 24px;
+  margin-top: 8px;
+}
+
+.det-partners-text {
+  margin: 0;
+  font-size: 11px;
+  color: #A1A9B1;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+/* ── 쿠팡 버튼 바 (페이지 하단) ─────────────────── */
+.det-coupang-bar {
+  padding: 16px 24px 32px;
+  border-top: 1px solid #E8EAEC;
+  margin-top: 8px;
+  background: #fff;
+}
+
+.det-coupang-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52px;
   background: #525760;
-  border-radius: 999px;
-  transition: width 0.4s ease;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
 }
+.det-coupang-btn:hover { background: #3e454e; }
 
 /* ── 리뷰 탭 ────────────────────────────────────── */
 .det-review {

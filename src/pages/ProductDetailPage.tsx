@@ -28,6 +28,18 @@ const NUTRITION_DEFS: { key: keyof NutrientsResponse; label: string; unit: strin
   { key: 'sodium',       label: '나트륨',    unit: 'mg',   max: 2000 },
 ]
 
+const NUTRIENT_CHAR: Record<string, string> = {
+  calories:     '열',
+  carbohydrate: '탄',
+  sugar:        '당',
+  protein:      '단',
+  fat:          '지',
+  saturatedFat: '포',
+  transFat:     '트',
+  cholesterol:  '콜',
+  sodium:       '나',
+}
+
 function formatDate(iso: string): string {
   const d = new Date(iso)
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
@@ -48,17 +60,6 @@ function StarRow({ score, size = 14 }: { score: number; size?: number }) {
   )
 }
 
-function gradeColor(grade: string): string {
-  switch (grade[0]?.toUpperCase()) {
-    case 'A': return '#10b981'
-    case 'B': return '#3b82f6'
-    case 'C': return '#f59e0b'
-    case 'D': return '#f97316'
-    case 'E': return '#ef4444'
-    default:  return '#8a8a8e'
-  }
-}
-
 const RING_R = 30
 const RING_CIRC = 2 * Math.PI * RING_R
 
@@ -75,8 +76,6 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
   const reviewData = reviewQuery.data
 
   const pns    = detail?.pns
-  const grade  = pns?.grade ?? detail?.grade ?? '-'
-  const color  = gradeColor(grade)
   const score  = pns?.score ?? 0
   const dashOff = RING_CIRC * (1 - Math.min(score / 10, 1))
 
@@ -96,35 +95,19 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="#fff"/>
             </svg>
           </button>
-          <div className="det-header-right">
-            <button
-              type="button"
-              className="det-icon-btn"
-              aria-label="공유"
-              onClick={() => navigator.share?.({ title: product.name })}
-            >
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="18" cy="5"  r="3" stroke="#fff" strokeWidth="1.8"/>
-                <circle cx="6"  cy="12" r="3" stroke="#fff" strokeWidth="1.8"/>
-                <circle cx="18" cy="19" r="3" stroke="#fff" strokeWidth="1.8"/>
-                <line x1="8.59"  y1="13.51" x2="15.42" y2="17.49" stroke="#fff" strokeWidth="1.8"/>
-                <line x1="15.41" y1="6.51"  x2="8.59"  y2="10.49" stroke="#fff" strokeWidth="1.8"/>
-              </svg>
-            </button>
-            <button
-              type="button"
-              className={`det-icon-btn${faved ? ' det-fav-on' : ''}`}
-              aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-              onClick={handleFav}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                {faved
-                  ? <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ea4335"/>
-                  : <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z" fill="#fff"/>
-                }
-              </svg>
-            </button>
-          </div>
+          <button
+            type="button"
+            className={`det-icon-btn${faved ? ' det-fav-on' : ''}`}
+            aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+            onClick={handleFav}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              {faved
+                ? <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ea4335"/>
+                : <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z" fill="#fff"/>
+              }
+            </svg>
+          </button>
         </header>
 
         <div className="det-img-wrap">
@@ -140,21 +123,38 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
 
         {/* 상품 정보 */}
         <div className="det-info">
-          <span className="det-brand">{detail?.brand?.name ?? product.brand.name}</span>
-          <h1 className="det-name">{product.name}</h1>
-          <div className="det-meta-row">
-            <span className="det-grade-chip" style={{ background: color }}>{grade}</span>
-            {detail?.coupang?.price != null && (
-              <span className="det-price">₩{detail.coupang.price.toLocaleString('ko-KR')}</span>
-            )}
+          <div className="det-info-brand-row">
+            <span className="det-brand">{detail?.brand?.name ?? product.brand.name}</span>
+            <button
+              type="button"
+              className="det-share-btn"
+              aria-label="공유"
+              onClick={() => navigator.share?.({ title: product.name })}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="18" cy="5"  r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <circle cx="6"  cy="12" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <circle cx="18" cy="19" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <line x1="8.59"  y1="13.51" x2="15.42" y2="17.49" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <line x1="15.41" y1="6.51"  x2="8.59"  y2="10.49" stroke="#8a8a8e" strokeWidth="1.8"/>
+              </svg>
+            </button>
           </div>
+          <h1 className="det-name">{product.name}</h1>
+          {detail?.coupang?.price != null && (
+            <span className="det-price">₩{detail.coupang.price.toLocaleString('ko-KR')}</span>
+          )}
         </div>
 
         {/* 영양점수 카드 */}
         <div className="det-score-card">
           <div className="det-score-left">
-            <span className="det-score-title">영양점수</span>
-            <span className="det-score-grade" style={{ color, borderColor: color }}>{grade}</span>
+            <div className="det-score-title-row">
+              <svg className="det-score-trophy" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M4.164 16.666V15H15.83v1.666H4.164ZM4.164 13.748L3.101 7.062a1.25 1.25 0 0 1-.976-.478 1.25 1.25 0 0 1 0-1.536A1.25 1.25 0 0 1 3.101 4.5a1.25 1.25 0 0 1 1.062.548l2.604 1.166 3.27-3.562 3.27 3.562 2.605-1.166a1.25 1.25 0 0 1 1.061-.548 1.25 1.25 0 0 1 .977.478 1.25 1.25 0 0 1 0 1.536 1.25 1.25 0 0 1-.977.478L15.83 13.748H4.164ZM5.58 12.082h8.414l.545-3.479-2.167.958L10 6.248l-2.372 3.313-2.167-.958.52 3.479Z" fill="black"/>
+              </svg>
+              <span className="det-score-title">영양점수</span>
+            </div>
             {pns != null && (
               <>
                 <p className="det-score-pct">상위 {pns.topPercent}%</p>
@@ -164,11 +164,11 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
           </div>
           <div className="det-score-ring-wrap">
             <svg viewBox="0 0 72 72" className="det-score-ring-svg" aria-hidden="true">
-              <circle cx="36" cy="36" r={RING_R} fill="none" stroke="#e8e8e8" strokeWidth="6"/>
+              <circle cx="36" cy="36" r={RING_R} fill="none" stroke="#D9DCE0" strokeWidth="6"/>
               <circle
                 cx="36" cy="36" r={RING_R}
                 fill="none"
-                stroke={color}
+                stroke="#777F8A"
                 strokeWidth="6"
                 strokeLinecap="round"
                 strokeDasharray={RING_CIRC}
@@ -182,12 +182,6 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
             </div>
           </div>
         </div>
-
-        {/* 쿠팡 구매 버튼 */}
-        {detail?.coupang?.affiliateUrl
-          ? <a href={detail.coupang.affiliateUrl} target="_blank" rel="noopener noreferrer" className="det-coupang-btn">쿠팡에서 구매하기</a>
-          : <button type="button" className="det-coupang-btn" disabled>쿠팡에서 구매하기</button>
-        }
 
         {/* 탭 */}
         <div className="det-tabs" role="tablist">
@@ -218,13 +212,20 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               const pct = Math.min(100, (val / max) * 100)
               return (
                 <div key={key} className="det-nut-row">
-                  <div className="det-nut-row-top">
-                    <span className="det-nut-label">{label}</span>
-                    <span className="det-nut-value">{val}{unit}</span>
-                    <span className="det-nut-pct">{Math.round(pct)}%</span>
+                  <div className="det-nut-circle">
+                    <span className="det-nut-circle-char">{NUTRIENT_CHAR[key]}</span>
                   </div>
-                  <div className="det-nut-bar-wrap">
-                    <div className="det-nut-bar" style={{ width: `${pct}%` }} />
+                  <div className="det-nut-body">
+                    <div className="det-nut-bar-row">
+                      <div className="det-nut-bar-track">
+                        <div className="det-nut-bar-fill" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="det-nut-pct">{Math.round(pct)}%</span>
+                    </div>
+                    <div className="det-nut-meta">
+                      <span className="det-nut-label">{label}</span>
+                      <span className="det-nut-value">{val}{unit}</span>
+                    </div>
                   </div>
                 </div>
               )
@@ -279,6 +280,27 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               </div>
             )}
           </div>
+        )}
+
+        {/* 파트너스 문구 + 쿠팡 구매 버튼 — 페이지 하단 */}
+        {detail?.coupang?.affiliateUrl && (
+          <>
+            <div className="det-partners-notice">
+              <p className="det-partners-text">
+                이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+              </p>
+            </div>
+            <div className="det-coupang-bar">
+              <a
+                href={detail.coupang.affiliateUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="det-coupang-btn"
+              >
+                쿠팡에서 구매하기
+              </a>
+            </div>
+          </>
         )}
 
       </div>
