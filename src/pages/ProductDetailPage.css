@@ -330,8 +330,8 @@
 }
 
 .det-cal-seg--carb    { background: #A1A9B1; }
-.det-cal-seg--fat     { background: #777F8A; }
-.det-cal-seg--protein { background: #111; }
+.det-cal-seg--protein { background: #777F8A; }
+.det-cal-seg--fat     { background: #111; }
 
 .det-cal-name-row {
   display: flex;

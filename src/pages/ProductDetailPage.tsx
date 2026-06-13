@@ -217,34 +217,37 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               const proteinCal = Math.round((detail?.nutrients?.protein ?? 0) * 4)
               const totalMacro = carbCal + fatCal + proteinCal
               const pct = (cal: number) => totalMacro > 0 ? Math.round((cal / totalMacro) * 100) : 0
+              const carbG    = detail?.nutrients?.carbohydrate ?? 0
+              const proteinG = detail?.nutrients?.protein ?? 0
+              const fatG     = detail?.nutrients?.fat ?? 0
               return (
                 <div className="det-cal-section">
                   <div className="det-cal-top">
-                    <span className="det-cal-total-num">{totalCal}</span>
+                    <span className="det-cal-total-num">총 {totalCal}</span>
                     <span className="det-cal-total-unit">kcal</span>
                     <span className="det-cal-macro-list">
-                      <span className="det-cal-macro">탄 {carbCal}kcal</span>
+                      <span className="det-cal-macro">탄 {carbG}g</span>
                       <span className="det-cal-dot">·</span>
-                      <span className="det-cal-macro">지 {fatCal}kcal</span>
+                      <span className="det-cal-macro">단 {proteinG}g</span>
                       <span className="det-cal-dot">·</span>
-                      <span className="det-cal-macro">단 {proteinCal}kcal</span>
+                      <span className="det-cal-macro">지 {fatG}g</span>
                     </span>
                   </div>
                   <div className="det-cal-bar">
                     <div className="det-cal-seg det-cal-seg--carb" />
-                    <div className="det-cal-seg det-cal-seg--fat" />
                     <div className="det-cal-seg det-cal-seg--protein" />
+                    <div className="det-cal-seg det-cal-seg--fat" />
                   </div>
                   <div className="det-cal-name-row">
                     <span className="det-cal-name-text">탄 {pct(carbCal)}%</span>
-                    <span className="det-cal-name-text">지 {pct(fatCal)}%</span>
                     <span className="det-cal-name-text">단 {pct(proteinCal)}%</span>
+                    <span className="det-cal-name-text">지 {pct(fatCal)}%</span>
                   </div>
                 </div>
               )
             })()}
             {detail?.nutrients?.servingSize != null && (
-              <p className="det-nut-serving">1회 제공량 {detail.nutrients.servingSize}g 기준</p>
+              <p className="det-nut-serving">1회 제공량 {detail.nutrients.servingSize} 기준</p>
             )}
             {NUTRITION_DEFS.map(({ key, label, unit, max }) => {
               const val = detail?.nutrients?.[key] ?? 0
