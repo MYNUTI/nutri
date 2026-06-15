@@ -75,7 +75,6 @@ export const HomePage = ({
 
   const { toggle, isFavorite } = useFavorites()
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
 
@@ -108,15 +107,18 @@ export const HomePage = ({
   const products = (data?.pages.flatMap(p => p.items) ?? []).filter(p => !!p.imageUrl)
 
   useEffect(() => {
-    const el = sentinelRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting && hasNextPage) fetchNextPage() },
-      { root: scrollContainerRef.current, threshold: 0.1 },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [fetchNextPage, hasNextPage])
+    const container = scrollContainerRef.current
+    if (!container || !hasNextPage || isFetchingNextPage) return
+
+    const handleScroll = () => {
+      const { scrollTop, clientHeight, scrollHeight } = container
+      if (scrollHeight - scrollTop - clientHeight < 300) fetchNextPage()
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
   const handleCatSelect = (id: number) => {
     onCategoryChange(selectedCategoryIds[0] === id ? [] : [id])
@@ -421,7 +423,6 @@ export const HomePage = ({
           })}
         </section>
 
-        <div ref={sentinelRef} style={{ height: 1 }} />
         {isFetchingNextPage && (
           <p style={{ textAlign: 'center', color: '#888', padding: '1rem' }}>불러오는 중...</p>
         )}
