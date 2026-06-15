@@ -76,6 +76,7 @@ export const HomePage = ({
   const { toggle, isFavorite } = useFavorites()
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -111,7 +112,7 @@ export const HomePage = ({
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting && hasNextPage) fetchNextPage() },
-      { threshold: 0.1 },
+      { root: scrollContainerRef.current, threshold: 0.1 },
     )
     observer.observe(el)
     return () => observer.disconnect()
@@ -135,7 +136,7 @@ export const HomePage = ({
   return (
     <div
       className={`home-page${catOpen ? ' home-page--catopen' : ''}`}
-
+      ref={scrollContainerRef}
     >
       <header className="home-header">
         <button
