@@ -130,20 +130,39 @@ function AppShell() {
   // 목표 위치에 도달할 때까지 몇 프레임 동안 즉시 강제 고정한다.
   useLayoutEffect(() => {
     const target = route === 'detail' ? 0 : (scrollPositions.current[route] ?? 0)
-    console.log('[restore] route=', route, 'target=', target, 'saved=', JSON.stringify(scrollPositions.current), 'docHeight=', document.documentElement.scrollHeight, 'winH=', window.innerHeight)
     let raf = 0
-    let tries = 0
+    let cancelled = false
+    let frames = 0
+    // 사용자가 직접 스크롤하면 강제 고정 중단
+    const abort = () => { cancelled = true }
+    if (target > 0) {
+      window.addEventListener('wheel', abort, { passive: true })
+      window.addEventListener('touchstart', abort, { passive: true })
+      window.addEventListener('keydown', abort)
+    }
+    // ~650ms(40프레임) 동안 목표 위치로 계속 고정 → 이미지 로드/리페치로 인한
+    // 뒤늦은 스크롤 리셋(리플로우)까지 덮어씀
     const apply = () => {
-      window.scrollTo(0, target)
-      tries += 1
-      if (Math.abs(window.scrollY - target) > 2 && tries < 20) {
-        raf = requestAnimationFrame(apply)
-      } else {
-        console.log('[restore done] route=', route, 'target=', target, 'final scrollY=', window.scrollY, 'tries=', tries)
-      }
+      if (cancelled) return
+      if (Math.abs(window.scrollY - target) > 2) window.scrollTo(0, target)
+      frames += 1
+      if (frames < 40) raf = requestAnimationFrame(apply)
     }
     apply()
-    return () => cancelAnimationFrame(raf)
+    // 진단: 복원 후 1.5초간 스크롤이 언제 되돌려지는지 추적
+    const t0 = performance.now()
+    const onDiag = () => console.log('[scroll-after-restore] y=', Math.round(window.scrollY), 'dt=', Math.round(performance.now() - t0), 'cancelled=', cancelled)
+    if (target > 0) window.addEventListener('scroll', onDiag, { passive: true })
+    const stopDiag = window.setTimeout(() => window.removeEventListener('scroll', onDiag), 1500)
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(raf)
+      clearTimeout(stopDiag)
+      window.removeEventListener('wheel', abort)
+      window.removeEventListener('touchstart', abort)
+      window.removeEventListener('keydown', abort)
+      window.removeEventListener('scroll', onDiag)
+    }
   }, [route])
 
   const navigate = (r: RouteKey) => {
