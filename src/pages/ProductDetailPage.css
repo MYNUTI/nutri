@@ -7,8 +7,6 @@
   overflow: hidden;
   gap: 0;
   margin: -14px;
-  /* 하단은 프레임의 safe-area 패딩까지 상쇄해 버튼 바가 화면 끝까지 닿게 함 */
-  margin-bottom: calc(-14px - env(safe-area-inset-bottom, 0px));
   border-radius: 14px;
 }
 
@@ -477,8 +475,7 @@
 /* ── 쿠팡 버튼 바 (화면 하단 고정) ─────────────────── */
 .det-coupang-bar {
   flex-shrink: 0;
-  /* 버튼 아래 기준 간격 20px + 모바일 홈 인디케이터 영역(safe-area) 흡수 */
-  padding: 16px 24px calc(20px + env(safe-area-inset-bottom, 0px));
+  padding: 16px 24px 20px;
   border-top: 1px solid #E8EAEC;
   background: #fff;
 }
