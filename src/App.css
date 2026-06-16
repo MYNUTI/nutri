@@ -484,12 +484,6 @@
 }
 
 .social-btn--google {
-  background: #fff;
-  border: 1px solid #d5d5d5;
-  color: #333;
-}
-
-.social-btn--apple {
   background: #000;
   border: none;
   color: #fff;
