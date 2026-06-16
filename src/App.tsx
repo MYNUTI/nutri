@@ -125,13 +125,6 @@ function AppShell() {
   // 문서 스크롤 구조: 라우트별 스크롤 위치 저장 → 뒤로 돌아올 때 복원
   const scrollPositions = useRef<Record<string, number>>({})
 
-  // 현재 라우트의 스크롤 위치를 계속 기록
-  useEffect(() => {
-    const onScroll = () => { scrollPositions.current[route] = window.scrollY }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [route])
-
   // 라우트 전환 시: 상세는 항상 맨 위, 그 외 페이지는 직전 위치 복원.
   // 콘텐츠 높이 확정 지연 / Safari의 스크롤 보정 애니메이션을 덮어쓰기 위해
   // 목표 위치에 도달할 때까지 몇 프레임 동안 즉시 강제 고정한다.
@@ -150,7 +143,12 @@ function AppShell() {
     return () => cancelAnimationFrame(raf)
   }, [route])
 
-  const navigate = (r: RouteKey) => { setRoute(r); setHashRoute(r) }
+  const navigate = (r: RouteKey) => {
+    // 떠나는 페이지의 현재 스크롤 위치 저장 (뒤로 돌아올 때 복원용)
+    scrollPositions.current[route] = window.scrollY
+    setRoute(r)
+    setHashRoute(r)
+  }
 
   const handleLogin = (nextAdmin = false) => {
     setIsAuthenticated(true)
@@ -198,7 +196,7 @@ function AppShell() {
             onMoveToFilter={() => setShowFilter(true)}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
-            onGoHome={() => { scrollPositions.current.home = 0; setHomeKeyword(''); setFilterCategoryIds([]); setFilterBrandIds([]); setFilterNutrients([]); navigate('home'); window.scrollTo({ top: 0 }) }}
+            onGoHome={() => { setHomeKeyword(''); setFilterCategoryIds([]); setFilterBrandIds([]); setFilterNutrients([]); navigate('home'); scrollPositions.current.home = 0; window.scrollTo({ top: 0 }) }}
             onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
             onAddToCompare={handleAddToCompare}
             isAuthenticated={isAuthenticated}
