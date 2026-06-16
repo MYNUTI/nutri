@@ -107,8 +107,8 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
         </header>
 
         <div className="det-img-wrap">
-          {product.image
-            ? <img className="det-img" src={product.image} alt={product.name} />
+          {(detail?.imageUrl ?? product.image)
+            ? <img className="det-img" src={detail?.imageUrl ?? product.image} alt={detail?.name ?? product.name} />
             : <div className="det-img det-img--placeholder" />
           }
         </div>
@@ -125,7 +125,12 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               type="button"
               className="det-share-btn"
               aria-label="공유"
-              onClick={() => navigator.share?.({ title: product.name })}
+              onClick={() => {
+                const url = window.location.href
+                const title = detail?.name ?? product.name
+                if (navigator.share) navigator.share({ title, url }).catch(() => {})
+                else navigator.clipboard?.writeText(url).then(() => alert('링크가 복사되었어요')).catch(() => {})
+              }}
             >
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle cx="18" cy="5"  r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
@@ -136,7 +141,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               </svg>
             </button>
           </div>
-          <h1 className="det-name">{product.name}</h1>
+          <h1 className="det-name">{detail?.name ?? product.name}</h1>
           {detail?.coupang?.price != null && (
             <span className="det-price">₩{detail.coupang.price.toLocaleString('ko-KR')}</span>
           )}

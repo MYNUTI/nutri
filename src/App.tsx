@@ -45,11 +45,29 @@ const validRoutes = new Set<RouteKey>([
 ])
 
 const getRouteFromHash = (): RouteKey => {
-  const hash = window.location.hash.replace('#', '') as RouteKey
-  return validRoutes.has(hash) ? hash : 'home'
+  const base = window.location.hash.replace('#', '').split('/')[0] as RouteKey
+  return validRoutes.has(base) ? base : 'home'
 }
 
-const setHashRoute = (route: RouteKey) => { window.location.hash = route }
+// 상세페이지 딥링크용: #detail/{id} 형태에서 상품 ID 추출
+const getProductIdFromHash = (): number | null => {
+  const parts = window.location.hash.replace('#', '').split('/')
+  if (parts[0] === 'detail' && parts[1]) {
+    const id = Number(parts[1])
+    return Number.isFinite(id) ? id : null
+  }
+  return null
+}
+
+const setHashRoute = (route: RouteKey, productId?: number) => {
+  window.location.hash = route === 'detail' && productId != null ? `detail/${productId}` : route
+}
+
+// 딥링크 진입 시 ID만 가진 임시 Product (상세 쿼리가 나머지를 채움)
+const makeProductFromId = (id: number): Product => ({
+  id, name: '', brand: { id: 0, name: '' }, image: '',
+  nutritionScore: 0, category: { id: 0, name: '' }, favorited: false,
+})
 
 function AppShell() {
   const [route, setRoute] = useState<RouteKey>(() => getRouteFromHash())
@@ -62,7 +80,9 @@ function AppShell() {
   const [filterCategoryIds, setFilterCategoryIds] = useState<number[]>([])
   const [filterBrandIds, setFilterBrandIds] = useState<number[]>([])
   const [filterNutrients, setFilterNutrients] = useState<string[]>([])
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(
+    () => { const pid = getProductIdFromHash(); return pid != null ? makeProductFromId(pid) : null },
+  )
   const [compareProducts, setCompareProducts] = useState<Product[]>([])
   // 신규 OAuth 회원가입 진행 중일 때 임시 보관 (provider, oauthId, email)
   const [oauthPending, setOauthPending] = useState<{ provider: string; oauthId: string; email?: string } | null>(null)
@@ -104,7 +124,14 @@ function AppShell() {
   }, [])
 
   useEffect(() => {
-    const handleHashChange = () => setRoute(getRouteFromHash())
+    // 해시가 #detail/{id}이면 그 상품을 로드 (딥링크/공유 링크 진입)
+    const resolveProductFromHash = () => {
+      if (getRouteFromHash() === 'detail') {
+        const pid = getProductIdFromHash()
+        if (pid != null) setSelectedProduct(prev => (prev?.id === pid ? prev : makeProductFromId(pid)))
+      }
+    }
+    const handleHashChange = () => { setRoute(getRouteFromHash()); resolveProductFromHash() }
     if (!window.location.hash) setHashRoute('home')
     window.addEventListener('hashchange', handleHashChange)
     return () => window.removeEventListener('hashchange', handleHashChange)
@@ -158,11 +185,11 @@ function AppShell() {
     }
   }, [route])
 
-  const navigate = (r: RouteKey) => {
+  const navigate = (r: RouteKey, productId?: number) => {
     // 떠나는 페이지의 현재 스크롤 위치 저장 (뒤로 돌아올 때 복원용)
     scrollPositions.current[route] = window.scrollY
     setRoute(r)
-    setHashRoute(r)
+    setHashRoute(r, productId)
   }
 
   const handleLogin = (nextAdmin = false) => {
@@ -212,7 +239,7 @@ function AppShell() {
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
             onGoHome={() => { setHomeKeyword(''); setFilterCategoryIds([]); setFilterBrandIds([]); setFilterNutrients([]); navigate('home'); scrollPositions.current.home = 0; window.scrollTo({ top: 0 }) }}
-            onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
+            onProductClick={product => { setSelectedProduct(product); navigate('detail', product.id) }}
             onAddToCompare={handleAddToCompare}
             isAuthenticated={isAuthenticated}
             onNeedLogin={() => navigate('login')}
@@ -232,7 +259,7 @@ function AppShell() {
           <SearchPage
             onBack={() => navigate('home')}
             onSubmitKeyword={(kw) => { scrollPositions.current.home = 0; setHomeKeyword(kw); navigate('home') }}
-            onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
+            onProductClick={product => { setSelectedProduct(product); navigate('detail', product.id) }}
           />
         )
       case 'mypage':
@@ -258,7 +285,7 @@ function AppShell() {
         return (
           <FavoritesPage
             onBack={() => navigate('mypage')}
-            onProductClick={product => { setSelectedProduct(product); navigate('detail') }}
+            onProductClick={product => { setSelectedProduct(product); navigate('detail', product.id) }}
           />
         )
       case 'password-change':
