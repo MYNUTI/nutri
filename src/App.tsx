@@ -86,6 +86,11 @@ function AppShell() {
   const [compareProducts, setCompareProducts] = useState<Product[]>([])
   // 신규 OAuth 회원가입 진행 중일 때 임시 보관 (provider, oauthId, email)
   const [oauthPending, setOauthPending] = useState<{ provider: string; oauthId: string; email?: string } | null>(null)
+  // 소셜 로그인 콜백 처리 중에는 홈이 깜빡이지 않도록 스플래시 표시
+  const [oauthProcessing, setOauthProcessing] = useState(() => {
+    const p = new URLSearchParams(window.location.search)
+    return !!(p.get('code') && p.get('provider'))
+  })
 
   const { setFavoriteIds } = useFavorites()
 
@@ -117,8 +122,10 @@ function AppShell() {
         setIsAuthenticated(true)
         navigate('home')
       }
+      setOauthProcessing(false)
     }).catch(() => {
       navigate('login')
+      setOauthProcessing(false)
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -373,6 +380,12 @@ function AppShell() {
             />
           )}
           <section className="page-body">{currentPage}</section>
+          {oauthProcessing && (
+            <div className="oauth-splash" role="status" aria-live="polite">
+              <span className="oauth-splash-spinner" aria-hidden="true" />
+              <span className="oauth-splash-text">로그인 중...</span>
+            </div>
+          )}
         </section>
       </main>
   )

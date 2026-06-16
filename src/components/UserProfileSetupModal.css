@@ -1,7 +1,12 @@
 /* ── 전체 모달 (phone frame을 덮음) ─────────────────────── */
 .ups-root {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
   border-radius: 14px;
   background: #fff;
   z-index: 200;
