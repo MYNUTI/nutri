@@ -87,6 +87,9 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
   return (
     <div className="det-page">
 
+      {/* 스크롤 영역 (히어로 + 본문) */}
+      <div className="det-scroll">
+
       {/* 히어로: 이미지 + 헤더 오버레이 */}
       <div className="det-hero">
         <header className="det-header">
@@ -324,28 +327,31 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
           </div>
         )}
 
-        {/* 파트너스 문구 + 쿠팡 구매 버튼 — 페이지 하단 */}
+        {/* 파트너스 고지 — 스크롤 콘텐츠 맨 끝(자연 푸터) */}
         {detail?.coupang?.affiliateUrl && (
-          <>
-            <div className="det-partners-notice">
-              <p className="det-partners-text">
-                이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
-              </p>
-            </div>
-            <div className="det-coupang-bar">
-              <a
-                href={detail.coupang.affiliateUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="det-coupang-btn"
-              >
-                쿠팡 바로가기
-              </a>
-            </div>
-          </>
+          <div className="det-partners-notice">
+            <p className="det-partners-text">
+              이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+            </p>
+          </div>
         )}
 
       </div>
+      </div>
+
+      {/* 쿠팡 구매 버튼 — 화면 하단 고정 */}
+      {detail?.coupang?.affiliateUrl && (
+        <div className="det-coupang-bar">
+          <a
+            href={detail.coupang.affiliateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="det-coupang-btn"
+          >
+            쿠팡 바로가기
+          </a>
+        </div>
+      )}
 
       {showLoginPrompt && (
         <LoginPromptModal

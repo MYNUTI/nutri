@@ -4,11 +4,20 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   gap: 0;
   margin: -14px;
   border-radius: 14px;
+}
+
+/* 스크롤 영역 (히어로 + 본문) — 하단 고정 바를 제외한 부분 */
+.det-scroll {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* ── 히어로 (이미지 + 헤더 오버레이) ────────────────── */
@@ -463,11 +472,11 @@
   text-align: center;
 }
 
-/* ── 쿠팡 버튼 바 (페이지 하단) ─────────────────── */
+/* ── 쿠팡 버튼 바 (화면 하단 고정) ─────────────────── */
 .det-coupang-bar {
+  flex-shrink: 0;
   padding: 16px 24px 32px;
   border-top: 1px solid #E8EAEC;
-  margin-top: 8px;
   background: #fff;
 }
 
