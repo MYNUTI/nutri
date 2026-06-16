@@ -61,12 +61,6 @@ const GoogleIcon = () => (
   </svg>
 )
 
-const AppleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.39c1.31.07 2.22.74 2.98.8 1.12-.21 2.2-.9 3.39-.84 1.44.07 2.52.6 3.22 1.52-2.95 1.78-2.25 5.7.5 6.8-.57 1.56-1.32 3.1-2.09 4.61zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-  </svg>
-)
-
 export const LoginPage = ({ onLogin: _onLogin }: LoginPageProps) => (
   <section className="login-page">
     <div className="login-top">
@@ -89,10 +83,6 @@ export const LoginPage = ({ onLogin: _onLogin }: LoginPageProps) => (
         <button type="button" className="social-btn social-btn--google" onClick={() => { window.location.href = buildOAuthUrl('GOOGLE') }}>
           <GoogleIcon />
           <span>구글로 로그인</span>
-        </button>
-        <button type="button" className="social-btn social-btn--apple" onClick={() => { window.location.href = buildOAuthUrl('APPLE') }}>
-          <AppleIcon />
-          <span>Apple로 로그인</span>
         </button>
       </div>
     </div>
