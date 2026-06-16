@@ -107,17 +107,18 @@ export const HomePage = ({
   const products = (data?.pages.flatMap(p => p.items) ?? []).filter(p => !!p.imageUrl)
 
   useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container || !hasNextPage || isFetchingNextPage) return
+    if (!hasNextPage || isFetchingNextPage) return
 
     const handleScroll = () => {
-      const { scrollTop, clientHeight, scrollHeight } = container
+      const scrollTop = window.scrollY
+      const clientHeight = window.innerHeight
+      const scrollHeight = document.documentElement.scrollHeight
       if (scrollHeight - scrollTop - clientHeight < 300) fetchNextPage()
     }
 
-    container.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
-    return () => container.removeEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
   const handleCatSelect = (id: number) => {

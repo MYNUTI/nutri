@@ -12,22 +12,21 @@
 }
 
 #root {
-  height: 100%;
+  min-height: 100dvh;
 }
 
 .screen-wrap {
-  height: 100%;
+  min-height: 100dvh;
 }
 
 .mobile-page {
   position: relative;
   width: 100%;
-  height: 100%;
+  min-height: 100dvh;
   background: #fff;
   padding: 14px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .app-shell {
@@ -76,7 +75,6 @@
 
 .page-body {
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -501,11 +499,9 @@
 /* ── 검색 페이지 (시안 재구현) ─────────────────── */
 .sp {
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 22px;
-  overflow-y: auto;
   margin: -14px;
   padding: 14px 16px 24px;
   background: #fff;
@@ -962,11 +958,9 @@
    ───────────────────────────────────────────── */
 .home-page {
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto;
   background: #fff;
   margin: -14px;
   padding: 14px;
