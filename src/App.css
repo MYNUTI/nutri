@@ -1644,6 +1644,13 @@
   letter-spacing: -0.01em;
 }
 
+/* 등급별 배경색 */
+.home-card-grade[data-grade="A"] { background: #4CAF50; }
+.home-card-grade[data-grade="B"] { background: #8BC34A; }
+.home-card-grade[data-grade="C"] { background: #FFC107; }
+.home-card-grade[data-grade="D"] { background: #FF9800; }
+.home-card-grade[data-grade="E"] { background: #F44336; }
+
 .home-card-brand {
   margin: 0;
   font-size: 11px;

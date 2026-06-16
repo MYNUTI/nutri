@@ -59,7 +59,7 @@ export const FavoritesPage = ({ onBack, onProductClick }: FavoritesPageProps) =>
                     ? <img className="home-card-img" src={item.imageUrl} alt={item.name} loading="lazy" />
                     : <div className="home-card-img home-card-img--placeholder" />
                   }
-                  <span className="home-card-grade">{item.grade ?? item.nutritionScore}</span>
+                  <span className="home-card-grade" data-grade={item.grade?.toUpperCase()}>{item.grade ?? item.nutritionScore}</span>
                 </div>
                 <div className="home-card-bottom">
                   <div className="home-card-text">
