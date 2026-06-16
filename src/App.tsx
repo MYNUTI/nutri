@@ -130,6 +130,7 @@ function AppShell() {
   // 목표 위치에 도달할 때까지 몇 프레임 동안 즉시 강제 고정한다.
   useLayoutEffect(() => {
     const target = route === 'detail' ? 0 : (scrollPositions.current[route] ?? 0)
+    console.log('[restore] route=', route, 'target=', target, 'saved=', JSON.stringify(scrollPositions.current), 'docHeight=', document.documentElement.scrollHeight, 'winH=', window.innerHeight)
     let raf = 0
     let tries = 0
     const apply = () => {
@@ -137,6 +138,8 @@ function AppShell() {
       tries += 1
       if (Math.abs(window.scrollY - target) > 2 && tries < 20) {
         raf = requestAnimationFrame(apply)
+      } else {
+        console.log('[restore done] route=', route, 'target=', target, 'final scrollY=', window.scrollY, 'tries=', tries)
       }
     }
     apply()
@@ -146,6 +149,7 @@ function AppShell() {
   const navigate = (r: RouteKey) => {
     // 떠나는 페이지의 현재 스크롤 위치 저장 (뒤로 돌아올 때 복원용)
     scrollPositions.current[route] = window.scrollY
+    console.log('[nav] leaving', route, 'savedScrollY=', window.scrollY, '-> going', r)
     setRoute(r)
     setHashRoute(r)
   }
