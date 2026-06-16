@@ -149,26 +149,18 @@ function AppShell() {
       if (frames < 40) raf = requestAnimationFrame(apply)
     }
     apply()
-    // 진단: 복원 후 1.5초간 스크롤이 언제 되돌려지는지 추적
-    const t0 = performance.now()
-    const onDiag = () => console.log('[scroll-after-restore] y=', Math.round(window.scrollY), 'dt=', Math.round(performance.now() - t0), 'cancelled=', cancelled)
-    if (target > 0) window.addEventListener('scroll', onDiag, { passive: true })
-    const stopDiag = window.setTimeout(() => window.removeEventListener('scroll', onDiag), 1500)
     return () => {
       cancelled = true
       cancelAnimationFrame(raf)
-      clearTimeout(stopDiag)
       window.removeEventListener('wheel', abort)
       window.removeEventListener('touchstart', abort)
       window.removeEventListener('keydown', abort)
-      window.removeEventListener('scroll', onDiag)
     }
   }, [route])
 
   const navigate = (r: RouteKey) => {
     // 떠나는 페이지의 현재 스크롤 위치 저장 (뒤로 돌아올 때 복원용)
     scrollPositions.current[route] = window.scrollY
-    console.log('[nav] leaving', route, 'savedScrollY=', window.scrollY, '-> going', r)
     setRoute(r)
     setHashRoute(r)
   }
