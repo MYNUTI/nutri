@@ -484,9 +484,9 @@
 }
 
 .social-btn--google {
-  background: #000;
-  border: none;
-  color: #fff;
+  background: #fff;
+  border: 1px solid #d5d5d5;
+  color: #333;
 }
 
 
