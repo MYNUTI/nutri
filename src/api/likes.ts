@@ -6,6 +6,7 @@ export type LikeItem = {
   name: string
   imageUrl: string
   nutritionScore: number
+  grade: string
   brand: BrandRef
 }
 
