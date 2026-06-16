@@ -60,9 +60,6 @@ function StarRow({ score, size = 14, filledColor = '#facc15' }: { score: number;
   )
 }
 
-const RING_R = 30
-const RING_CIRC = 2 * Math.PI * RING_R
-
 export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogin }: ProductDetailPageProps) => {
   const { isFavorite, toggle } = useFavorites()
   const faved = isFavorite(product.id)
@@ -74,10 +71,6 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
 
   const reviewQuery = useProductReviewsQuery(product.id)
   const reviewData = reviewQuery.data
-
-  const pns    = detail?.pns
-  const score  = pns?.score ?? 0
-  const dashOff = RING_CIRC * (1 - Math.min(score / 10, 1))
 
   const handleFav = () => {
     if (!isAuthenticated) { setShowLoginPrompt(true); return }
@@ -153,43 +146,6 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               <span className="det-info-rating-num">{reviewQuery.data.avgScoreOverall.toFixed(1)}</span>
             </div>
           )}
-        </div>
-
-        {/* 영양점수 카드 */}
-        <div className="det-score-card">
-          <div className="det-score-left">
-            <div className="det-score-title-row">
-              <svg className="det-score-trophy" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M4.164 16.666V15H15.83v1.666H4.164ZM4.164 13.748L3.101 7.062a1.25 1.25 0 0 1-.976-.478 1.25 1.25 0 0 1 0-1.536A1.25 1.25 0 0 1 3.101 4.5a1.25 1.25 0 0 1 1.062.548l2.604 1.166 3.27-3.562 3.27 3.562 2.605-1.166a1.25 1.25 0 0 1 1.061-.548 1.25 1.25 0 0 1 .977.478 1.25 1.25 0 0 1 0 1.536 1.25 1.25 0 0 1-.977.478L15.83 13.748H4.164ZM5.58 12.082h8.414l.545-3.479-2.167.958L10 6.248l-2.372 3.313-2.167-.958.52 3.479Z" fill="black"/>
-              </svg>
-              <span className="det-score-title">영양점수</span>
-            </div>
-            {pns != null && (
-              <>
-                <p className="det-score-pct">상위 {pns.topPercent}%</p>
-                <p className="det-score-total">{detail?.category?.name} 총 {pns.categoryTotal}개 중</p>
-              </>
-            )}
-          </div>
-          <div className="det-score-ring-wrap">
-            <svg viewBox="0 0 72 72" className="det-score-ring-svg" aria-hidden="true">
-              <circle cx="36" cy="36" r={RING_R} fill="none" stroke="#D9DCE0" strokeWidth="6"/>
-              <circle
-                cx="36" cy="36" r={RING_R}
-                fill="none"
-                stroke="#777F8A"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeDasharray={RING_CIRC}
-                strokeDashoffset={dashOff}
-                transform="rotate(-90 36 36)"
-              />
-            </svg>
-            <div className="det-score-inner">
-              <span className="det-score-num">{score.toFixed(1)}</span>
-              <span className="det-score-denom">/10</span>
-            </div>
-          </div>
         </div>
 
         {/* 탭 */}
