@@ -72,6 +72,7 @@ export const HomePage = ({
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
   const [tempBrandIds, setTempBrandIds] = useState<number[]>(selectedBrandIds)
   const [tempNutrients, setTempNutrients] = useState<string[]>(selectedNutrients)
+  const [showScrollTop, setShowScrollTop] = useState(false)
 
   const { toggle, isFavorite } = useFavorites()
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
@@ -120,6 +121,12 @@ export const HomePage = ({
     handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 300)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleCatSelect = (id: number) => {
     onCategoryChange(selectedCategoryIds[0] === id ? [] : [id])
@@ -433,6 +440,16 @@ export const HomePage = ({
           onClose={() => setShowLoginPrompt(false)}
           onLogin={() => { setShowLoginPrompt(false); onNeedLogin?.() }}
         />
+      )}
+      {showScrollTop && (
+        <button
+          type="button"
+          className="home-scroll-top"
+          aria-label="맨 위로"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <ChevronUpIcon />
+        </button>
       )}
     </div>
   )
