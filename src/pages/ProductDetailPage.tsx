@@ -145,10 +145,17 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
           {detail?.coupang?.price != null && (
             <span className="det-price">₩{detail.coupang.price.toLocaleString('ko-KR')}</span>
           )}
-          {reviewQuery.data && reviewQuery.data.total > 0 && (
+          {(detail?.grade || (reviewQuery.data && reviewQuery.data.total > 0)) && (
             <div className="det-info-rating-row">
-              <StarRow score={reviewQuery.data.avgScoreOverall} size={22} filledColor="#525760" />
-              <span className="det-info-rating-num">{reviewQuery.data.avgScoreOverall.toFixed(1)}</span>
+              {reviewQuery.data && reviewQuery.data.total > 0 && (
+                <>
+                  <StarRow score={reviewQuery.data.avgScoreOverall} size={22} filledColor="#525760" />
+                  <span className="det-info-rating-num">{reviewQuery.data.avgScoreOverall.toFixed(1)}</span>
+                </>
+              )}
+              {detail?.grade && (
+                <span className="det-grade-badge">{detail.grade}등급</span>
+              )}
             </div>
           )}
         </div>

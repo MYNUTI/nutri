@@ -134,6 +134,21 @@
   letter-spacing: -0.01em;
 }
 
+.det-grade-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 27px;
+  padding: 0 12px;
+  border-radius: 13.5px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
 .det-price {
   font-size: 17px;
   font-weight: 600;
