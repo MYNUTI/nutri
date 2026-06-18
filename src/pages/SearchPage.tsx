@@ -87,7 +87,9 @@ export const SearchPage = ({ onBack, onSubmitKeyword, onProductClick, isAuthenti
   const runSearch = (kw: string) => {
     const trimmed = kw.trim()
     if (!trimmed) return
-    setRecent(prev => [trimmed, ...prev.filter(k => k !== trimmed)].slice(0, RECENT_MAX))
+    const next = [trimmed, ...recent.filter(k => k !== trimmed)].slice(0, RECENT_MAX)
+    setRecent(next)
+    saveRecent(next)
     onSubmitKeyword?.(trimmed)
   }
 
