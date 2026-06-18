@@ -15,7 +15,7 @@ export type ReviewListResponse = {
   items: ReviewItem[]
 }
 
-export const getProductReviews = (productId: number, page = 0, size = 20) =>
+export const getProductReviews = (productId: number, page = 1, size = 20) =>
   apiFetch<ReviewListResponse>(
     `/reviews/${productId}?page=${page}&size=${size}`,
     { skipAuth: true },
