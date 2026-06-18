@@ -337,7 +337,7 @@ function AppShell() {
           {showProfileSetup && (
             <UserProfileSetupModal
               initialProfile={oauthPending?.email
-                ? { ...{ name: '', email: oauthPending.email, gender: '', birth_date: '', height: '', weight: '', body_fat_rate: '', skeletal_muscle_mass: '', activity_type: '', weekly_exercise_count: '', exercise_intensity: '', daily_meal_count: 3, daily_snack_count: 1, diet_purpose: '' } }
+                ? { ...{ name: '', email: oauthPending.email, gender: '', birth_date: '', height: '', weight: '', body_fat_rate: '', skeletal_muscle_mass: '', activity_type: '', weekly_exercise_count: '', exercise_intensity: '', daily_meal_count: 3, daily_snack_count: 1, diet_purpose: '', personalInfoAgreed: false, healthInfoAgreed: false, ageConfirmed: false } }
                 : undefined
               }
               onClose={() => { setShowProfileSetup(false); setOauthPending(null) }}
