@@ -45,6 +45,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
   const [profile, setProfile] = useState<Profile>(initialProfile ?? initial)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [expandPersonal, setExpandPersonal] = useState(false)
+  const [expandHealth, setExpandHealth] = useState(false)
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -260,17 +261,41 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
             )}
 
             {/* ② 건강정보 */}
-            <label className="ups-consent-row">
-              <input
-                type="checkbox"
-                className="ups-consent-check"
-                checked={profile.healthInfoAgreed}
-                onChange={e => set('healthInfoAgreed')(e.target.checked)}
-              />
-              <span className="ups-consent-text">
-                <span className="ups-consent-optional">(선택)</span> 건강정보 수집·이용 동의
-              </span>
-            </label>
+            <div className="ups-consent-item">
+              <label className="ups-consent-row">
+                <input
+                  type="checkbox"
+                  className="ups-consent-check"
+                  checked={profile.healthInfoAgreed}
+                  onChange={e => set('healthInfoAgreed')(e.target.checked)}
+                />
+                <span className="ups-consent-text">
+                  <span className="ups-consent-optional">(선택)</span> 건강정보 수집·이용 동의
+                </span>
+              </label>
+              <button
+                type="button"
+                className="ups-consent-expand-btn"
+                onClick={() => setExpandHealth(v => !v)}
+                aria-label="상세 보기"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.41 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.7 6.7a1 1 0 0 0-1.41.01z" fill="#aaa"/>
+                </svg>
+              </button>
+            </div>
+            {expandHealth && (
+              <div className="ups-consent-detail">
+                <table className="ups-consent-table">
+                  <tbody>
+                    <tr><td>수집 목적</td><td>체성분·활동량·식습관 기반 영양 필요량 산정 및 맞춤 식품 추천</td></tr>
+                    <tr><td>수집 항목</td><td>체지방률, 골격근량, 키, 몸무게, 직업 형태, 운동 빈도, 운동 강도, 하루 끼니 수, 간식 횟수, 식이 목적</td></tr>
+                    <tr><td>보유·이용 기간</td><td>회원 탈퇴 시까지 (탈퇴 시 30일 이내 파기)</td></tr>
+                    <tr><td>동의 거부 권리</td><td>거부하셔도 회원가입 및 기본 서비스 이용이 가능합니다.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {/* ③ 만 14세 */}
             <label className="ups-consent-row">
@@ -281,7 +306,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
                 onChange={e => set('ageConfirmed')(e.target.checked)}
               />
               <span className="ups-consent-text">
-                <span className="ups-consent-required">(필수)</span> 만 14세 이상 확인
+                <span className="ups-consent-required">(필수)</span> 본인은 만 14세 이상입니다.
               </span>
             </label>
           </div>
