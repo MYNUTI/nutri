@@ -267,6 +267,7 @@ function AppShell() {
             onBack={() => navigate('home')}
             onSubmitKeyword={(kw) => { scrollPositions.current.home = 0; setHomeKeyword(kw); navigate('home') }}
             onProductClick={product => { setSelectedProduct(product); navigate('detail', product.id) }}
+            isAuthenticated={isAuthenticated}
           />
         )
       case 'mypage':

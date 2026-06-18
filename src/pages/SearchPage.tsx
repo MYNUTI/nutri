@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Product } from '../types/product'
+import { getPopularKeywords, getRecommendedKeywords, type PopularKeyword, type RecommendedKeyword } from '../api/search'
 
 const RECOMMENDED_KEYWORDS = [
   '아침 단백질 한 끼',
@@ -10,21 +11,8 @@ const RECOMMENDED_KEYWORDS = [
   '대용량 닭가슴살',
 ]
 
-type Trend = 'up' | 'down' | 'same'
+type Trend = 'up' | 'down' | 'same' | 'new'
 type PopularItem = { rank: number; keyword: string; trend: Trend }
-
-const POPULAR_KEYWORDS: PopularItem[] = [
-  { rank: 1,  keyword: '닭가슴살',   trend: 'same' },
-  { rank: 2,  keyword: '하림',       trend: 'up'   },
-  { rank: 3,  keyword: '잡곡',       trend: 'up'   },
-  { rank: 4,  keyword: '리코타 치즈', trend: 'up'  },
-  { rank: 5,  keyword: '두부면',     trend: 'same' },
-  { rank: 6,  keyword: '곤약',       trend: 'same' },
-  { rank: 7,  keyword: '두유',       trend: 'up'   },
-  { rank: 8,  keyword: '프로틴',     trend: 'up'   },
-  { rank: 9,  keyword: '저칼로리',   trend: 'up'   },
-  { rank: 10, keyword: '저당',       trend: 'same' },
-]
 
 const RECENT_KEY = 'recentSearchKeywords'
 const RECENT_MAX = 10
@@ -48,16 +36,49 @@ function formatPopularStamp(d: Date): string {
   return `오늘 ${isPM ? '오후' : '오전'}${h}:${String(d.getMinutes()).padStart(2, '0')} 기준`
 }
 
+function changeToTrend(change: PopularKeyword['change']): Trend {
+  if (change === 'UP') return 'up'
+  if (change === 'DOWN') return 'down'
+  if (change === 'NEW') return 'new'
+  return 'same'
+}
+
 type SearchPageProps = {
   onBack?: () => void
   onSubmitKeyword?: (keyword: string) => void
-  /** 호환용 — 더 이상 검색 결과를 페이지 내에서 보여주지 않으므로 미사용 */
   onProductClick?: (product: Product) => void
+  isAuthenticated?: boolean
 }
 
-export const SearchPage = ({ onBack, onSubmitKeyword }: SearchPageProps) => {
+export const SearchPage = ({ onBack, onSubmitKeyword, onProductClick, isAuthenticated }: SearchPageProps) => {
   const [inputValue, setInputValue] = useState('')
   const [recent, setRecent] = useState<string[]>(() => loadRecent())
+  const [popularItems, setPopularItems] = useState<PopularItem[]>([])
+  const [popularLoading, setPopularLoading] = useState(true)
+  const [recommendedProducts, setRecommendedProducts] = useState<RecommendedKeyword[]>([])
+  const [recommendedLoading, setRecommendedLoading] = useState(false)
+
+  useEffect(() => {
+    getPopularKeywords()
+      .then(data => {
+        setPopularItems(data.map(item => ({
+          rank: item.rank,
+          keyword: item.keyword,
+          trend: changeToTrend(item.change),
+        })))
+      })
+      .catch(() => {})
+      .finally(() => setPopularLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    setRecommendedLoading(true)
+    getRecommendedKeywords()
+      .then(data => setRecommendedProducts(data ?? []))
+      .catch(() => {})
+      .finally(() => setRecommendedLoading(false))
+  }, [isAuthenticated])
 
   const stamp = useMemo(() => formatPopularStamp(new Date()), [])
 
@@ -70,11 +91,23 @@ export const SearchPage = ({ onBack, onSubmitKeyword }: SearchPageProps) => {
     onSubmitKeyword?.(trimmed)
   }
 
+  const handleRecommendedProductClick = (item: RecommendedKeyword) => {
+    onProductClick?.({
+      id: item.productId,
+      name: item.name,
+      brand: { id: 0, name: '' },
+      image: '',
+      nutritionScore: 0,
+      category: { id: 0, name: '' },
+      favorited: false,
+    })
+  }
+
   const removeRecent = (kw: string) => setRecent(prev => prev.filter(k => k !== kw))
   const clearRecent = () => setRecent([])
 
-  const left = POPULAR_KEYWORDS.slice(0, 5)
-  const right = POPULAR_KEYWORDS.slice(5, 10)
+  const left = popularItems.slice(0, 5)
+  const right = popularItems.slice(5, 10)
 
   return (
     <section className="sp" aria-label="검색 페이지">
@@ -100,65 +133,85 @@ export const SearchPage = ({ onBack, onSubmitKeyword }: SearchPageProps) => {
         </div>
       </header>
 
-      {/* 결과는 홈 그리드에서 표시. SearchPage는 키워드 입력 + 추천/인기/최근 패널만 담당 */}
-
       {/* 최근 검색어 */}
       <section className="sp-section" aria-label="최근 검색어">
-            <div className="sp-section-head">
-              <h3 className="sp-section-title">최근 검색어</h3>
-              {recent.length > 0 && (
-                <button type="button" className="sp-section-action" onClick={clearRecent}>전체삭제</button>
-              )}
-            </div>
-            {recent.length === 0 ? (
-              <p className="sp-empty">최근 검색한 키워드가 없습니다</p>
-            ) : (
-              <div className="sp-chip-row sp-chip-row--scroll">
-                {recent.map(kw => (
-                  <span key={kw} className="sp-chip sp-chip--removable">
-                    <button type="button" className="sp-chip-text" onClick={() => runSearch(kw)}>{kw}</button>
-                    <button
-                      type="button"
-                      className="sp-chip-remove"
-                      aria-label={`${kw} 삭제`}
-                      onClick={() => removeRecent(kw)}
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </section>
+        <div className="sp-section-head">
+          <h3 className="sp-section-title">최근 검색어</h3>
+          {recent.length > 0 && (
+            <button type="button" className="sp-section-action" onClick={clearRecent}>전체삭제</button>
+          )}
+        </div>
+        {recent.length === 0 ? (
+          <p className="sp-empty">최근 검색한 키워드가 없습니다</p>
+        ) : (
+          <div className="sp-chip-row sp-chip-row--scroll">
+            {recent.map(kw => (
+              <span key={kw} className="sp-chip sp-chip--removable">
+                <button type="button" className="sp-chip-text" onClick={() => runSearch(kw)}>{kw}</button>
+                <button
+                  type="button"
+                  className="sp-chip-remove"
+                  aria-label={`${kw} 삭제`}
+                  onClick={() => removeRecent(kw)}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </section>
 
-          {/* 추천 검색어 */}
-          <section className="sp-section" aria-label="추천 검색어">
-            <h3 className="sp-section-title">추천 검색어</h3>
+      {/* 추천 검색어 */}
+      <section className="sp-section" aria-label="추천 검색어">
+        <h3 className="sp-section-title">추천 검색어</h3>
+        {isAuthenticated ? (
+          recommendedLoading ? (
+            <p className="sp-empty">불러오는 중...</p>
+          ) : recommendedProducts.length > 0 ? (
             <div className="sp-chip-row sp-chip-row--wrap">
-              {RECOMMENDED_KEYWORDS.map(kw => (
-                <button key={kw} type="button" className="sp-chip" onClick={() => runSearch(kw)}>
-                  {kw}
+              {recommendedProducts.map(item => (
+                <button key={item.productId} type="button" className="sp-chip" onClick={() => handleRecommendedProductClick(item)}>
+                  {item.name}
                 </button>
               ))}
             </div>
-          </section>
+          ) : (
+            <p className="sp-empty">추천 검색어가 없습니다</p>
+          )
+        ) : (
+          <div className="sp-chip-row sp-chip-row--wrap">
+            {RECOMMENDED_KEYWORDS.map(kw => (
+              <button key={kw} type="button" className="sp-chip" onClick={() => runSearch(kw)}>
+                {kw}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
 
-          {/* 인기 검색어 */}
-          <section className="sp-section sp-section--popular" aria-label="인기 검색어">
-            <div className="sp-section-head">
-              <h3 className="sp-section-title">인기 검색어</h3>
-              <span className="sp-stamp">{stamp}</span>
-            </div>
-            <div className="sp-popular-grid">
-              <ol className="sp-popular-col" start={1}>
-                {left.map(it => <PopularRow key={it.rank} item={it} onClick={() => runSearch(it.keyword)} />)}
-              </ol>
-              <ol className="sp-popular-col" start={6}>
-                {right.map(it => <PopularRow key={it.rank} item={it} onClick={() => runSearch(it.keyword)} />)}
-        </ol>
-      </div>
+      {/* 인기 검색어 */}
+      <section className="sp-section sp-section--popular" aria-label="인기 검색어">
+        <div className="sp-section-head">
+          <h3 className="sp-section-title">인기 검색어</h3>
+          <span className="sp-stamp">{stamp}</span>
+        </div>
+        {popularLoading ? (
+          <p className="sp-empty">불러오는 중...</p>
+        ) : popularItems.length === 0 ? (
+          <p className="sp-empty">집계 중입니다</p>
+        ) : (
+          <div className="sp-popular-grid">
+            <ol className="sp-popular-col" start={1}>
+              {left.map(it => <PopularRow key={it.rank} item={it} onClick={() => runSearch(it.keyword)} />)}
+            </ol>
+            <ol className="sp-popular-col" start={6}>
+              {right.map(it => <PopularRow key={it.rank} item={it} onClick={() => runSearch(it.keyword)} />)}
+            </ol>
+          </div>
+        )}
+      </section>
     </section>
-  </section>
   )
 }
 
@@ -167,7 +220,7 @@ const PopularRow = ({ item, onClick }: { item: PopularItem; onClick: () => void 
     <span className="sp-popular-rank">{item.rank}</span>
     <button type="button" className="sp-popular-term" onClick={onClick}>{item.keyword}</button>
     <span className={`sp-popular-trend sp-popular-trend--${item.trend}`} aria-hidden="true">
-      {item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '–'}
+      {item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : item.trend === 'new' ? 'N' : '–'}
     </span>
   </li>
 )

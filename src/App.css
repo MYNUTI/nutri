@@ -761,6 +761,7 @@
 .sp-popular-trend--up   { color: #e94e4e; }
 .sp-popular-trend--down { color: #3a7bd5; }
 .sp-popular-trend--same { color: #c9cbd0; }
+.sp-popular-trend--new  { color: #1f1f22; font-size: 10px; font-weight: 700; }
 
 /* ── 검색 결과 리스트 ──────────────────── */
 .sp-results {
