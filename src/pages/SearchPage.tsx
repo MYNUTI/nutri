@@ -3,12 +3,11 @@ import type { Product } from '../types/product'
 import { getPopularKeywords, getRecommendedKeywords, type PopularKeyword, type RecommendedKeyword } from '../api/search'
 
 const RECOMMENDED_KEYWORDS = [
-  '아침 단백질 한 끼',
-  '당 없는 두유',
-  '간편 도시락',
-  '고단백 저지방',
-  '식이섬유 많은',
-  '대용량 닭가슴살',
+  '닭가슴살',
+  '프로틴',
+  '고단백',
+  '오트밀',
+  '그릭요거트',
 ]
 
 type Trend = 'up' | 'down' | 'same' | 'new'
