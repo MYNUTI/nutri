@@ -385,7 +385,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
         )}
       </div>
 
-      <button type="button" className={`ups-submit${isStepValid() ? ' ups-submit--on' : ''}`} onClick={handleNext}>
+      <button type="button" className={`ups-submit${isStepValid() ? ' ups-submit--on' : ''}`} onClick={handleNext} disabled={!isStepValid()}>
         {step === TOTAL_STEPS ? (submitLabel ?? '완료하기') : '다음'}
       </button>
     </div>
