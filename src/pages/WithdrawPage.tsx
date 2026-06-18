@@ -12,6 +12,8 @@ const REASONS = [
   '기타',
 ]
 
+type Phase = 'select' | 'confirm' | 'done'
+
 type WithdrawPageProps = {
   onBack: () => void
   onWithdraw: () => void
@@ -19,16 +21,15 @@ type WithdrawPageProps = {
 
 export const WithdrawPage = ({ onBack, onWithdraw }: WithdrawPageProps) => {
   const [selected, setSelected] = useState<number | null>(null)
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [phase, setPhase] = useState<Phase>('select')
 
-  const handleConfirm = async () => {
+  const handleWithdraw = async () => {
     try {
       await apiWithdraw(selected !== null ? REASONS[selected] : undefined)
     } catch {
       // 서버 오류여도 로컬 상태 초기화
     }
-    setShowConfirm(false)
-    onWithdraw()
+    setPhase('done')
   }
 
   return (
@@ -62,21 +63,33 @@ export const WithdrawPage = ({ onBack, onWithdraw }: WithdrawPageProps) => {
           type="button"
           className={`wd-btn${selected !== null ? ' wd-btn--on' : ''}`}
           disabled={selected === null}
-          onClick={() => setShowConfirm(true)}
+          onClick={() => setPhase('confirm')}
         >
           회원탈퇴
         </button>
       </div>
 
-      {showConfirm && (
-        <div className="wd-overlay" onClick={() => setShowConfirm(false)}>
-          <div className="wd-confirm-card" onClick={e => e.stopPropagation()}>
-            <p className="wd-confirm-title">정말 탈퇴하시겠어요?</p>
-            <p className="wd-confirm-desc">탈퇴 시 모든 정보가 삭제되며<br />복구할 수 없어요</p>
+      {/* 확인 팝업 */}
+      {phase === 'confirm' && (
+        <div className="wd-overlay" onClick={() => setPhase('select')}>
+          <div className="wd-modal" onClick={e => e.stopPropagation()}>
+            <p className="wd-modal-title">정말 탈퇴하시겠어요?</p>
+            <p className="wd-modal-desc">탈퇴 시 모든 정보가 삭제되며<br />복구할 수 없어요</p>
+            <button type="button" className="wd-modal-btn" onClick={handleWithdraw}>
+              탈퇴하기
+            </button>
           </div>
-          <div className="wd-confirm-footer" onClick={e => e.stopPropagation()}>
-            <button type="button" className="wd-btn wd-btn--on" onClick={handleConfirm}>
-              회원탈퇴
+        </div>
+      )}
+
+      {/* 완료 팝업 */}
+      {phase === 'done' && (
+        <div className="wd-overlay">
+          <div className="wd-modal">
+            <p className="wd-modal-title">탈퇴가 완료되었습니다</p>
+            <p className="wd-modal-desc">다시 만나는 날을<br />기다리고 있을게요</p>
+            <button type="button" className="wd-modal-btn" onClick={onWithdraw}>
+              확인
             </button>
           </div>
         </div>

@@ -29,7 +29,8 @@
 }
 
 .wd-title {
-  font-size: 22px;
+  font-family: 'Paperlogy', sans-serif;
+  font-size: 24px;
   font-weight: 600;
   color: #363a3f;
   line-height: 1.4;
@@ -37,7 +38,8 @@
 }
 
 .wd-desc {
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 400;
   color: #777f8a;
   line-height: 1.6;
   margin: 0 0 36px;
@@ -49,7 +51,6 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .wd-item {
@@ -84,14 +85,14 @@
 }
 
 .wd-label {
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
   color: #777f8a;
   line-height: 1.4;
 }
 
 .wd-label--on {
   color: #525760;
-  font-weight: 500;
 }
 
 .wd-footer {
@@ -121,45 +122,54 @@
 
 .wd-btn--on:hover { background: #666a74; }
 
-/* ── 확인 오버레이 ─────────────────────────── */
+/* ── 팝업 오버레이 ─────────────────────────── */
 .wd-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 200;
+  padding: 24px;
 }
 
-.wd-confirm-card {
-  width: calc(100% - 88px);
+.wd-modal {
+  width: 100%;
   max-width: 305px;
   background: #fff;
-  border-radius: 12px;
-  padding: 24px 20px 20px;
-  box-shadow: 2px 8px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  padding: 28px 24px 24px;
   text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
 }
 
-.wd-confirm-title {
-  font-size: 16px;
+.wd-modal-title {
+  font-size: 17px;
   font-weight: 600;
   color: #1f1f22;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
 }
 
-.wd-confirm-desc {
-  font-size: 13px;
-  color: #a1a9b1;
-  line-height: 1.5;
-  margin: 0;
+.wd-modal-desc {
+  font-size: 14px;
+  font-weight: 400;
+  color: #777f8a;
+  line-height: 1.6;
+  margin: 0 0 24px;
 }
 
-.wd-confirm-footer {
-  width: calc(100% - 48px);
-  max-width: 345px;
-  position: fixed;
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+.wd-modal-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  border: 0;
+  background: #525760;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
 }
+
+.wd-modal-btn:hover { background: #666a74; }
