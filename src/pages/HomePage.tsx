@@ -18,7 +18,7 @@ type HomePageProps = {
   onCategoryChange: (ids: number[]) => void
   onBrandChange: (ids: number[]) => void
   onNutrientsChange: (nutrients: string[]) => void
-  onMoveToFilter: () => void
+  onMoveToFilter: (section?: 'nutrient' | 'brand') => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
   onGoHome?: () => void
@@ -28,7 +28,7 @@ type HomePageProps = {
   onNeedLogin?: () => void
 }
 
-const FILTER_CHIPS = ['추천순', '브랜드', '성분'] as const
+const FILTER_CHIPS = ['추천순', '성분', '브랜드'] as const
 type ChipKey = typeof FILTER_CHIPS[number]
 
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
@@ -70,8 +70,6 @@ export const HomePage = ({
   const [catOpen, setCatOpen] = useState(false)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
   const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
-  const [tempBrandIds, setTempBrandIds] = useState<number[]>(selectedBrandIds)
-  const [tempNutrients, setTempNutrients] = useState<string[]>(selectedNutrients)
   const [showScrollTop, setShowScrollTop] = useState(false)
 
   const { toggle, isFavorite } = useFavorites()
@@ -84,12 +82,6 @@ export const HomePage = ({
     const selected = catsScrollRef.current.querySelector<HTMLElement>('.home-cat-chip--on')
     if (selected) selected.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
   }, [catOpen])
-
-  useEffect(() => {
-    if (openChip === '브랜드') setTempBrandIds([...selectedBrandIds])
-    if (openChip === '성분') setTempNutrients([...selectedNutrients])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openChip])
 
   const condition = useMemo<ProductSearchCondition>(() => {
     const c: ProductSearchCondition = {
@@ -138,10 +130,6 @@ export const HomePage = ({
     setCatOpen(prev => !prev)
   }
 
-  const handleFilterChipClick = (label: ChipKey) => {
-    if (openChip !== label) setCatOpen(false)
-    setOpenChip(openChip === label ? null : label)
-  }
 
   return (
     <div
@@ -258,27 +246,36 @@ export const HomePage = ({
       {/* 필터 칩 */}
       <div className="home-chips-wrap">
         <div className="home-chips">
-          <button className="home-chip-icon" type="button" aria-label="필터" onClick={onMoveToFilter}>
+          <button className="home-chip-icon" type="button" aria-label="필터" onClick={() => onMoveToFilter()}>
             <FilterIcon />
           </button>
           {FILTER_CHIPS.map(label => {
-            const isOpen = openChip === label
+            const isSort = label === '추천순'
+            const isOpen = isSort && openChip === '추천순'
             const count =
               label === '브랜드' ? selectedBrandIds.length :
               label === '성분' ? selectedNutrients.length : 0
-            const display = label === '추천순' ? selectedSort : label
+            const display = isSort ? selectedSort : label
             return (
               <button
                 key={label}
                 type="button"
                 className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
-                onClick={() => handleFilterChipClick(label)}
-                aria-expanded={isOpen}
+                onClick={() => {
+                  if (isSort) {
+                    if (openChip !== '추천순') setCatOpen(false)
+                    setOpenChip(openChip === '추천순' ? null : '추천순')
+                  } else {
+                    setCatOpen(false)
+                    onMoveToFilter(label === '성분' ? 'nutrient' : 'brand')
+                  }
+                }}
+                aria-expanded={isSort ? isOpen : undefined}
               >
                 {display}{count > 0 ? ` ${count}` : ''}
-          <span className="home-chip-chevron" aria-hidden="true">
-            {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-          </span>
+                <span className="home-chip-chevron" aria-hidden="true">
+                  {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                </span>
               </button>
             )
           })}

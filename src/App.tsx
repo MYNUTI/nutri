@@ -76,6 +76,7 @@ function AppShell() {
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
+  const [filterInitialSection, setFilterInitialSection] = useState<'nutrient' | 'brand' | undefined>(undefined)
   const [homeKeyword, setHomeKeyword] = useState('')
   const [filterCategoryIds, setFilterCategoryIds] = useState<number[]>([])
   const [filterBrandIds, setFilterBrandIds] = useState<number[]>([])
@@ -242,7 +243,7 @@ function AppShell() {
             onCategoryChange={setFilterCategoryIds}
             onBrandChange={setFilterBrandIds}
             onNutrientsChange={setFilterNutrients}
-            onMoveToFilter={() => setShowFilter(true)}
+            onMoveToFilter={(section) => { setFilterInitialSection(section); setShowFilter(true) }}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
             onGoHome={() => { setHomeKeyword(''); setFilterCategoryIds([]); setFilterBrandIds([]); setFilterNutrients([]); navigate('home'); scrollPositions.current.home = 0; window.scrollTo({ top: 0 }) }}
@@ -372,7 +373,8 @@ function AppShell() {
               initialCategoryIds={filterCategoryIds}
               initialBrandIds={filterBrandIds}
               initialNutrients={filterNutrients}
-              onClose={() => setShowFilter(false)}
+              initialOpenSection={filterInitialSection}
+              onClose={() => { setShowFilter(false); setFilterInitialSection(undefined) }}
               onApply={(sel) => {
                 setFilterCategoryIds(sel.categoryIds)
                 setFilterBrandIds(sel.brandIds)

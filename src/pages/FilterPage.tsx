@@ -7,6 +7,7 @@ type FilterPageProps = {
   initialCategoryIds?: number[]
   initialBrandIds?: number[]
   initialNutrients?: string[]
+  initialOpenSection?: 'nutrient' | 'brand'
   onClose: () => void
   onApply?: (selection: { categoryIds: number[]; brandIds: number[]; nutrients: string[] }) => void
 }
@@ -29,6 +30,7 @@ export const FilterPage = ({
   initialCategoryIds = [],
   initialBrandIds = [],
   initialNutrients = [],
+  initialOpenSection,
   onClose,
   onApply,
 }: FilterPageProps) => {
@@ -41,9 +43,9 @@ export const FilterPage = ({
   const [selectedNutrients, setSelectedNutrients] = useState<Set<string>>(new Set(initialNutrients))
   const [selectedPrices, setSelectedPrices] = useState<Set<string>>(new Set())
 
-  const [nutrientOpen, setNutrientOpen] = useState(true)
-  const [brandOpen, setBrandOpen] = useState(true)
-  const [priceOpen, setPriceOpen] = useState(true)
+  const [nutrientOpen, setNutrientOpen] = useState(!initialOpenSection || initialOpenSection === 'nutrient')
+  const [brandOpen, setBrandOpen] = useState(!initialOpenSection || initialOpenSection === 'brand')
+  const [priceOpen, setPriceOpen] = useState(!initialOpenSection)
 
   const toggleNum = (set: Set<number>, item: number): Set<number> => {
     const next = new Set(set)
