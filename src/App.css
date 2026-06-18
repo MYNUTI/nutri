@@ -1044,7 +1044,7 @@
 
 .home-search-icon {
   position: absolute;
-  left: 14px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -1057,7 +1057,7 @@
   border: 1px solid #e8eaec;
   border-radius: 999px;
   background: #fff;
-  padding: 0 18px 0 42px;
+  padding: 0 42px 0 18px;
   font-size: 13px;
   color: #333;
   letter-spacing: -0.01em;

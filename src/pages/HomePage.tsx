@@ -150,13 +150,13 @@ export const HomePage = ({
           onClick={() => onMoveToSearch?.()}
           aria-label={keyword ? `검색어: ${keyword}` : '검색 페이지로 이동'}
         >
-          <svg className="home-search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-            <path d="M10 2a8 8 0 1 1-5.3 14L1 19.7 2.3 21l3.7-3.7A8 8 0 0 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="#9a9a9a"/>
-          </svg>
           {keyword
             ? <span className="home-search-keyword">{keyword}</span>
             : <span className="home-search-placeholder">검색</span>
           }
+          <svg className="home-search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M10 2a8 8 0 1 1-5.3 14L1 19.7 2.3 21l3.7-3.7A8 8 0 0 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="#9a9a9a"/>
+          </svg>
         </button>
         {keyword && (
           <button

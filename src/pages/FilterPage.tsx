@@ -12,7 +12,6 @@ type FilterPageProps = {
   onApply?: (selection: { categoryIds: number[]; brandIds: number[]; nutrients: string[] }) => void
 }
 
-const PRICE_OPTIONS = ['1만원 이하', '1~3만원', '3~5만원', '5만원 이상'] as const
 
 const ChevronIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#777F8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -41,11 +40,9 @@ export const FilterPage = ({
 
   const [selectedBrandIds, setSelectedBrandIds] = useState<Set<number>>(new Set(initialBrandIds))
   const [selectedNutrients, setSelectedNutrients] = useState<Set<string>>(new Set(initialNutrients))
-  const [selectedPrices, setSelectedPrices] = useState<Set<string>>(new Set())
 
   const [nutrientOpen, setNutrientOpen] = useState(!initialOpenSection || initialOpenSection === 'nutrient')
   const [brandOpen, setBrandOpen] = useState(!initialOpenSection || initialOpenSection === 'brand')
-  const [priceOpen, setPriceOpen] = useState(!initialOpenSection)
 
   const toggleNum = (set: Set<number>, item: number): Set<number> => {
     const next = new Set(set)
@@ -62,7 +59,6 @@ export const FilterPage = ({
   const handleReset = () => {
     setSelectedBrandIds(new Set())
     setSelectedNutrients(new Set())
-    setSelectedPrices(new Set())
   }
 
   const handleApply = () => {
@@ -74,7 +70,7 @@ export const FilterPage = ({
     onClose()
   }
 
-  const totalSelected = selectedBrandIds.size + selectedNutrients.size + selectedPrices.size
+  const totalSelected = selectedBrandIds.size + selectedNutrients.size
 
   return (
     <div className="fil-page">
@@ -128,26 +124,6 @@ export const FilterPage = ({
           )}
         </section>
 
-        <section className="fil-section">
-          <button type="button" className="fil-section-head" onClick={() => setPriceOpen(v => !v)}>
-            <span className="fil-section-label">가격</span>
-            <ChevronIcon className={`fil-chevron${priceOpen ? ' fil-chevron--up' : ''}`} />
-          </button>
-          {priceOpen && (
-            <div className="fil-chips">
-              {PRICE_OPTIONS.map(p => (
-                <button
-                  key={p}
-                  type="button"
-                  className={`fil-chip${selectedPrices.has(p) ? ' fil-chip--on' : ''}`}
-                  onClick={() => setSelectedPrices(toggleStr(selectedPrices, p))}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
       </div>
 
       <footer className="fil-footer">
