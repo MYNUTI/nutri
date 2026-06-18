@@ -55,6 +55,7 @@ export const SearchPage = ({ onBack, onSubmitKeyword, onProductClick, isAuthenti
   const [recent, setRecent] = useState<string[]>(() => loadRecent())
   const [popularItems, setPopularItems] = useState<PopularItem[]>([])
   const [popularLoading, setPopularLoading] = useState(true)
+  const [popularError, setPopularError] = useState(false)
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedKeyword[]>([])
   const [recommendedLoading, setRecommendedLoading] = useState(false)
 
@@ -67,7 +68,7 @@ export const SearchPage = ({ onBack, onSubmitKeyword, onProductClick, isAuthenti
           trend: changeToTrend(item.change),
         })))
       })
-      .catch(() => {})
+      .catch(() => setPopularError(true))
       .finally(() => setPopularLoading(false))
   }, [])
 
@@ -200,6 +201,8 @@ export const SearchPage = ({ onBack, onSubmitKeyword, onProductClick, isAuthenti
         </div>
         {popularLoading ? (
           <p className="sp-empty">불러오는 중...</p>
+        ) : popularError ? (
+          <p className="sp-empty">불러오지 못했습니다</p>
         ) : popularItems.length === 0 ? (
           <p className="sp-empty">집계 중입니다</p>
         ) : (
