@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMyPageQuery, myPageKeys } from '../queries/myPageQueries'
-import { logout as apiLogout, withdraw as apiWithdraw, updateMe } from '../api/auth'
+import { logout as apiLogout, updateMe } from '../api/auth'
 import './MyPage.css'
 
 type MyPageProps = {
@@ -94,53 +94,11 @@ const LogoutModal = ({ phase, onCancel, onConfirm, onClose }: LogoutModalProps) 
   </div>
 )
 
-/* 회원탈퇴 confirm/success 모달 */
-type WithdrawModalProps = {
-  phase: 'confirm' | 'done'
-  reason: string
-  onReasonChange: (v: string) => void
-  onCancel: () => void
-  onConfirm: () => void
-  onClose: () => void
-}
-const WithdrawModal = ({ phase, reason, onReasonChange, onCancel, onConfirm, onClose }: WithdrawModalProps) => (
-  <div className="mp-modal-overlay">
-    <div className="mp-modal">
-      {phase === 'confirm' ? (
-        <>
-          <p className="mp-modal-msg">정말 회원탈퇴를<br />하시겠습니까?</p>
-          <textarea
-            className="mp-modal-reason"
-            placeholder="탈퇴 사유를 입력해 주세요 (선택)"
-            value={reason}
-            onChange={e => onReasonChange(e.target.value)}
-            maxLength={500}
-            rows={3}
-          />
-          <div className="mp-modal-btns">
-            <button type="button" className="mp-modal-btn mp-modal-btn--cancel" onClick={onCancel}>취소</button>
-            <button type="button" className="mp-modal-btn mp-modal-btn--ok" onClick={onConfirm}>확인</button>
-          </div>
-        </>
-      ) : (
-        <>
-          <p className="mp-modal-msg">회원탈퇴가<br />정상적으로 처리되었습니다</p>
-          <div className="mp-modal-btns mp-modal-btns--single">
-            <button type="button" className="mp-modal-btn mp-modal-btn--cancel" onClick={onClose}>닫기</button>
-          </div>
-        </>
-      )}
-    </div>
-  </div>
-)
-
 export const MyPage = ({ isAuthenticated, onBack, onLogin, onGoFavorites, onGoPasswordChange, onLogout, onEditNutrition, onWithdraw }: MyPageProps) => {
   const myPageQuery = useMyPageQuery(isAuthenticated)
   const name = myPageQuery.data?.nickname ?? myPageQuery.data?.name ?? ''
   const queryClient = useQueryClient()
   const [logoutPhase, setLogoutPhase] = useState<null | 'confirm' | 'done'>(null)
-  const [withdrawPhase, setWithdrawPhase] = useState<null | 'confirm' | 'done'>(null)
-  const [withdrawReason, setWithdrawReason] = useState('')
   const [nickEdit, setNickEdit] = useState(false)
   const [nickVal, setNickVal] = useState('')
 
@@ -164,20 +122,6 @@ export const MyPage = ({ isAuthenticated, onBack, onLogin, onGoFavorites, onGoPa
     onLogout()
   }
 
-  const handleWithdrawConfirm = async () => {
-    try {
-      await apiWithdraw(withdrawReason.trim() || undefined)
-    } catch {
-      // 서버 오류여도 로컬 상태는 초기화
-    }
-    setWithdrawPhase('done')
-  }
-  const handleWithdrawClose = () => {
-    setWithdrawPhase(null)
-    setWithdrawReason('')
-    onWithdraw()
-  }
-
   return (
     <section className="mypage" aria-label="마이페이지">
       {logoutPhase && (
@@ -186,16 +130,6 @@ export const MyPage = ({ isAuthenticated, onBack, onLogin, onGoFavorites, onGoPa
           onCancel={() => setLogoutPhase(null)}
           onConfirm={handleLogoutConfirm}
           onClose={handleLogoutClose}
-        />
-      )}
-      {withdrawPhase && (
-        <WithdrawModal
-          phase={withdrawPhase}
-          reason={withdrawReason}
-          onReasonChange={setWithdrawReason}
-          onCancel={() => setWithdrawPhase(null)}
-          onConfirm={handleWithdrawConfirm}
-          onClose={handleWithdrawClose}
         />
       )}
 
@@ -268,7 +202,7 @@ export const MyPage = ({ isAuthenticated, onBack, onLogin, onGoFavorites, onGoPa
             <button type="button" className="mypage-row mypage-row--btn" onClick={() => setLogoutPhase('confirm')}>
               <span className="mypage-row-label">로그아웃</span>
             </button>
-            <button type="button" className="mypage-row mypage-row--btn" onClick={() => setWithdrawPhase('confirm')}>
+            <button type="button" className="mypage-row mypage-row--btn" onClick={onWithdraw}>
               <span className="mypage-row-label">회원탈퇴</span>
             </button>
           </section>

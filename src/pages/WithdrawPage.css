@@ -1,0 +1,165 @@
+.wd-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: #fff;
+  position: relative;
+}
+
+.wd-header {
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+
+.wd-back {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.wd-body {
+  flex: 1;
+  padding: 12px 24px 24px;
+  overflow-y: auto;
+}
+
+.wd-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #363a3f;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+
+.wd-desc {
+  font-size: 13px;
+  color: #777f8a;
+  line-height: 1.6;
+  margin: 0 0 36px;
+}
+
+.wd-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.wd-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+
+.wd-radio {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid #e8eaec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s;
+}
+
+.wd-radio--on {
+  border-color: #525760;
+}
+
+.wd-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #525760;
+}
+
+.wd-label {
+  font-size: 14px;
+  color: #777f8a;
+  line-height: 1.4;
+}
+
+.wd-label--on {
+  color: #525760;
+  font-weight: 500;
+}
+
+.wd-footer {
+  padding: 12px 24px calc(16px + env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.wd-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 8px;
+  border: 0;
+  background: #f2f3f5;
+  color: #777f8a;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: not-allowed;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wd-btn--on {
+  background: #525760;
+  color: #fff;
+  cursor: pointer;
+}
+
+.wd-btn--on:hover { background: #666a74; }
+
+/* ── 확인 오버레이 ─────────────────────────── */
+.wd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.wd-confirm-card {
+  width: calc(100% - 88px);
+  max-width: 305px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px 20px;
+  box-shadow: 2px 8px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.wd-confirm-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f1f22;
+  margin: 0 0 8px;
+}
+
+.wd-confirm-desc {
+  font-size: 13px;
+  color: #a1a9b1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.wd-confirm-footer {
+  width: calc(100% - 48px);
+  max-width: 345px;
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}

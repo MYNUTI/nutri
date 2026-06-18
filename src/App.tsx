@@ -9,6 +9,7 @@ import { postNutrition, type NutritionData } from './api/nutrition'
 import { oauthLogin, register } from './api/auth'
 import { products as allProducts } from './mocks/products'
 import { AdminPage } from './pages/AdminPage'
+import { WithdrawPage } from './pages/WithdrawPage'
 import { ComparePage } from './pages/ComparePage'
 import { FilterPage } from './pages/FilterPage'
 import { FavoritesPage } from './pages/FavoritesPage'
@@ -37,11 +38,11 @@ function profileToNutrition(p: Profile): NutritionData {
 
 type RouteKey =
   | 'home' | 'search' | 'mypage' | 'login' | 'admin'
-  | 'detail' | 'compare' | 'favorites' | 'password-change'
+  | 'detail' | 'compare' | 'favorites' | 'password-change' | 'withdraw'
 
 const validRoutes = new Set<RouteKey>([
   'home', 'search', 'mypage', 'login', 'admin',
-  'detail', 'compare', 'favorites', 'password-change',
+  'detail', 'compare', 'favorites', 'password-change', 'withdraw',
 ])
 
 const getRouteFromHash = (): RouteKey => {
@@ -219,6 +220,7 @@ function AppShell() {
   const handleWithdraw = () => {
     setIsAuthenticated(false)
     setIsAdmin(false)
+    setFavoriteIds([])
     navigate('home')
   }
 
@@ -282,7 +284,7 @@ function AppShell() {
             onGoPasswordChange={() => navigate('password-change')}
             onLogout={handleLogout}
             onEditNutrition={() => setShowNutritionEdit(true)}
-            onWithdraw={handleWithdraw}
+            onWithdraw={() => navigate('withdraw')}
           />
         )
       case 'login':
@@ -302,6 +304,13 @@ function AppShell() {
         return (
           <PasswordChangePage
             onBack={() => navigate('mypage')}
+          />
+        )
+      case 'withdraw':
+        return (
+          <WithdrawPage
+            onBack={() => navigate('mypage')}
+            onWithdraw={handleWithdraw}
           />
         )
       case 'admin':
