@@ -16,6 +16,9 @@ export type Profile = {
   daily_meal_count: number
   daily_snack_count: number
   diet_purpose: string
+  personalInfoAgreed: boolean
+  healthInfoAgreed: boolean
+  ageConfirmed: boolean
 }
 
 type Props = {
@@ -26,7 +29,7 @@ type Props = {
 }
 
 const DIET_GOALS = ['다이어트', '벌크업', '린매스업', '건강한식생활', '기타']
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 5
 const TODAY = new Date().toISOString().split('T')[0]
 
 const initial: Profile = {
@@ -34,12 +37,14 @@ const initial: Profile = {
   height: '', weight: '', body_fat_rate: '', skeletal_muscle_mass: '',
   activity_type: '', weekly_exercise_count: '', exercise_intensity: '',
   daily_meal_count: 3, daily_snack_count: 1, diet_purpose: '',
+  personalInfoAgreed: false, healthInfoAgreed: false, ageConfirmed: false,
 }
 
 export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, submitLabel }: Props) => {
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState<Profile>(initialProfile ?? initial)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [expandPersonal, setExpandPersonal] = useState(false)
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -52,8 +57,18 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
     setErrors(e => { const n = { ...e }; delete n[k as string]; return n })
   }
 
+  const allAgreed = profile.personalInfoAgreed && profile.healthInfoAgreed && profile.ageConfirmed
+  const toggleAll = () => {
+    const next = !allAgreed
+    setProfile(p => ({ ...p, personalInfoAgreed: next, healthInfoAgreed: next, ageConfirmed: next }))
+    setErrors({})
+  }
+
   const isStepValid = (): boolean => {
     if (step === 1) {
+      return profile.personalInfoAgreed && profile.ageConfirmed
+    }
+    if (step === 2) {
       return !!(
         profile.name && /^[가-힣a-zA-Z]{2,}$/.test(profile.name) &&
         profile.email && /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(profile.email) &&
@@ -61,16 +76,16 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
         profile.birth_date && profile.birth_date <= TODAY
       )
     }
-    if (step === 2) {
+    if (step === 3) {
       const h = Number(profile.height)
       const w = Number(profile.weight)
       return !!(profile.height && !isNaN(h) && h >= 50 && h <= 250 &&
         profile.weight && !isNaN(w) && w >= 10 && w <= 200)
     }
-    if (step === 3) {
+    if (step === 4) {
       return !!(profile.activity_type && profile.weekly_exercise_count && profile.exercise_intensity)
     }
-    if (step === 4) {
+    if (step === 5) {
       return !!profile.diet_purpose
     }
     return false
@@ -78,7 +93,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
 
   const validate = (): Record<string, string> => {
     const e: Record<string, string> = {}
-    if (step === 1) {
+    if (step === 2) {
       if (!profile.name || !/^[가-힣a-zA-Z]{2,}$/.test(profile.name))
         e.name = '이름은 2자 이상 한글/영문만 입력 가능합니다'
       if (!profile.email || !/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(profile.email))
@@ -90,7 +105,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
       else if (profile.birth_date > TODAY)
         e.birth_date = '미래 날짜는 선택할 수 없습니다'
     }
-    if (step === 2) {
+    if (step === 3) {
       const h = Number(profile.height)
       if (!profile.height || isNaN(h) || h < 50 || h > 250)
         e.height = '키는 50~250cm 사이로 입력해 주세요'
@@ -108,12 +123,12 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
           e.skeletal_muscle_mass = '골격근량은 5~100kg 사이로 입력해 주세요'
       }
     }
-    if (step === 3) {
+    if (step === 4) {
       if (!profile.activity_type) e.activity_type = '활동 유형을 선택해 주세요'
       if (!profile.weekly_exercise_count) e.weekly_exercise_count = '주간 운동 횟수를 선택해 주세요'
       if (!profile.exercise_intensity) e.exercise_intensity = '운동 강도를 선택해 주세요'
     }
-    if (step === 4) {
+    if (step === 5) {
       if (!profile.diet_purpose) e.diet_purpose = '식이 목적을 선택해 주세요'
     }
     return e
@@ -179,17 +194,101 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
       </button>
 
       <div className="ups-steps" aria-label={`단계 ${step}/${TOTAL_STEPS}`}>
-        {[1, 2, 3, 4].map(n => (
+        {[1, 2, 3, 4, 5].map(n => (
           <span key={n} className={`ups-step${n === step ? ' ups-step--on' : ''}`}>{n}</span>
         ))}
       </div>
 
       <h2 className="ups-title">
-        내 몸에 맞는 영양점수,<br />1분이면 끝나요
+        {step === 1
+          ? <>영양점수 확인을 위해<br />개인정보 이용에 동의해주세요</>
+          : <>내 몸에 맞는 영양점수,<br />1분이면 끝나요</>
+        }
       </h2>
 
       <div className="ups-body">
+        {/* ── Step 1: 동의 ──────────────────────────── */}
         {step === 1 && (
+          <div className="ups-consent">
+            <label className="ups-consent-row ups-consent-row--all">
+              <input
+                type="checkbox"
+                className="ups-consent-check"
+                checked={allAgreed}
+                onChange={toggleAll}
+              />
+              <span className="ups-consent-text ups-consent-text--all">전체동의</span>
+            </label>
+
+            <div className="ups-consent-divider" />
+
+            {/* ① 개인정보 */}
+            <div className="ups-consent-item">
+              <label className="ups-consent-row">
+                <input
+                  type="checkbox"
+                  className="ups-consent-check"
+                  checked={profile.personalInfoAgreed}
+                  onChange={e => set('personalInfoAgreed')(e.target.checked)}
+                />
+                <span className="ups-consent-text">
+                  <span className="ups-consent-required">(필수)</span> 개인정보 수집·이용 동의
+                </span>
+              </label>
+              <button
+                type="button"
+                className="ups-consent-expand-btn"
+                onClick={() => setExpandPersonal(v => !v)}
+                aria-label="상세 보기"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.41 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.7 6.7a1 1 0 0 0-1.41.01z" fill="#aaa"/>
+                </svg>
+              </button>
+            </div>
+            {expandPersonal && (
+              <div className="ups-consent-detail">
+                <table className="ups-consent-table">
+                  <tbody>
+                    <tr><td>수집 목적</td><td>회원 식별·관리, 영양점수 기반 식품 비교 및 맞춤 추천 제공</td></tr>
+                    <tr><td>수집 항목</td><td>이름, 이메일, 성별, 생년월일</td></tr>
+                    <tr><td>보유·이용 기간</td><td>회원 탈퇴 시까지 (법령상 보존 의무 기간 이후 파기)</td></tr>
+                    <tr><td>동의 거부 권리</td><td>동의를 거부할 권리가 있으며, 거부 시 회원가입이 제한됩니다.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ② 건강정보 */}
+            <label className="ups-consent-row">
+              <input
+                type="checkbox"
+                className="ups-consent-check"
+                checked={profile.healthInfoAgreed}
+                onChange={e => set('healthInfoAgreed')(e.target.checked)}
+              />
+              <span className="ups-consent-text">
+                <span className="ups-consent-optional">(선택)</span> 건강정보 수집·이용 동의
+              </span>
+            </label>
+
+            {/* ③ 만 14세 */}
+            <label className="ups-consent-row">
+              <input
+                type="checkbox"
+                className="ups-consent-check"
+                checked={profile.ageConfirmed}
+                onChange={e => set('ageConfirmed')(e.target.checked)}
+              />
+              <span className="ups-consent-text">
+                <span className="ups-consent-required">(필수)</span> 만 14세 이상 확인
+              </span>
+            </label>
+          </div>
+        )}
+
+        {/* ── Step 2: 개인정보 ───────────────────────── */}
+        {step === 2 && (
           <>
             <TextField label="이름" placeholder="이름을 입력해 주세요" value={profile.name} onChange={set('name')} onBlur={() => validateField('name')} error={errors.name} />
             <TextField label="이메일" placeholder="이메일 주소를 입력해 주세요" type="email" value={profile.email} onChange={set('email')} onBlur={() => validateField('email')} error={errors.email} />
@@ -216,7 +315,8 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
           </>
         )}
 
-        {step === 2 && (
+        {/* ── Step 3: 신체정보 ───────────────────────── */}
+        {step === 3 && (
           <>
             <div className="ups-grid-2">
               <NumberField label="키" unit="cm" value={profile.height} onChange={set('height')} onBlur={() => validateField('height')} error={errors.height} />
@@ -231,7 +331,8 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
           </>
         )}
 
-        {step === 3 && (
+        {/* ── Step 4: 활동정보 ───────────────────────── */}
+        {step === 4 && (
           <>
             <OptionGroup
               label="직업 형태"
@@ -260,7 +361,8 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
           </>
         )}
 
-        {step === 4 && (
+        {/* ── Step 5: 식습관 ────────────────────────── */}
+        {step === 5 && (
           <>
             <StepperField label="하루 끼니 수" value={profile.daily_meal_count} min={1} max={10} onChange={v => set('daily_meal_count')(v)} />
             <StepperField label="간식 횟수" value={profile.daily_snack_count} min={0} max={10} onChange={v => set('daily_snack_count')(v)} />

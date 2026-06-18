@@ -353,6 +353,9 @@ function AppShell() {
                       email: profile.email,
                       gender: profile.gender,
                       birthDate: profile.birth_date,
+                      personalInfoAgreed: profile.personalInfoAgreed,
+                      healthInfoAgreed: profile.healthInfoAgreed,
+                      ageConfirmed: profile.ageConfirmed,
                     })
                     setOauthPending(null)
                     setIsAuthenticated(true)

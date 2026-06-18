@@ -26,6 +26,9 @@ export type RegisterPayload = {
   email: string
   gender: string
   birthDate: string
+  personalInfoAgreed: boolean
+  healthInfoAgreed: boolean
+  ageConfirmed: boolean
 }
 
 export async function register(payload: RegisterPayload): Promise<OAuthResponse> {

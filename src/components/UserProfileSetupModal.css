@@ -253,6 +253,109 @@
   border-color: #e53935 !important;
 }
 
+/* ── 동의 화면 ─────────────────────────────────────────── */
+.ups-consent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ups-consent-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.ups-consent-row--all {
+  padding-bottom: 4px;
+}
+
+.ups-consent-check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  accent-color: #525760;
+  cursor: pointer;
+}
+
+.ups-consent-text {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.ups-consent-text--all {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+}
+
+.ups-consent-required {
+  color: #111;
+  font-weight: 600;
+}
+
+.ups-consent-optional {
+  color: #777F8A;
+  font-weight: 500;
+}
+
+.ups-consent-divider {
+  height: 1px;
+  background: #e8eaec;
+  margin: 0 -4px;
+}
+
+.ups-consent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ups-consent-item .ups-consent-row {
+  flex: 1;
+}
+
+.ups-consent-expand-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 0;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.ups-consent-detail {
+  margin-left: 30px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: -8px;
+}
+
+.ups-consent-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.ups-consent-table td {
+  padding: 4px 6px;
+  vertical-align: top;
+}
+
+.ups-consent-table td:first-child {
+  white-space: nowrap;
+  color: #888;
+  font-weight: 500;
+  padding-right: 10px;
+}
+
 /* ── 스테퍼 ────────────────────────────────────────────── */
 .ups-stepper {
   display: flex;
