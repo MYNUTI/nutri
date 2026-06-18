@@ -1430,12 +1430,12 @@
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: #444;
+  color: #B0B8C1;
 }
 
 .home-chip-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   fill: currentColor;
 }
 
