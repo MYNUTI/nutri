@@ -155,7 +155,7 @@ export const FilterPage = ({
           초기화
         </button>
         <button type="button" className="fil-btn-apply" onClick={handleApply}>
-          적용하기{totalSelected > 0 ? ` ${totalSelected}` : ''}
+          적용하기{totalSelected > 0 ? ` (${totalSelected})` : ''}
         </button>
       </footer>
     </div>

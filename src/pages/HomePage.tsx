@@ -14,6 +14,8 @@ type HomePageProps = {
   selectedBrandIds: number[]
   selectedNutrients: string[]
   onCategoryChange: (ids: number[]) => void
+  selectedSort: SortKey
+  onSortChange: (sort: SortKey) => void
   onMoveToFilter: (section?: 'nutrient' | 'brand') => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
@@ -28,7 +30,7 @@ const FILTER_CHIPS = ['추천순', '성분', '브랜드'] as const
 type ChipKey = typeof FILTER_CHIPS[number]
 
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
-type SortKey = typeof SORT_OPTIONS[number]
+export type SortKey = typeof SORT_OPTIONS[number]
 
 const SORT_MAP: Record<SortKey, SortType> = {
   '추천순':     'RECOMMENDED',
@@ -52,7 +54,7 @@ function mapToProduct(p: ProductResponse): Product {
 export const HomePage = ({
   keyword, onClearKeyword,
   selectedCategoryIds, selectedBrandIds, selectedNutrients,
-  onCategoryChange,
+  onCategoryChange, selectedSort, onSortChange,
   onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick,
   isAuthenticated, onNeedLogin,
 }: HomePageProps) => {
@@ -61,7 +63,6 @@ export const HomePage = ({
 
   const [catOpen, setCatOpen] = useState(false)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
-  const [selectedSort, setSelectedSort] = useState<SortKey>('추천순')
   const [showScrollTop, setShowScrollTop] = useState(false)
 
   const { toggle, isFavorite } = useFavorites()
@@ -244,15 +245,15 @@ export const HomePage = ({
           {FILTER_CHIPS.map(label => {
             const isSort = label === '추천순'
             const isOpen = isSort && openChip === '추천순'
-            const count =
-              label === '브랜드' ? selectedBrandIds.length :
-              label === '성분' ? selectedNutrients.length : 0
+            const hasFilter =
+              (label === '브랜드' && selectedBrandIds.length > 0) ||
+              (label === '성분' && selectedNutrients.length > 0)
             const display = isSort ? selectedSort : label
             return (
               <button
                 key={label}
                 type="button"
-                className={`home-chip${isOpen ? ' home-chip--on' : ''}`}
+                className={`home-chip${isOpen || hasFilter ? ' home-chip--on' : ''}`}
                 onClick={() => {
                   if (isSort) {
                     if (openChip !== '추천순') setCatOpen(false)
@@ -264,7 +265,7 @@ export const HomePage = ({
                 }}
                 aria-expanded={isSort ? isOpen : undefined}
               >
-                {display}{count > 0 ? ` ${count}` : ''}
+                {display}
                 <span className="home-chip-chevron" aria-hidden="true">
                   {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
                 </span>
@@ -285,7 +286,7 @@ export const HomePage = ({
                       role="option"
                       aria-selected={isActive}
                       className={`home-dropdown-row${isActive ? ' home-dropdown-row--on' : ''}`}
-                      onClick={() => { setSelectedSort(opt); setOpenChip(null) }}
+                      onClick={() => { onSortChange(opt); setOpenChip(null) }}
                     >
                       {opt}
                     </button>

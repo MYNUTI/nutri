@@ -13,7 +13,7 @@ import { ComparePage } from './pages/ComparePage'
 import { FilterPage } from './pages/FilterPage'
 import { FavoritesPage } from './pages/FavoritesPage'
 import { PasswordChangePage } from './pages/PasswordChangePage'
-import { HomePage } from './pages/HomePage'
+import { HomePage, type SortKey } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyPage } from './pages/MyPage'
 import { ProductDetailPage } from './pages/ProductDetailPage'
@@ -78,6 +78,7 @@ function AppShell() {
   const [showFilter, setShowFilter] = useState(false)
   const [filterInitialSection, setFilterInitialSection] = useState<'nutrient' | 'brand' | undefined>(undefined)
   const [homeKeyword, setHomeKeyword] = useState('')
+  const [homeSort, setHomeSort] = useState<SortKey>('추천순')
   const [filterCategoryIds, setFilterCategoryIds] = useState<number[]>([])
   const [filterBrandIds, setFilterBrandIds] = useState<number[]>([])
   const [filterNutrients, setFilterNutrients] = useState<string[]>([])
@@ -241,6 +242,8 @@ function AppShell() {
             selectedBrandIds={filterBrandIds}
             selectedNutrients={filterNutrients}
             onCategoryChange={setFilterCategoryIds}
+            selectedSort={homeSort}
+            onSortChange={setHomeSort}
             onMoveToFilter={(section) => { setFilterInitialSection(section); setShowFilter(true) }}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
