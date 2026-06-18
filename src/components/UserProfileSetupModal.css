@@ -104,7 +104,7 @@
   border: 1px solid #e2e2e2;
   border-radius: 10px;
   padding: 0 14px;
-  font-size: 14px;
+  font-size: 16px;
   color: #111;
   background: #fff;
   -webkit-appearance: none;
@@ -133,7 +133,7 @@
   border: 1px solid #e2e2e2;
   border-radius: 10px;
   padding: 0 36px 0 14px;
-  font-size: 14px;
+  font-size: 16px;
   color: #111;
   background: #fff;
 }
@@ -310,7 +310,7 @@
   border: 1px solid #E8EAEC;
   border-radius: 8px;
   padding: 0 36px 0 20px;
-  font-size: 14px;
+  font-size: 16px;
   color: #111;
   background: #fff;
   appearance: none;
