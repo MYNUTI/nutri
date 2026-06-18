@@ -3,11 +3,9 @@ import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '../components/icons'
 import { useInfiniteProductListQuery } from '../queries/productQueries'
-import { useBrandsQuery } from '../queries/brandsQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import type { Product } from '../types/product'
-import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 
 type HomePageProps = {
   keyword?: string
@@ -16,8 +14,6 @@ type HomePageProps = {
   selectedBrandIds: number[]
   selectedNutrients: string[]
   onCategoryChange: (ids: number[]) => void
-  onBrandChange: (ids: number[]) => void
-  onNutrientsChange: (nutrients: string[]) => void
   onMoveToFilter: (section?: 'nutrient' | 'brand') => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
@@ -56,14 +52,10 @@ function mapToProduct(p: ProductResponse): Product {
 export const HomePage = ({
   keyword, onClearKeyword,
   selectedCategoryIds, selectedBrandIds, selectedNutrients,
-  onCategoryChange, onBrandChange, onNutrientsChange,
+  onCategoryChange,
   onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick,
   isAuthenticated, onNeedLogin,
 }: HomePageProps) => {
-  const { data: brandsData } = useBrandsQuery()
-  const brandOptions = brandsData ?? []
-  const { data: claimsData } = useNutrientClaimsQuery()
-  const claimOptions = claimsData ?? []
   const { data: categoriesData } = useCategoriesQuery()
   const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
 
@@ -304,69 +296,6 @@ export const HomePage = ({
           </div>
         )}
 
-        {openChip === '브랜드' && (
-          <div className="home-dropdown" role="dialog" aria-label="브랜드 필터">
-            <div className="home-dropdown-header">
-              <span className="home-dropdown-title">브랜드</span>
-              <button type="button" className="home-dropdown-close" aria-label="닫기" onClick={() => setOpenChip(null)}>
-                <span aria-hidden="true">▾</span>
-              </button>
-            </div>
-            <div className="home-dropdown-grid">
-              {brandOptions.map(b => (
-                <label key={b.id} className="home-dropdown-item">
-                  <input
-                    type="checkbox"
-                    className="home-dropdown-check"
-                    checked={tempBrandIds.includes(b.id)}
-                    onChange={() => setTempBrandIds(
-                      tempBrandIds.includes(b.id)
-                        ? tempBrandIds.filter(id => id !== b.id)
-                        : [...tempBrandIds, b.id]
-                    )}
-                  />
-                  <span>{b.name}</span>
-                </label>
-              ))}
-            </div>
-            <div className="home-dropdown-footer">
-              <button type="button" className="home-dropdown-reset" onClick={() => setTempBrandIds([])}>초기화</button>
-              <button type="button" className="home-dropdown-apply" onClick={() => { onBrandChange(tempBrandIds); setOpenChip(null) }}>적용하기</button>
-            </div>
-          </div>
-        )}
-
-        {openChip === '성분' && (
-          <div className="home-dropdown" role="dialog" aria-label="성분 필터">
-            <div className="home-dropdown-header">
-              <span className="home-dropdown-title">성분</span>
-              <button type="button" className="home-dropdown-close" aria-label="닫기" onClick={() => setOpenChip(null)}>
-                <span aria-hidden="true">▾</span>
-              </button>
-            </div>
-            <div className="home-dropdown-grid">
-              {claimOptions.map(opt => (
-                <label key={opt.code} className="home-dropdown-item">
-                  <input
-                    type="checkbox"
-                    className="home-dropdown-check"
-                    checked={tempNutrients.includes(opt.code)}
-                    onChange={() => setTempNutrients(
-                      tempNutrients.includes(opt.code)
-                        ? tempNutrients.filter(n => n !== opt.code)
-                        : [...tempNutrients, opt.code]
-                    )}
-                  />
-                  <span>{opt.label}</span>
-                </label>
-              ))}
-            </div>
-            <div className="home-dropdown-footer">
-              <button type="button" className="home-dropdown-reset" onClick={() => setTempNutrients([])}>초기화</button>
-              <button type="button" className="home-dropdown-apply" onClick={() => { onNutrientsChange(tempNutrients); setOpenChip(null) }}>적용하기</button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 상품 목록 영역 — catOpen 시 딤 처리 */}

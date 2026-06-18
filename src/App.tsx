@@ -241,8 +241,6 @@ function AppShell() {
             selectedBrandIds={filterBrandIds}
             selectedNutrients={filterNutrients}
             onCategoryChange={setFilterCategoryIds}
-            onBrandChange={setFilterBrandIds}
-            onNutrientsChange={setFilterNutrients}
             onMoveToFilter={(section) => { setFilterInitialSection(section); setShowFilter(true) }}
             onMoveToMyPage={() => navigate('mypage')}
             onMoveToSearch={() => navigate('search')}
