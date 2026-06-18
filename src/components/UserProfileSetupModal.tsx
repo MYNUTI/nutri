@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './UserProfileSetupModal.css'
 
 export type Profile = {
@@ -40,6 +40,12 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
   const [step, setStep] = useState(1)
   const [profile, setProfile] = useState<Profile>(initialProfile ?? initial)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
 
   const set = <K extends keyof Profile>(k: K) => (v: Profile[K]) => {
     setProfile(p => ({ ...p, [k]: v }))
@@ -113,6 +119,40 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
     return e
   }
 
+  const validateField = (field: string) => {
+    let msg = ''
+    if (field === 'name') {
+      if (!profile.name || !/^[가-힣a-zA-Z]{2,}$/.test(profile.name))
+        msg = '이름은 2자 이상 한글/영문만 입력 가능합니다'
+    } else if (field === 'email') {
+      if (!profile.email || !/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(profile.email))
+        msg = '올바른 이메일 형식을 입력해 주세요'
+    } else if (field === 'birth_date') {
+      if (!profile.birth_date) msg = '생년월일을 입력해 주세요'
+      else if (profile.birth_date > TODAY) msg = '미래 날짜는 선택할 수 없습니다'
+    } else if (field === 'height') {
+      const h = Number(profile.height)
+      if (!profile.height || isNaN(h) || h < 50 || h > 250)
+        msg = '키는 50~250cm 사이로 입력해 주세요'
+    } else if (field === 'weight') {
+      const w = Number(profile.weight)
+      if (!profile.weight || isNaN(w) || w < 10 || w > 200)
+        msg = '몸무게는 10~200kg 사이로 입력해 주세요'
+    } else if (field === 'body_fat_rate' && profile.body_fat_rate) {
+      const v = Number(profile.body_fat_rate)
+      if (isNaN(v) || v < 1 || v > 70) msg = '체지방률은 1~70% 사이로 입력해 주세요'
+    } else if (field === 'skeletal_muscle_mass' && profile.skeletal_muscle_mass) {
+      const v = Number(profile.skeletal_muscle_mass)
+      if (isNaN(v) || v < 5 || v > 100) msg = '골격근량은 5~100kg 사이로 입력해 주세요'
+    }
+    setErrors(prev => {
+      const next = { ...prev }
+      if (msg) next[field] = msg
+      else delete next[field]
+      return next
+    })
+  }
+
   const handleBack = () => {
     setErrors({})
     if (step === 1) onClose()
@@ -151,8 +191,8 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
       <div className="ups-body">
         {step === 1 && (
           <>
-            <TextField label="이름" placeholder="이름을 입력해 주세요" value={profile.name} onChange={set('name')} error={errors.name} />
-            <TextField label="이메일" placeholder="이메일 주소를 입력해 주세요" type="email" value={profile.email} onChange={set('email')} error={errors.email} />
+            <TextField label="이름" placeholder="이름을 입력해 주세요" value={profile.name} onChange={set('name')} onBlur={() => validateField('name')} error={errors.name} />
+            <TextField label="이메일" placeholder="이메일 주소를 입력해 주세요" type="email" value={profile.email} onChange={set('email')} onBlur={() => validateField('email')} error={errors.email} />
             <div className="ups-field">
               <span className="ups-field-label">성별</span>
               <div className="ups-gender">
@@ -169,6 +209,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
                 max={TODAY}
                 value={profile.birth_date}
                 onChange={e => set('birth_date')(e.target.value)}
+                onBlur={() => validateField('birth_date')}
               />
               {errors.birth_date && <span className="ups-field-error">{errors.birth_date}</span>}
             </div>
@@ -178,13 +219,13 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
         {step === 2 && (
           <>
             <div className="ups-grid-2">
-              <NumberField label="키" unit="cm" value={profile.height} onChange={set('height')} error={errors.height} />
-              <NumberField label="몸무게" unit="kg" value={profile.weight} onChange={set('weight')} error={errors.weight} />
+              <NumberField label="키" unit="cm" value={profile.height} onChange={set('height')} onBlur={() => validateField('height')} error={errors.height} />
+              <NumberField label="몸무게" unit="kg" value={profile.weight} onChange={set('weight')} onBlur={() => validateField('weight')} error={errors.weight} />
             </div>
             <p className="ups-required-hint">*필수</p>
             <div className="ups-grid-2" style={{ marginTop: 4 }}>
-              <NumberField label="체지방률" unit="%" value={profile.body_fat_rate} onChange={set('body_fat_rate')} error={errors.body_fat_rate} />
-              <NumberField label="골격근량" unit="kg" value={profile.skeletal_muscle_mass} onChange={set('skeletal_muscle_mass')} error={errors.skeletal_muscle_mass} />
+              <NumberField label="체지방률" unit="%" value={profile.body_fat_rate} onChange={set('body_fat_rate')} onBlur={() => validateField('body_fat_rate')} error={errors.body_fat_rate} />
+              <NumberField label="골격근량" unit="kg" value={profile.skeletal_muscle_mass} onChange={set('skeletal_muscle_mass')} onBlur={() => validateField('skeletal_muscle_mass')} error={errors.skeletal_muscle_mass} />
             </div>
             <p className="ups-optional-hint">*선택</p>
           </>
@@ -251,21 +292,21 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
 
 // ── 내부 컴포넌트 ──────────────────────────────────────────────
 
-type TextFieldProps = { label: string; placeholder?: string; value: string; onChange: (v: string) => void; type?: string; error?: string }
-const TextField = ({ label, placeholder, value, onChange, type = 'text', error }: TextFieldProps) => (
+type TextFieldProps = { label: string; placeholder?: string; value: string; onChange: (v: string) => void; onBlur?: () => void; type?: string; error?: string }
+const TextField = ({ label, placeholder, value, onChange, onBlur, type = 'text', error }: TextFieldProps) => (
   <div className="ups-field">
     <span className="ups-field-label">{label}</span>
-    <input className={`ups-text-input${error ? ' ups-input--error' : ''}`} type={type} placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
+    <input className={`ups-text-input${error ? ' ups-input--error' : ''}`} type={type} placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} onBlur={onBlur} />
     {error && <span className="ups-field-error">{error}</span>}
   </div>
 )
 
-type NumberFieldProps = { label: string; unit?: string; value: string; onChange: (v: string) => void; error?: string }
-const NumberField = ({ label, unit, value, onChange, error }: NumberFieldProps) => (
+type NumberFieldProps = { label: string; unit?: string; value: string; onChange: (v: string) => void; onBlur?: () => void; error?: string }
+const NumberField = ({ label, unit, value, onChange, onBlur, error }: NumberFieldProps) => (
   <div className="ups-field">
     <span className="ups-field-label">{label}</span>
     <div className="ups-num-row">
-      <input className={`ups-num-input${error ? ' ups-input--error' : ''}`} type="number" min={0} step="0.1" placeholder="0" value={value} onChange={e => onChange(e.target.value)} />
+      <input className={`ups-num-input${error ? ' ups-input--error' : ''}`} type="number" min={0} step="0.1" placeholder="0" value={value} onChange={e => onChange(e.target.value)} onBlur={onBlur} />
       {unit && <span className="ups-unit">{unit}</span>}
     </div>
     {error && <span className="ups-field-error">{error}</span>}
