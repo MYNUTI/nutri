@@ -1668,8 +1668,8 @@
   height: 30px;
   padding: 0;
   border-radius: 999px;
-  background: #2b2b2e;
-  color: #fff;
+  background: rgba(0, 0, 0, 0.08);
+  color: #444;
   font-size: 12px;
   font-weight: 700;
   display: grid;
@@ -1677,12 +1677,12 @@
   letter-spacing: -0.01em;
 }
 
-/* 등급별 배경색 */
-.home-card-grade[data-grade="A"] { background: #4CAF50; }
-.home-card-grade[data-grade="B"] { background: #8BC34A; }
-.home-card-grade[data-grade="C"] { background: #FFC107; }
-.home-card-grade[data-grade="D"] { background: #FF9800; }
-.home-card-grade[data-grade="E"] { background: #F44336; }
+/* 등급별 소프트 배지 */
+.home-card-grade[data-grade="A"] { background: rgba(76, 175, 80, 0.15); color: #2E7D32; }
+.home-card-grade[data-grade="B"] { background: rgba(139, 195, 74, 0.18); color: #558B2F; }
+.home-card-grade[data-grade="C"] { background: rgba(255, 193, 7, 0.22); color: #E65100; }
+.home-card-grade[data-grade="D"] { background: rgba(255, 152, 0, 0.18); color: #BF360C; }
+.home-card-grade[data-grade="E"] { background: rgba(244, 67, 54, 0.15); color: #C62828; }
 
 .home-card-brand {
   margin: 0;

@@ -31,6 +31,11 @@ type Props = {
 const DIET_GOALS = ['다이어트', '벌크업', '린매스업', '건강한식생활', '기타']
 const TOTAL_STEPS = 5
 const TODAY = new Date().toISOString().split('T')[0]
+const AGE_LIMIT = (() => {
+  const d = new Date()
+  d.setFullYear(d.getFullYear() - 14)
+  return d.toISOString().split('T')[0]
+})()
 
 const initial: Profile = {
   name: '', email: '', gender: '', birth_date: '',
@@ -74,7 +79,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
         profile.name && /^[가-힣a-zA-Z]{2,}$/.test(profile.name) &&
         profile.email && /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(profile.email) &&
         profile.gender &&
-        profile.birth_date && profile.birth_date <= TODAY
+        profile.birth_date && profile.birth_date <= TODAY && profile.birth_date <= AGE_LIMIT
       )
     }
     if (step === 3) {
@@ -105,6 +110,8 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
         e.birth_date = '생년월일을 입력해 주세요'
       else if (profile.birth_date > TODAY)
         e.birth_date = '미래 날짜는 선택할 수 없습니다'
+      else if (profile.birth_date > AGE_LIMIT)
+        e.birth_date = '만 14세 미만은 가입할 수 없습니다'
     }
     if (step === 3) {
       const h = Number(profile.height)
@@ -146,6 +153,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
     } else if (field === 'birth_date') {
       if (!profile.birth_date) msg = '생년월일을 입력해 주세요'
       else if (profile.birth_date > TODAY) msg = '미래 날짜는 선택할 수 없습니다'
+      else if (profile.birth_date > AGE_LIMIT) msg = '만 14세 미만은 가입할 수 없습니다'
     } else if (field === 'height') {
       const h = Number(profile.height)
       if (!profile.height || isNaN(h) || h < 50 || h > 250)
