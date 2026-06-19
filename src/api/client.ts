@@ -49,6 +49,9 @@ export async function apiFetch<T>(
     if (token) headers.set('Authorization', `Bearer ${token}`)
   }
 
+  const cohort = localStorage.getItem('cohort')
+  if (cohort) headers.set('X-Cohort', cohort)
+
   let res = await fetch(`${BASE}${path}`, { ...init, headers })
 
   // 401 → 토큰 갱신 후 재시도

@@ -92,6 +92,8 @@ function AppShell() {
   // 소셜 로그인 콜백 처리 중에는 홈이 깜빡이지 않도록 스플래시 표시
   const [oauthProcessing, setOauthProcessing] = useState(() => {
     const p = new URLSearchParams(window.location.search)
+    const src = p.get('src')
+    if (src) localStorage.setItem('cohort', src)
     return !!(p.get('code') && p.get('provider'))
   })
 
