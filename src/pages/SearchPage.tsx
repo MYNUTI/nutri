@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Product } from '../types/product'
 import { getPopularKeywords, getRecommendedKeywords, type PopularKeyword, type RecommendedKeyword } from '../api/search'
+import { logSearch } from '../api/logging'
 
 const RECOMMENDED_KEYWORDS = [
   '닭가슴살',
@@ -90,6 +91,7 @@ export const SearchPage = ({ onBack, onSubmitKeyword, onProductClick, isAuthenti
     const next = [trimmed, ...recent.filter(k => k !== trimmed)].slice(0, RECENT_MAX)
     setRecent(next)
     saveRecent(next)
+    logSearch(trimmed, 0)
     onSubmitKeyword?.(trimmed)
   }
 

@@ -1,0 +1,15 @@
+import { apiFetch } from './client'
+
+const silent = (p: Promise<unknown>) => p.catch(() => {})
+
+export const logView = (productId: number) =>
+  silent(apiFetch('/logging/view', { method: 'POST', body: JSON.stringify({ productId }) }))
+
+export const logSearch = (keyword: string, resultCount: number) =>
+  silent(apiFetch('/logging/search', { method: 'POST', body: JSON.stringify({ keyword, resultCount }) }))
+
+export const logFilter = (filterType: string, filterValue?: string) =>
+  silent(apiFetch('/logging/filter', { method: 'POST', body: JSON.stringify({ filterType, filterValue }) }))
+
+export const logCta = (productId: number) =>
+  silent(apiFetch('/logging/cta', { method: 'POST', body: JSON.stringify({ productId }) }))

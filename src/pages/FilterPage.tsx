@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useBrandsQuery } from '../queries/brandsQueries'
 import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
+import { logFilter } from '../api/logging'
 import './FilterPage.css'
 
 type FilterPageProps = {
@@ -62,6 +63,8 @@ export const FilterPage = ({
   }
 
   const handleApply = () => {
+    if (selectedBrandIds.size > 0) logFilter('BRAND', Array.from(selectedBrandIds).join(','))
+    if (selectedNutrients.size > 0) logFilter('NUTRIENT', Array.from(selectedNutrients).join(','))
     onApply?.({
       categoryIds: initialCategoryIds,
       brandIds: Array.from(selectedBrandIds),

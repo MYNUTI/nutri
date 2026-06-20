@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { logFilter } from '../api/logging'
 import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '../components/icons'
@@ -286,7 +287,7 @@ export const HomePage = ({
                       role="option"
                       aria-selected={isActive}
                       className={`home-dropdown-row${isActive ? ' home-dropdown-row--on' : ''}`}
-                      onClick={() => { onSortChange(opt); setOpenChip(null) }}
+                      onClick={() => { onSortChange(opt); setOpenChip(null); logFilter('SORT', opt) }}
                     >
                       {opt}
                     </button>

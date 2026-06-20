@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { logView, logCta } from '../api/logging'
 import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useProductDetailQuery } from '../queries/productQueries'
@@ -71,6 +72,8 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
 
   const reviewQuery = useProductReviewsQuery(product.id)
   const reviewData = reviewQuery.data
+
+  useEffect(() => { logView(product.id) }, [product.id])
 
   const handleFav = () => {
     if (!isAuthenticated) { setShowLoginPrompt(true); return }
@@ -315,6 +318,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
             target="_blank"
             rel="noopener noreferrer"
             className="det-coupang-btn"
+            onClick={() => logCta(product.id)}
           >
             쿠팡 바로가기
           </a>

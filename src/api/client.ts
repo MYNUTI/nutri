@@ -1,5 +1,21 @@
 const BASE = '/api'
 
+function getAnonymousId(): string {
+  let id = localStorage.getItem('anonymousId')
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem('anonymousId', id) }
+  return id
+}
+
+function getSessionId(): string {
+  const TIMEOUT = 30 * 60 * 1000
+  const now = Date.now()
+  const last = Number(localStorage.getItem('sessionLastActivity') || 0)
+  let sid = localStorage.getItem('sessionId')
+  if (!sid || now - last > TIMEOUT) { sid = crypto.randomUUID(); localStorage.setItem('sessionId', sid) }
+  localStorage.setItem('sessionLastActivity', String(now))
+  return sid
+}
+
 // 동시 다발 refresh 방지: 진행 중인 refresh가 있으면 같은 Promise 공유
 let refreshingPromise: Promise<string | null> | null = null
 
@@ -49,6 +65,8 @@ export async function apiFetch<T>(
     if (token) headers.set('Authorization', `Bearer ${token}`)
   }
 
+  headers.set('X-Anonymous-Id', getAnonymousId())
+  headers.set('X-Session-Id', getSessionId())
   const cohort = localStorage.getItem('cohort')
   if (cohort) headers.set('X-Cohort', cohort)
 
