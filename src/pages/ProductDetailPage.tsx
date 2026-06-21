@@ -245,7 +245,8 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
             )}
             {NUTRITION_DEFS.map(({ key, label, unit, boundKey, fallbackMax }) => {
               const val = detail?.nutrients?.[key] ?? 0
-              const bounds = detail?.nutrientBounds ?? DEFAULT_BOUNDS
+              // 비로그인은 서버 값 무시하고 항상 670kcal 기준 DEFAULT_BOUNDS 사용
+              const bounds = isAuthenticated ? (detail?.nutrientBounds ?? DEFAULT_BOUNDS) : DEFAULT_BOUNDS
               const maxVal = (bounds[boundKey] as number) || fallbackMax
               const pct = Math.min(100, (val / maxVal) * 100)
               return (
@@ -254,15 +255,16 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                     <span className="det-nut-circle-char">{NUTRIENT_CHAR[key]}</span>
                   </div>
                   <div className="det-nut-body">
-                    <div className="det-nut-bar-row">
-                      <div className="det-nut-bar-track">
-                        <div className="det-nut-bar-fill" style={{ width: `${pct}%` }} />
-                      </div>
-                      <span className="det-nut-pct">{fmt1(maxVal)}{unit}</span>
+                    <div className="det-nut-head">
+                      <span className="det-nut-label">{label}</span>
+                      <span className="det-nut-bound-label">한끼 권장 섭취량</span>
+                    </div>
+                    <div className="det-nut-bar-track">
+                      <div className="det-nut-bar-fill" style={{ width: `${pct}%` }} />
                     </div>
                     <div className="det-nut-meta">
-                      <span className="det-nut-label">{label}</span>
                       <span className="det-nut-value">{fmt1(val)}{unit}</span>
+                      <span className="det-nut-pct">{fmt1(maxVal)}{unit}</span>
                     </div>
                   </div>
                 </div>
