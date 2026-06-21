@@ -1,5 +1,6 @@
 import { BackArrowIcon } from '../components/icons'
 import type { Product } from '../types/product'
+import { displayCategoryName } from '../queries/categoriesQueries'
 import './ComparePage.css'
 
 // ── Radar Chart ───────────────────────────────────────────────
@@ -210,7 +211,7 @@ function CompareCard({
         <img src={product.image} alt={product.name} className="compare-card-img" />
         <div className="compare-card-product-info">
           <p className="compare-card-name">{product.name}</p>
-          <p className="compare-card-price">{product.category?.name ?? '-'}</p>
+          <p className="compare-card-price">{displayCategoryName(product.category?.name)}</p>
         </div>
       </div>
 
@@ -276,7 +277,7 @@ export function ComparePage({ products, onBack }: ComparePageProps) {
         </div>
         <div className="compare-featured-info">
           <h3 className="compare-featured-name">{p0.name}</h3>
-          <p className="compare-featured-price">{p0.category?.name ?? '-'}</p>
+          <p className="compare-featured-price">{displayCategoryName(p0.category?.name)}</p>
           <p className="compare-featured-stars">★★★★★</p>
         </div>
       </div>
