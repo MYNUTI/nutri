@@ -18,9 +18,7 @@ export const useInfiniteProductListQuery = (condition: ProductSearchCondition = 
       const totalPages = Math.ceil(lastPage.total / lastPage.size)
       return nextPage < totalPages ? nextPage : undefined
     },
-    staleTime: 1000 * 60 * 3,
     refetchOnWindowFocus: false,
-    maxPages: 10,
   })
 
 export const useProductDetailQuery = (id: number) =>

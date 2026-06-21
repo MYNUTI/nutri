@@ -70,6 +70,7 @@ export const HomePage = ({
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
+  const scrollReadyRef = useRef(false)
 
   useEffect(() => {
     if (catOpen || !catsScrollRef.current) return
@@ -91,27 +92,27 @@ export const HomePage = ({
 
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteProductListQuery(condition)
-  const products = (data?.pages.flatMap(p => p.items) ?? []).filter(p => !!p.imageUrl)
+  const products = data?.pages.flatMap(p => p.items) ?? []
+
+  useEffect(() => {
+    scrollReadyRef.current = false
+    const timer = setTimeout(() => { scrollReadyRef.current = true }, 700)
+    return () => { clearTimeout(timer); scrollReadyRef.current = false }
+  }, [])
 
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return
 
-    let handler: (() => void) | null = null
-
-    const timer = setTimeout(() => {
-      handler = () => {
-        const scrollTop = window.scrollY
-        const clientHeight = window.innerHeight
-        const scrollHeight = document.documentElement.scrollHeight
-        if (scrollHeight - scrollTop - clientHeight < 300) fetchNextPage()
-      }
-      window.addEventListener('scroll', handler, { passive: true })
-    }, 700)
-
-    return () => {
-      clearTimeout(timer)
-      if (handler) window.removeEventListener('scroll', handler)
+    const handleScroll = () => {
+      if (!scrollReadyRef.current) return
+      const scrollTop = window.scrollY
+      const clientHeight = window.innerHeight
+      const scrollHeight = document.documentElement.scrollHeight
+      if (scrollHeight - scrollTop - clientHeight < 300) fetchNextPage()
     }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
   useEffect(() => {
