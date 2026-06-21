@@ -240,9 +240,12 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                 </div>
               )
             })()}
-            {detail?.nutrients?.servingSize != null && (
-              <p className="det-nut-serving">1회 제공량 {detail.nutrients.servingSize} 기준</p>
-            )}
+            <div className="det-nut-serving-row">
+              {detail?.nutrients?.servingSize != null && (
+                <span className="det-nut-serving">1회 제공량 {detail.nutrients.servingSize} 기준</span>
+              )}
+              <span className="det-nut-serving-bound">한끼 권장 섭취량</span>
+            </div>
             {NUTRITION_DEFS.map(({ key, label, unit, boundKey, fallbackMax }) => {
               const val = detail?.nutrients?.[key] ?? 0
               // 비로그인은 서버 값 무시하고 항상 670kcal 기준 DEFAULT_BOUNDS 사용
@@ -255,10 +258,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                     <span className="det-nut-circle-char">{NUTRIENT_CHAR[key]}</span>
                   </div>
                   <div className="det-nut-body">
-                    <div className="det-nut-head">
-                      <span className="det-nut-label">{label}</span>
-                      <span className="det-nut-bound-label">한끼 권장 섭취량</span>
-                    </div>
+                    <span className="det-nut-label">{label}</span>
                     <div className="det-nut-bar-track">
                       <div className="det-nut-bar-fill" style={{ width: `${pct}%` }} />
                     </div>

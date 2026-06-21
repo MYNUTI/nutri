@@ -369,10 +369,23 @@
   gap: 0;
 }
 
-.det-nut-serving {
+.det-nut-serving-row {
+  display: flex;
+  align-items: center;
   margin: 12px 22px 4px;
+}
+
+.det-nut-serving {
   font-size: 12px;
   color: #8a8a8e;
+  letter-spacing: -0.01em;
+}
+
+.det-nut-serving-bound {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #777F8A;
   letter-spacing: -0.01em;
 }
 
@@ -444,20 +457,7 @@
   justify-content: space-between;
 }
 
-.det-nut-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .det-nut-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #777F8A;
-  letter-spacing: -0.01em;
-}
-
-.det-nut-bound-label {
   font-size: 12px;
   font-weight: 600;
   color: #777F8A;
