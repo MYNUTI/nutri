@@ -12,7 +12,7 @@ export const useInfiniteProductListQuery = (condition: ProductSearchCondition = 
   useInfiniteQuery({
     queryKey: productKeys.list(condition),
     queryFn: ({ pageParam }) => searchProducts({ ...condition, page: pageParam }),
-    initialPageParam: 1,
+    initialPageParam: 0,
     getNextPageParam: (lastPage) => {
       const nextPage = lastPage.page + 1
       const totalPages = Math.ceil(lastPage.total / lastPage.size)
