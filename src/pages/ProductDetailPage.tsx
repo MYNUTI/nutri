@@ -58,6 +58,9 @@ const NUTRIENT_CHAR: Record<string, string> = {
   sodium:       '나',
 }
 
+// 영양성분 값 표시: 소수점 한 자리까지만 (초과분 절삭)
+const fmt1 = (n: number) => String(Math.trunc(Math.round(n * 100) / 10) / 10)
+
 function formatDate(iso: string): string {
   const d = new Date(iso)
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
@@ -255,11 +258,11 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                       <div className="det-nut-bar-track">
                         <div className="det-nut-bar-fill" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="det-nut-pct">{maxVal}{unit}</span>
+                      <span className="det-nut-pct">{fmt1(maxVal)}{unit}</span>
                     </div>
                     <div className="det-nut-meta">
                       <span className="det-nut-label">{label}</span>
-                      <span className="det-nut-value">{val}{unit}</span>
+                      <span className="det-nut-value">{fmt1(val)}{unit}</span>
                     </div>
                   </div>
                 </div>
