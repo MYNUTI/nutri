@@ -29,6 +29,23 @@ export type NutrientsResponse = {
   sodium: number
 }
 
+// ── 영양소 권장범위 (상세) ───────────────────────────────────────────
+export type NutrientBounds = {
+  caloriesMax: number
+  carbMax: number
+  carbMin: number
+  sugarMax: number
+  proteinMin: number
+  proteinMax: number
+  fatMax: number
+  fatMin: number
+  saturatedFatMax: number
+  transFatMax: number
+  cholesterolMax: number
+  sodiumMax: number
+  fiberTarget: number
+}
+
 // ── 쿠팡 연동 정보 (상세) ─────────────────────────────────────────
 export type CoupangInfo = {
   affiliateUrl: string
@@ -58,6 +75,7 @@ export type ProductDetailResponse = {
   grade: string
   category: CategoryRef
   nutrients: NutrientsResponse
+  nutrientBounds: NutrientBounds | null
   pns: PnsResponse
   coupang: CoupangInfo | null
   favorited: boolean

@@ -4,7 +4,7 @@ import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useProductDetailQuery } from '../queries/productQueries'
 import { useProductReviewsQuery } from '../queries/reviewsQueries'
-import type { NutrientsResponse } from '../api/products/types'
+import type { NutrientsResponse, NutrientBounds } from '../api/products/types'
 import type { Product } from '../types/product'
 import './ProductDetailPage.css'
 
@@ -17,16 +17,33 @@ type ProductDetailPageProps = {
   onNeedLogin?: () => void
 }
 
-const NUTRITION_DEFS: { key: keyof NutrientsResponse; label: string; unit: string; max: number }[] = [
-  { key: 'calories',     label: '열량',      unit: 'kcal', max: 2000 },
-  { key: 'carbohydrate', label: '탄수화물',  unit: 'g',    max: 324  },
-  { key: 'sugar',        label: '당류',      unit: 'g',    max: 100  },
-  { key: 'protein',      label: '단백질',    unit: 'g',    max: 55   },
-  { key: 'fat',          label: '지방',      unit: 'g',    max: 54   },
-  { key: 'saturatedFat', label: '포화지방',  unit: 'g',    max: 15   },
-  { key: 'transFat',     label: '트랜스지방', unit: 'g',   max: 2.2  },
-  { key: 'cholesterol',  label: '콜레스테롤', unit: 'mg',  max: 300  },
-  { key: 'sodium',       label: '나트륨',    unit: 'mg',   max: 2000 },
+// 비로그인 기본값: 670kcal (EER 2000 × mealRatio 1/3) 기준
+const DEFAULT_BOUNDS: NutrientBounds = {
+  caloriesMax:     670,
+  carbMax:         Math.round(2000 * 0.65 / 4 / 3),   // 108
+  carbMin:         Math.round(2000 * 0.55 / 4 / 3),   // 92
+  sugarMax:        Math.round(2000 * 0.10 / 4 / 3),   // 17
+  proteinMin:      Math.round(2000 * 0.10 / 4 / 3),   // 17
+  proteinMax:      Math.round(2000 * 0.20 / 4 / 3),   // 33
+  fatMax:          Math.round(2000 * 0.30 / 9 / 3),   // 22
+  fatMin:          Math.round(2000 * 0.15 / 9 / 3),   // 11
+  saturatedFatMax: Math.round(2000 * 0.07 / 9 / 3),  // 5
+  transFatMax:     Math.round(2000 * 0.01 / 9 / 3 * 10) / 10, // 0.7
+  cholesterolMax:  300,
+  sodiumMax:       Math.round(2300 / 3),              // 767
+  fiberTarget:     Math.round(25 / 3),                // 8
+}
+
+const NUTRITION_DEFS: { key: keyof NutrientsResponse; label: string; unit: string; boundKey: keyof NutrientBounds; fallbackMax: number }[] = [
+  { key: 'calories',     label: '열량',       unit: 'kcal', boundKey: 'caloriesMax',     fallbackMax: 2000 },
+  { key: 'carbohydrate', label: '탄수화물',   unit: 'g',    boundKey: 'carbMax',         fallbackMax: 324  },
+  { key: 'sugar',        label: '당류',        unit: 'g',    boundKey: 'sugarMax',        fallbackMax: 100  },
+  { key: 'protein',      label: '단백질',      unit: 'g',    boundKey: 'proteinMax',      fallbackMax: 55   },
+  { key: 'fat',          label: '지방',         unit: 'g',    boundKey: 'fatMax',          fallbackMax: 54   },
+  { key: 'saturatedFat', label: '포화지방',    unit: 'g',    boundKey: 'saturatedFatMax', fallbackMax: 15   },
+  { key: 'transFat',     label: '트랜스지방',  unit: 'g',    boundKey: 'transFatMax',     fallbackMax: 2.2  },
+  { key: 'cholesterol',  label: '콜레스테롤',  unit: 'mg',   boundKey: 'cholesterolMax',  fallbackMax: 300  },
+  { key: 'sodium',       label: '나트륨',       unit: 'mg',   boundKey: 'sodiumMax',       fallbackMax: 2000 },
 ]
 
 const NUTRIENT_CHAR: Record<string, string> = {
@@ -223,9 +240,11 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
             {detail?.nutrients?.servingSize != null && (
               <p className="det-nut-serving">1회 제공량 {detail.nutrients.servingSize} 기준</p>
             )}
-            {NUTRITION_DEFS.map(({ key, label, unit, max }) => {
+            {NUTRITION_DEFS.map(({ key, label, unit, boundKey, fallbackMax }) => {
               const val = detail?.nutrients?.[key] ?? 0
-              const pct = Math.min(100, (val / max) * 100)
+              const bounds = detail?.nutrientBounds ?? DEFAULT_BOUNDS
+              const maxVal = (bounds[boundKey] as number) || fallbackMax
+              const pct = Math.min(100, (val / maxVal) * 100)
               return (
                 <div key={key} className="det-nut-row">
                   <div className="det-nut-circle">
@@ -236,7 +255,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                       <div className="det-nut-bar-track">
                         <div className="det-nut-bar-fill" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="det-nut-pct">{Math.round(pct)}%</span>
+                      <span className="det-nut-pct">{maxVal}{unit}</span>
                     </div>
                     <div className="det-nut-meta">
                       <span className="det-nut-label">{label}</span>
