@@ -96,16 +96,22 @@ export const HomePage = ({
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return
 
-    const handleScroll = () => {
-      const scrollTop = window.scrollY
-      const clientHeight = window.innerHeight
-      const scrollHeight = document.documentElement.scrollHeight
-      if (scrollHeight - scrollTop - clientHeight < 300) fetchNextPage()
-    }
+    let handler: (() => void) | null = null
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
+    const timer = setTimeout(() => {
+      handler = () => {
+        const scrollTop = window.scrollY
+        const clientHeight = window.innerHeight
+        const scrollHeight = document.documentElement.scrollHeight
+        if (scrollHeight - scrollTop - clientHeight < 300) fetchNextPage()
+      }
+      window.addEventListener('scroll', handler, { passive: true })
+    }, 700)
+
+    return () => {
+      clearTimeout(timer)
+      if (handler) window.removeEventListener('scroll', handler)
+    }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
   useEffect(() => {
