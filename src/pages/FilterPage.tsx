@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useBrandsQuery } from '../queries/brandsQueries'
+import { useBrandsQuery, useCategoryBrandsQuery } from '../queries/brandsQueries'
 import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 import { logFilter } from '../api/logging'
 import './FilterPage.css'
@@ -34,8 +34,11 @@ export const FilterPage = ({
   onClose,
   onApply,
 }: FilterPageProps) => {
-  const { data: brandsData } = useBrandsQuery()
-  const brandList = brandsData ?? []
+  // 카테고리가 선택돼 있으면 해당 카테고리 브랜드만, 아니면 전체 브랜드
+  const categoryId = initialCategoryIds[0]
+  const { data: allBrands } = useBrandsQuery()
+  const { data: categoryBrands } = useCategoryBrandsQuery(categoryId)
+  const brandList = categoryId != null ? (categoryBrands ?? []) : (allBrands ?? [])
   const { data: claimsData } = useNutrientClaimsQuery()
   const claimOptions = claimsData ?? []
 
@@ -112,18 +115,24 @@ export const FilterPage = ({
             <ChevronIcon className={`fil-chevron${brandOpen ? ' fil-chevron--up' : ''}`} />
           </button>
           {brandOpen && (
-            <div className="fil-chips">
-              {brandList.map(b => (
-                <button
-                  key={b.id}
-                  type="button"
-                  className={`fil-chip${selectedBrandIds.has(b.id) ? ' fil-chip--on' : ''}`}
-                  onClick={() => setSelectedBrandIds(toggleNum(selectedBrandIds, b.id))}
-                >
-                  {b.name}
-                </button>
-              ))}
-            </div>
+            brandList.length > 0 ? (
+              <div className="fil-chips">
+                {brandList.map(b => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    className={`fil-chip${selectedBrandIds.has(b.id) ? ' fil-chip--on' : ''}`}
+                    onClick={() => setSelectedBrandIds(toggleNum(selectedBrandIds, b.id))}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="fil-empty">
+                {categoryId != null ? '이 카테고리에 등록된 브랜드가 없어요.' : '브랜드를 불러오는 중...'}
+              </p>
+            )
           )}
         </section>
 
