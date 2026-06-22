@@ -40,6 +40,23 @@ const SORT_MAP: Record<SortKey, SortType> = {
   '정확도순':   'ACCURACY',
 }
 
+// 카테고리명 → 이미지 (public/categories/). 없는 카테고리는 글자로 폴백
+const CATEGORY_IMAGES: Record<string, string> = {
+  '음료류':         '/categories/drink.png',
+  '쉐이크, 프로틴':  '/categories/shake_prot.png',
+  '스낵, 빵, 디저트': '/categories/snack.png',
+  '닭고기':         '/categories/chicken.png',
+  '유제품':         '/categories/dairy.png',
+  '견과류':         '/categories/nuts.png',
+  '유지류·소스':     '/categories/oils.png',
+  '밥 / 식사류':     '/categories/meal.png',
+  '곡류, 시리얼':    '/categories/mean.png',
+  '면류':           '/categories/noodle.png',
+  '수산물':         '/categories/aquatic.png',
+  '돼지, 소, 오리':   '/categories/meat.png',
+  '식물성 단백질':   '/categories/veget_prot.png',
+}
+
 function mapToProduct(p: ProductResponse): Product {
   return {
     id: p.id,
@@ -228,17 +245,24 @@ export const HomePage = ({
                 <span className="home-cat-panel-icon">전체</span>
                 <span className="home-cat-panel-label">전체</span>
               </button>
-              {categories.map(c => (
-                <button
-                  key={c.id}
-                  type="button"
-                  className={`home-cat-panel-item${selectedCategoryIds.includes(c.id) ? ' home-cat-panel-item--on' : ''}`}
-                  onClick={() => handleCatSelect(c.id)}
-                >
-                  <span className="home-cat-panel-icon">{c.name.slice(0, 2)}</span>
-                  <span className="home-cat-panel-label">{c.name}</span>
-                </button>
-              ))}
+              {categories.map(c => {
+                const img = CATEGORY_IMAGES[c.name]
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`home-cat-panel-item${selectedCategoryIds.includes(c.id) ? ' home-cat-panel-item--on' : ''}`}
+                    onClick={() => handleCatSelect(c.id)}
+                  >
+                    <span className="home-cat-panel-icon">
+                      {img
+                        ? <img src={img} alt="" className="home-cat-panel-img" />
+                        : c.name.slice(0, 2)}
+                    </span>
+                    <span className="home-cat-panel-label">{c.name}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}
