@@ -245,7 +245,7 @@ function AppShell() {
             selectedCategoryIds={filterCategoryIds}
             selectedBrandIds={filterBrandIds}
             selectedNutrients={filterNutrients}
-            onCategoryChange={setFilterCategoryIds}
+            onCategoryChange={(ids) => { setFilterCategoryIds(ids); setFilterBrandIds([]) }}
             selectedSort={homeSort}
             onSortChange={setHomeSort}
             onMoveToFilter={(section) => { setFilterInitialSection(section); setShowFilter(true) }}

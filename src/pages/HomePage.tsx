@@ -27,7 +27,7 @@ type HomePageProps = {
   onNeedLogin?: () => void
 }
 
-const FILTER_CHIPS = ['추천순', '성분', '브랜드'] as const
+const FILTER_CHIPS = ['추천순', '영양성분', '브랜드'] as const
 type ChipKey = typeof FILTER_CHIPS[number]
 
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
@@ -279,7 +279,7 @@ export const HomePage = ({
             const isOpen = isSort && openChip === '추천순'
             const hasFilter =
               (label === '브랜드' && selectedBrandIds.length > 0) ||
-              (label === '성분' && selectedNutrients.length > 0)
+              (label === '영양성분' && selectedNutrients.length > 0)
             const display = isSort ? selectedSort : label
             return (
               <button
@@ -292,7 +292,7 @@ export const HomePage = ({
                     setOpenChip(openChip === '추천순' ? null : '추천순')
                   } else {
                     setCatOpen(false)
-                    onMoveToFilter(label === '성분' ? 'nutrient' : 'brand')
+                    onMoveToFilter(label === '영양성분' ? 'nutrient' : 'brand')
                   }
                 }}
                 aria-expanded={isSort ? isOpen : undefined}

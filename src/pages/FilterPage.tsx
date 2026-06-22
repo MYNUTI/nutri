@@ -90,7 +90,7 @@ export const FilterPage = ({
       <div className="fil-body">
         <section className="fil-section">
           <button type="button" className="fil-section-head" onClick={() => setNutrientOpen(v => !v)}>
-            <span className="fil-section-label">성분</span>
+            <span className="fil-section-label">영양성분</span>
             <ChevronIcon className={`fil-chevron${nutrientOpen ? ' fil-chevron--up' : ''}`} />
           </button>
           {nutrientOpen && (
