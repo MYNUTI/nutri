@@ -774,9 +774,15 @@
 .rv-empty-write-btn:hover { background: #3e454e; }
 
 /* ── 리뷰 작성/수정 폼 (전체화면 오버레이) ─────────── */
+/* PC에서도 mobile-page(max-width:420px) 안에 갇히도록 oauth-splash 패턴 사용 */
 .rv-form-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
   z-index: 200;
   background: #fff;
   display: flex;
@@ -866,6 +872,14 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 상품 정보 하단 구분선 (SVG y=200, h=8, #F2F3F5) */
+.rv-form-divider {
+  height: 8px;
+  background: #F2F3F5;
+  margin: 0 -24px;
+  flex-shrink: 0;
 }
 
 /* 별점 선택 (SVG: 5개 star, 중앙 정렬, 간격 36px 단위) */

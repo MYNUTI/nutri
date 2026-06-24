@@ -134,6 +134,9 @@ function ReviewForm({ productName, productImage, editTarget, onClose, onSubmit, 
           <span className="rv-form-product-name">{productName}</span>
         </div>
 
+        {/* 구분선 (SVG y=200, h=8, #F2F3F5) */}
+        <div className="rv-form-divider" />
+
         {/* 별점 선택 */}
         <div className="rv-star-selector">
           {[1, 2, 3, 4, 5].map(i => (
@@ -164,7 +167,7 @@ function ReviewForm({ productName, productImage, editTarget, onClose, onSubmit, 
           className="rv-textarea"
           value={content}
           onChange={e => setContent(e.target.value)}
-          placeholder="이 상품에 대한 솔직한 리뷰를 작성해주세요."
+          placeholder="최소 10자 이상 입력해주세요."
           maxLength={500}
         />
         <div className="rv-char-count">{content.length} / 500</div>
@@ -178,7 +181,7 @@ function ReviewForm({ productName, productImage, editTarget, onClose, onSubmit, 
           onClick={handleSubmit}
           disabled={submitting || score === 0}
         >
-          {submitting ? '처리 중...' : isEdit ? '수정 완료' : '리뷰 등록'}
+          {submitting ? '처리 중...' : isEdit ? '수정 완료' : '등록하기'}
         </button>
       </div>
     </div>
@@ -487,7 +490,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                       <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
                       </svg>
-                      리뷰 작성
+                      리뷰 쓰기
                     </button>
                   )}
                   {isAuthenticated && ownReview && (
@@ -503,7 +506,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                       <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
                       </svg>
-                      리뷰 작성
+                      리뷰 쓰기
                     </button>
                   )}
                 </div>
