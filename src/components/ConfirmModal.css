@@ -1,0 +1,9 @@
+@import './LoginPromptModal.css';
+
+.lpm-btn--danger {
+  background: #e53e3e;
+  color: #fff;
+}
+.lpm-btn--danger:hover {
+  background: #c53030;
+}

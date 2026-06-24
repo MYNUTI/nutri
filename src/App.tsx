@@ -102,7 +102,8 @@ function AppShell() {
   // 로그인 상태일 때 찜 목록을 서버에서 로드해 FavoritesContext 동기화
   useLikesQuery(isAuthenticated)
   // 앱 시작 시 토큰 유효성 검증 — 만료 시 auth:logout 이벤트로 자동 로그아웃
-  useMyPageQuery(isAuthenticated)
+  const myPageQuery = useMyPageQuery(isAuthenticated)
+  const myNickname = myPageQuery.data?.nickname
 
   // OAuth 콜백: URL ?code=xxx&provider=PROVIDER 감지 → /auth/oauth 호출
   useEffect(() => {
@@ -265,6 +266,7 @@ function AppShell() {
             onBack={() => { setSelectedProduct(null); navigate('home') }}
             isAuthenticated={isAuthenticated}
             onNeedLogin={() => navigate('login')}
+            myNickname={myNickname}
           />
         ) : null
       case 'search':

@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react'
 import { logView, logCta } from '../api/logging'
 import { LoginPromptModal } from '../components/LoginPromptModal'
+import { ConfirmModal } from '../components/ConfirmModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useProductDetailQuery } from '../queries/productQueries'
-import { useProductReviewsQuery } from '../queries/reviewsQueries'
+import {
+  useProductReviewsQuery,
+  useCreateReviewMutation,
+  useUpdateReviewMutation,
+  useDeleteReviewMutation,
+} from '../queries/reviewsQueries'
+import type { ReviewItem } from '../api/reviews'
 import type { NutrientsResponse, NutrientBounds } from '../api/products/types'
 import type { Product } from '../types/product'
 import './ProductDetailPage.css'
@@ -15,23 +22,24 @@ type ProductDetailPageProps = {
   onBack: () => void
   isAuthenticated?: boolean
   onNeedLogin?: () => void
+  myNickname?: string
 }
 
 // 비로그인 기본값: 670kcal (EER 2000 × mealRatio 1/3) 기준
 const DEFAULT_BOUNDS: NutrientBounds = {
   caloriesMax:     670,
-  carbMax:         Math.round(2000 * 0.65 / 4 / 3),   // 108
-  carbMin:         Math.round(2000 * 0.55 / 4 / 3),   // 92
-  sugarMax:        Math.round(2000 * 0.10 / 4 / 3),   // 17
-  proteinMin:      Math.round(2000 * 0.10 / 4 / 3),   // 17
-  proteinMax:      Math.round(2000 * 0.20 / 4 / 3),   // 33
-  fatMax:          Math.round(2000 * 0.30 / 9 / 3),   // 22
-  fatMin:          Math.round(2000 * 0.15 / 9 / 3),   // 11
-  saturatedFatMax: Math.round(2000 * 0.07 / 9 / 3),  // 5
-  transFatMax:     Math.round(2000 * 0.01 / 9 / 3 * 10) / 10, // 0.7
+  carbMax:         Math.round(2000 * 0.65 / 4 / 3),
+  carbMin:         Math.round(2000 * 0.55 / 4 / 3),
+  sugarMax:        Math.round(2000 * 0.10 / 4 / 3),
+  proteinMin:      Math.round(2000 * 0.10 / 4 / 3),
+  proteinMax:      Math.round(2000 * 0.20 / 4 / 3),
+  fatMax:          Math.round(2000 * 0.30 / 9 / 3),
+  fatMin:          Math.round(2000 * 0.15 / 9 / 3),
+  saturatedFatMax: Math.round(2000 * 0.07 / 9 / 3),
+  transFatMax:     Math.round(2000 * 0.01 / 9 / 3 * 10) / 10,
   cholesterolMax:  300,
-  sodiumMax:       Math.round(2300 / 3),              // 767
-  fiberTarget:     Math.round(25 / 3),                // 8
+  sodiumMax:       Math.round(2300 / 3),
+  fiberTarget:     Math.round(25 / 3),
 }
 
 const NUTRITION_DEFS: { key: keyof NutrientsResponse; label: string; unit: string; boundKey: keyof NutrientBounds; fallbackMax: number }[] = [
@@ -58,7 +66,6 @@ const NUTRIENT_CHAR: Record<string, string> = {
   sodium:       '나',
 }
 
-// 영양성분 값 표시: 소수점 한 자리까지만 (초과분 절삭)
 const fmt1 = (n: number) => String(Math.trunc(Math.round(n * 100) / 10) / 10)
 
 function formatDate(iso: string): string {
@@ -81,17 +88,124 @@ function StarRow({ score, size = 14, filledColor = '#facc15' }: { score: number;
   )
 }
 
-export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogin }: ProductDetailPageProps) => {
+// 리뷰 작성/수정 폼 (전체 화면 오버레이)
+type ReviewFormProps = {
+  productName: string
+  productImage: string
+  editTarget?: ReviewItem | null
+  onClose: () => void
+  onSubmit: (score: number, content: string) => Promise<void>
+  submitting: boolean
+}
+
+function ReviewForm({ productName, productImage, editTarget, onClose, onSubmit, submitting }: ReviewFormProps) {
+  const [score, setScore] = useState(editTarget?.scoreOverall ?? 0)
+  const [content, setContent] = useState(editTarget?.content ?? '')
+  const [hovered, setHovered] = useState(0)
+
+  const isEdit = !!editTarget
+
+  const handleSubmit = async () => {
+    if (score === 0) return
+    await onSubmit(score, content)
+  }
+
+  return (
+    <div className="rv-form-overlay">
+      {/* 헤더 */}
+      <div className="rv-form-header">
+        <button type="button" className="rv-form-back" onClick={onClose} aria-label="닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="#1f1f22"/>
+          </svg>
+        </button>
+        <span className="rv-form-title">{isEdit ? '리뷰 수정' : '리뷰 작성'}</span>
+      </div>
+
+      <div className="rv-form-body">
+        {/* 상품 정보 */}
+        <div className="rv-form-product">
+          <div className="rv-form-product-img">
+            {productImage
+              ? <img src={productImage} alt={productName} />
+              : <div className="rv-form-product-img-placeholder" />
+            }
+          </div>
+          <span className="rv-form-product-name">{productName}</span>
+        </div>
+
+        {/* 별점 선택 */}
+        <div className="rv-star-selector">
+          {[1, 2, 3, 4, 5].map(i => (
+            <button
+              key={i}
+              type="button"
+              className="rv-star-btn"
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(0)}
+              onClick={() => setScore(i)}
+              aria-label={`${i}점`}
+            >
+              <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  fill={i <= (hovered || score) ? '#525760' : '#D9DCE0'}
+                />
+              </svg>
+            </button>
+          ))}
+        </div>
+        {score === 0 && (
+          <p className="rv-star-hint">별점을 선택해 주세요</p>
+        )}
+
+        {/* 리뷰 내용 */}
+        <textarea
+          className="rv-textarea"
+          value={content}
+          onChange={e => setContent(e.target.value)}
+          placeholder="이 상품에 대한 솔직한 리뷰를 작성해주세요."
+          maxLength={500}
+        />
+        <div className="rv-char-count">{content.length} / 500</div>
+      </div>
+
+      {/* 제출 버튼 */}
+      <div className="rv-form-footer">
+        <button
+          type="button"
+          className="rv-submit-btn"
+          onClick={handleSubmit}
+          disabled={submitting || score === 0}
+        >
+          {submitting ? '처리 중...' : isEdit ? '수정 완료' : '리뷰 등록'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogin, myNickname }: ProductDetailPageProps) => {
   const { isFavorite, toggle } = useFavorites()
   const faved = isFavorite(product.id)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const [tab, setTab] = useState<Tab>('nutrition')
+
+  // 리뷰 폼 상태
+  const [showForm, setShowForm] = useState(false)
+  const [editTarget, setEditTarget] = useState<ReviewItem | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null)
+  const [confirmAlert, setConfirmAlert] = useState<string | null>(null)
 
   const detailQuery = useProductDetailQuery(product.id)
   const detail = detailQuery.data
 
   const reviewQuery = useProductReviewsQuery(product.id)
   const reviewData = reviewQuery.data
+
+  const createMutation = useCreateReviewMutation(product.id)
+  const updateMutation = useUpdateReviewMutation(product.id)
+  const deleteMutation = useDeleteReviewMutation(product.id)
 
   useEffect(() => { logView(product.id) }, [product.id])
 
@@ -100,13 +214,72 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
     toggle(product.id)
   }
 
+  // 본인 리뷰 여부
+  const ownReview = myNickname
+    ? (reviewData?.items ?? []).find(r => r.nickname === myNickname)
+    : undefined
+
+  // 별점 분포 계산 (로드된 items 기준)
+  const starCounts = [5, 4, 3, 2, 1].map(star => ({
+    star,
+    count: (reviewData?.items ?? []).filter(r => Math.round(r.scoreOverall) === star).length,
+  }))
+  const maxCount = Math.max(...starCounts.map(s => s.count), 1)
+
+  const handleWriteClick = () => {
+    if (!isAuthenticated) { setShowLoginPrompt(true); return }
+    setEditTarget(null)
+    setShowForm(true)
+  }
+
+  const handleEditClick = (review: ReviewItem) => {
+    setEditTarget(review)
+    setShowForm(true)
+  }
+
+  const handleDeleteClick = (reviewId: number) => {
+    setShowDeleteConfirm(reviewId)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (showDeleteConfirm == null) return
+    try {
+      await deleteMutation.mutateAsync(showDeleteConfirm)
+    } catch {
+      // 에러 무시 (403 등)
+    } finally {
+      setShowDeleteConfirm(null)
+    }
+  }
+
+  const handleFormSubmit = async (score: number, content: string) => {
+    try {
+      if (editTarget) {
+        await updateMutation.mutateAsync({ reviewId: editTarget.reviewId, scoreOverall: score, content })
+      } else {
+        await createMutation.mutateAsync({ scoreOverall: score, content })
+      }
+      setShowForm(false)
+    } catch (e: unknown) {
+      setShowForm(false)
+      const msg = e instanceof Error ? e.message : ''
+      if (msg.includes('409') || msg.includes('이미')) {
+        setConfirmAlert('이미 작성한 리뷰가 있습니다.')
+      } else {
+        setConfirmAlert('오류가 발생했습니다. 다시 시도해 주세요.')
+      }
+    }
+  }
+
+  const submitting = createMutation.isPending || updateMutation.isPending
+
   return (
     <div className="det-page">
 
-      {/* 스크롤 영역 (히어로 + 본문) */}
+      {/* 스크롤 영역 */}
       <div className="det-scroll">
 
-      {/* 히어로: 이미지 + 헤더 오버레이 */}
+      {/* 히어로 */}
       <div className="det-hero">
         <header className="det-header">
           <button type="button" className="det-icon-btn" aria-label="뒤로가기" onClick={onBack}>
@@ -248,7 +421,6 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
             </div>
             {NUTRITION_DEFS.map(({ key, label, unit, boundKey, fallbackMax }) => {
               const val = detail?.nutrients?.[key] ?? 0
-              // 비로그인은 서버 값 무시하고 항상 670kcal 기준 DEFAULT_BOUNDS 사용
               const bounds = isAuthenticated ? (detail?.nutrientBounds ?? DEFAULT_BOUNDS) : DEFAULT_BOUNDS
               const maxVal = (bounds[boundKey] as number) || fallbackMax
               const pct = Math.min(100, (val / maxVal) * 100)
@@ -282,47 +454,114 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
 
             {!reviewQuery.isLoading && reviewData && reviewData.total > 0 && (
               <>
-                <div className="det-review-summary">
-                  <span className="det-review-avg-num">{reviewData.avgScoreOverall.toFixed(1)}</span>
-                  <div className="det-review-summary-right">
-                    <StarRow score={reviewData.avgScoreOverall} size={16} />
-                    <span className="det-review-total">리뷰 {reviewData.total}개</span>
+                {/* 별점 요약 */}
+                <div className="rv-summary">
+                  <div className="rv-summary-left">
+                    <span className="rv-avg-num">{reviewData.avgScoreOverall.toFixed(1)}</span>
+                    <StarRow score={reviewData.avgScoreOverall} size={16} filledColor="#525760" />
+                  </div>
+                  <div className="rv-summary-right">
+                    {starCounts.map(({ star, count }) => (
+                      <div key={star} className="rv-bar-row">
+                        <span className="rv-bar-label">{star}</span>
+                        <div className="rv-bar-track">
+                          <div
+                            className="rv-bar-fill"
+                            style={{ width: `${maxCount > 0 ? (count / maxCount) * 100 : 0}%` }}
+                          />
+                        </div>
+                        <span className="rv-bar-count">{count}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="det-review-list">
-                  {reviewData.items.map(review => (
-                    <div key={review.reviewId} className="det-review-item">
-                      <div className="det-review-item-header">
-                        <span className="det-review-nickname">{review.nickname}</span>
-                        <span className="det-review-date">{formatDate(review.createdAt)}</span>
-                      </div>
-                      <StarRow score={review.scoreOverall} size={13} />
-                      {review.content && (
-                        <p className="det-review-content">{review.content}</p>
-                      )}
-                      {review.images.length > 0 && (
-                        <div className="det-review-images">
-                          {review.images.map((src, i) => (
-                            <img key={i} src={src} alt="" className="det-review-img" loading="lazy" />
-                          ))}
+                {/* 구분선 */}
+                <div className="rv-divider" />
+
+                {/* 액션 행 */}
+                <div className="rv-action-row">
+                  <span className="rv-total-label">리뷰 {reviewData.total}개</span>
+                  {isAuthenticated && !ownReview && (
+                    <button type="button" className="rv-write-btn" onClick={handleWriteClick}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                      </svg>
+                      리뷰 작성
+                    </button>
+                  )}
+                  {isAuthenticated && ownReview && (
+                    <button type="button" className="rv-write-btn" onClick={() => handleEditClick(ownReview)}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                      </svg>
+                      내 리뷰 수정
+                    </button>
+                  )}
+                  {!isAuthenticated && (
+                    <button type="button" className="rv-write-btn" onClick={handleWriteClick}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                      </svg>
+                      리뷰 작성
+                    </button>
+                  )}
+                </div>
+
+                {/* 리뷰 목록 */}
+                <div className="rv-list">
+                  {reviewData.items.map(review => {
+                    const isOwn = myNickname ? review.nickname === myNickname : false
+                    const isEdited = review.updatedAt && review.createdAt !== review.updatedAt
+                    return (
+                      <div key={review.reviewId} className="rv-item">
+                        <div className="rv-item-header">
+                          <div className="rv-item-header-left">
+                            <span className="rv-nickname">{review.nickname}</span>
+                            {isEdited && <span className="rv-edited-badge">수정됨</span>}
+                          </div>
+                          <span className="rv-date">{formatDate(review.createdAt)}</span>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        <StarRow score={review.scoreOverall} size={13} filledColor="#525760" />
+                        {review.content && (
+                          <p className="rv-content">{review.content}</p>
+                        )}
+                        {isAuthenticated && isOwn && (
+                          <div className="rv-item-actions">
+                            <button
+                              type="button"
+                              className="rv-action-btn"
+                              onClick={() => handleEditClick(review)}
+                            >수정</button>
+                            <span className="rv-action-sep">·</span>
+                            <button
+                              type="button"
+                              className="rv-action-btn rv-action-btn--delete"
+                              onClick={() => handleDeleteClick(review.reviewId)}
+                            >삭제</button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </>
             )}
 
+            {/* 리뷰 없을 때 */}
             {!reviewQuery.isLoading && (!reviewData || reviewData.total === 0) && (
-              <div className="det-review-empty">
-                <p>아직 리뷰가 없어요</p>
+              <div className="rv-empty">
+                <p className="rv-empty-text">아직 리뷰가 없어요</p>
+                <p className="rv-empty-sub">첫 번째 리뷰를 남겨보세요</p>
+                <button type="button" className="rv-empty-write-btn" onClick={handleWriteClick}>
+                  리뷰 작성하기
+                </button>
               </div>
             )}
           </div>
         )}
 
-        {/* 파트너스 고지 — 스크롤 콘텐츠 맨 끝(자연 푸터) */}
+        {/* 파트너스 고지 */}
         {detail?.coupang?.affiliateUrl && (
           <div className="det-partners-notice">
             <p className="det-partners-text">
@@ -334,7 +573,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
       </div>
       </div>
 
-      {/* 쿠팡 구매 버튼 — 화면 하단 고정 */}
+      {/* 쿠팡 구매 버튼 */}
       {detail?.coupang?.affiliateUrl && (
         <div className="det-coupang-bar">
           <a
@@ -353,6 +592,38 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
         <LoginPromptModal
           onClose={() => setShowLoginPrompt(false)}
           onLogin={() => { setShowLoginPrompt(false); onNeedLogin?.() }}
+        />
+      )}
+
+      {/* 리뷰 작성/수정 폼 */}
+      {showForm && (
+        <ReviewForm
+          productName={detail?.name ?? product.name}
+          productImage={detail?.imageUrl ?? product.image}
+          editTarget={editTarget}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleFormSubmit}
+          submitting={submitting}
+        />
+      )}
+
+      {/* 삭제 확인 */}
+      {showDeleteConfirm != null && (
+        <ConfirmModal
+          message={'삭제하면 이 상품에 리뷰를\n다시 작성할 수 없습니다.'}
+          confirmText={deleteMutation.isPending ? '삭제 중...' : '삭제'}
+          cancelText="취소"
+          isDanger
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setShowDeleteConfirm(null)}
+        />
+      )}
+
+      {/* 에러/알림 팝업 */}
+      {confirmAlert && (
+        <ConfirmModal
+          message={confirmAlert}
+          onConfirm={() => setConfirmAlert(null)}
         />
       )}
     </div>

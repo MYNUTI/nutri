@@ -520,10 +520,8 @@
 
 /* ── 리뷰 탭 ────────────────────────────────────── */
 .det-review {
-  padding: 20px 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .det-review-loading {
@@ -533,17 +531,31 @@
   color: #b0b0b3;
 }
 
-.det-review-summary {
+.det-star-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 18px;
-  background: #f5f6f8;
-  border-radius: 14px;
-  margin-bottom: 20px;
 }
 
-.det-review-avg-num {
+/* ── 별점 요약 (SVG: x=24, y=562, w=345, h=96) ──── */
+.rv-summary {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px;
+  gap: 0;
+  min-height: 96px;
+  box-sizing: border-box;
+}
+
+.rv-summary-left {
+  width: 140px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rv-avg-num {
   font-size: 36px;
   font-weight: 800;
   color: #111;
@@ -551,85 +563,390 @@
   line-height: 1;
 }
 
-.det-review-summary-right {
+.rv-summary-right {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
 }
 
-.det-review-total {
-  font-size: 12px;
-  color: #8a8a8e;
+/* 별점 바 행 (SVG: h=6, radius=3, track #D9DCE0, fill #777F8A) */
+.rv-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rv-bar-label {
+  font-size: 11px;
+  color: #A1A9B1;
+  width: 8px;
+  text-align: right;
+  flex-shrink: 0;
   letter-spacing: -0.01em;
 }
 
-.det-star-row {
+.rv-bar-track {
+  flex: 1;
+  height: 6px;
+  background: #D9DCE0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rv-bar-fill {
+  height: 100%;
+  background: #777F8A;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.rv-bar-count {
+  font-size: 11px;
+  color: #A1A9B1;
+  width: 20px;
+  text-align: right;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+/* ── 구분선 (SVG: y=690, h=8, #F2F3F5) ─────────── */
+.rv-divider {
+  height: 8px;
+  background: #F2F3F5;
+  flex-shrink: 0;
+}
+
+/* ── 액션 행 (SVG: y=714, h=35) ─────────────────── */
+.rv-action-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
 }
 
-.det-review-list {
+.rv-total-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #525760;
+  letter-spacing: -0.01em;
+}
+
+/* 리뷰 작성 버튼 (SVG: w=85, h=35, rx=17.5, border #E8EAEC) */
+.rv-write-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 35px;
+  padding: 0 14px;
+  border: 1px solid #E8EAEC;
+  border-radius: 17.5px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #525760;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.rv-write-btn:hover { background: #f5f6f8; }
+
+/* ── 리뷰 목록 ──────────────────────────────────── */
+.rv-list {
   display: flex;
   flex-direction: column;
+  padding: 0 24px;
 }
 
-.det-review-item {
+.rv-item {
   padding: 16px 0;
-  border-bottom: 1px solid #f3f3f5;
+  border-bottom: 1px solid #F3F3F5;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.det-review-item:last-child { border-bottom: 0; }
+.rv-item:last-child { border-bottom: 0; }
 
-.det-review-item-header {
+.rv-item-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.det-review-nickname {
+.rv-item-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rv-nickname {
   font-size: 13px;
   font-weight: 600;
   color: #1f1f22;
   letter-spacing: -0.01em;
 }
 
-.det-review-date {
-  font-size: 11px;
-  color: #b0b0b3;
+.rv-edited-badge {
+  font-size: 10px;
+  color: #A1A9B1;
   letter-spacing: -0.01em;
+  font-weight: 400;
 }
 
-.det-review-content {
+.rv-date {
+  font-size: 11px;
+  color: #B0B8C1;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.rv-content {
   margin: 2px 0 0;
   font-size: 13px;
   color: #444;
   line-height: 1.55;
   letter-spacing: -0.01em;
+  word-break: keep-all;
 }
 
-.det-review-images {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-
-.det-review-img {
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: 8px;
-  background: #ececec;
-}
-
-.det-review-empty {
-  padding: 48px 0;
+.rv-item-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #b0b0b3;
-  font-size: 14px;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.rv-action-btn {
+  font-size: 12px;
+  color: #A1A9B1;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   letter-spacing: -0.01em;
 }
+.rv-action-btn:hover { color: #525760; }
+.rv-action-btn--delete:hover { color: #e53e3e; }
+
+.rv-action-sep {
+  font-size: 12px;
+  color: #D9DCE0;
+}
+
+/* ── 리뷰 없음 ──────────────────────────────────── */
+.rv-empty {
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.rv-empty-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f1f22;
+  letter-spacing: -0.01em;
+}
+
+.rv-empty-sub {
+  margin: 0;
+  font-size: 13px;
+  color: #B0B8C1;
+  letter-spacing: -0.01em;
+}
+
+.rv-empty-write-btn {
+  margin-top: 16px;
+  height: 44px;
+  padding: 0 24px;
+  background: #525760;
+  color: #fff;
+  border: 0;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+}
+.rv-empty-write-btn:hover { background: #3e454e; }
+
+/* ── 리뷰 작성/수정 폼 (전체화면 오버레이) ─────────── */
+.rv-form-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 폼 헤더 (SVG 리뷰 작성: h=44, border-bottom) */
+.rv-form-header {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid #E8EAEC;
+  position: relative;
+}
+
+.rv-form-back {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.rv-form-back svg { width: 20px; height: 20px; }
+
+.rv-form-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f1f22;
+  letter-spacing: -0.01em;
+}
+
+/* 폼 본문 (스크롤 가능) */
+.rv-form-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 상품 정보 (SVG: thumbnail 64x64, radius=8, bg=#F2F3F5) */
+.rv-form-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.rv-form-product-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  background: #F2F3F5;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.rv-form-product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rv-form-product-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #F2F3F5;
+}
+
+.rv-form-product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f1f22;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 별점 선택 (SVG: 5개 star, 중앙 정렬, 간격 36px 단위) */
+.rv-star-selector {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rv-star-btn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.1s;
+}
+.rv-star-btn:hover { transform: scale(1.15); }
+.rv-star-btn:active { transform: scale(0.95); }
+
+.rv-star-hint {
+  text-align: center;
+  font-size: 12px;
+  color: #B0B8C1;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+
+/* 텍스트 영역 (SVG: w=345, h=183, rx=10, bg=#F2F3F5) */
+.rv-textarea {
+  width: 100%;
+  min-height: 183px;
+  background: #F2F3F5;
+  border: 0;
+  border-radius: 10px;
+  padding: 20px;
+  font-size: 14px;
+  color: #525760;
+  resize: none;
+  box-sizing: border-box;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  outline: none;
+  margin-top: 16px;
+}
+.rv-textarea::placeholder { color: #B0B8C1; }
+
+.rv-char-count {
+  text-align: right;
+  font-size: 11px;
+  color: #B0B8C1;
+  margin-top: 6px;
+  letter-spacing: -0.01em;
+}
+
+
+/* 폼 하단 버튼 (SVG: x=24, y=764, w=345, h=52, rx=8, bg=#525760) */
+.rv-form-footer {
+  flex-shrink: 0;
+  padding: 16px 24px 20px;
+  background: #fff;
+  border-top: 1px solid #E8EAEC;
+}
+
+.rv-submit-btn {
+  width: 100%;
+  height: 52px;
+  background: #525760;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.15s;
+}
+.rv-submit-btn:hover:not(:disabled) { background: #3e454e; }
+.rv-submit-btn:disabled { background: #B0B8C1; cursor: not-allowed; }
+
