@@ -129,8 +129,8 @@
 
 .det-info-rating-num {
   font-size: 11px;
-  font-weight: 500;
-  color: #525760;
+  font-weight: 400;
+  color: #A1A9B1;
   letter-spacing: -0.01em;
 }
 
@@ -580,7 +580,7 @@
 .rv-bar-label {
   font-size: 11px;
   color: #A1A9B1;
-  width: 8px;
+  width: 26px;
   text-align: right;
   flex-shrink: 0;
   letter-spacing: -0.01em;
@@ -632,25 +632,23 @@
   letter-spacing: -0.01em;
 }
 
-/* 리뷰 작성 버튼 (SVG: w=85, h=35, rx=17.5, border #E8EAEC) */
+/* 리뷰 작성 버튼 (SVG: 테두리 없는 텍스트+아이콘, 색상 #777F8A, 아이콘 #B0B8C1) */
 .rv-write-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
-  height: 35px;
-  padding: 0 14px;
-  border: 1px solid #E8EAEC;
-  border-radius: 17.5px;
-  background: #fff;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 13px;
-  font-weight: 600;
-  color: #525760;
+  font-weight: 500;
+  color: #777F8A;
   cursor: pointer;
   letter-spacing: -0.01em;
   white-space: nowrap;
   flex-shrink: 0;
 }
-.rv-write-btn:hover { background: #f5f6f8; }
+.rv-write-btn:hover { color: #525760; }
 
 /* ── 리뷰 목록 ──────────────────────────────────── */
 .rv-list {
@@ -669,12 +667,6 @@
 .rv-item:last-child { border-bottom: 0; }
 
 .rv-item-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.rv-item-header-left {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -882,12 +874,13 @@
   flex-shrink: 0;
 }
 
-/* 별점 선택 (SVG: 5개 star, 중앙 정렬, 간격 36px 단위) */
+/* 별점 선택 (SVG: divider→stars 40px, y=248~280) */
 .rv-star-selector {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-top: 40px;  /* divider bottom(y=208) → star top(y=248) = 40px */
+  margin-bottom: 0;
 }
 
 .rv-star-btn {
@@ -904,15 +897,7 @@
 .rv-star-btn:hover { transform: scale(1.15); }
 .rv-star-btn:active { transform: scale(0.95); }
 
-.rv-star-hint {
-  text-align: center;
-  font-size: 12px;
-  color: #B0B8C1;
-  margin: 0 0 16px;
-  letter-spacing: -0.01em;
-}
-
-/* 텍스트 영역 (SVG: w=345, h=183, rx=10, bg=#F2F3F5) */
+/* 텍스트 영역 (SVG: stars bottom y=280 → textarea top y=317 = 37px) */
 .rv-textarea {
   width: 100%;
   min-height: 183px;
@@ -927,7 +912,7 @@
   line-height: 1.6;
   letter-spacing: -0.01em;
   outline: none;
-  margin-top: 16px;
+  margin-top: 37px;  /* star bottom(y=280) → textarea top(y=317) = 37px */
 }
 .rv-textarea::placeholder { color: #B0B8C1; }
 

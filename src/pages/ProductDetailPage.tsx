@@ -158,9 +158,6 @@ function ReviewForm({ productName, productImage, editTarget, onClose, onSubmit, 
             </button>
           ))}
         </div>
-        {score === 0 && (
-          <p className="rv-star-hint">별점을 선택해 주세요</p>
-        )}
 
         {/* 리뷰 내용 */}
         <textarea
@@ -349,7 +346,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               {reviewQuery.data && reviewQuery.data.total > 0 && (
                 <>
                   <StarRow score={reviewQuery.data.avgScoreOverall} size={22} filledColor="#525760" />
-                  <span className="det-info-rating-num">{reviewQuery.data.avgScoreOverall.toFixed(1)}</span>
+                  <span className="det-info-rating-num">({reviewQuery.data.avgScoreOverall.toFixed(1)})</span>
                 </>
               )}
               {detail?.grade && (
@@ -466,7 +463,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                   <div className="rv-summary-right">
                     {starCounts.map(({ star, count }) => (
                       <div key={star} className="rv-bar-row">
-                        <span className="rv-bar-label">{star}</span>
+                        <span className="rv-bar-label">{star}점</span>
                         <div className="rv-bar-track">
                           <div
                             className="rv-bar-fill"
@@ -488,7 +485,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                   {isAuthenticated && !ownReview && (
                     <button type="button" className="rv-write-btn" onClick={handleWriteClick}>
                       <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#B0B8C1"/>
                       </svg>
                       리뷰 쓰기
                     </button>
@@ -496,7 +493,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                   {isAuthenticated && ownReview && (
                     <button type="button" className="rv-write-btn" onClick={() => handleEditClick(ownReview)}>
                       <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#B0B8C1"/>
                       </svg>
                       내 리뷰 수정
                     </button>
@@ -504,7 +501,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                   {!isAuthenticated && (
                     <button type="button" className="rv-write-btn" onClick={handleWriteClick}>
                       <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#B0B8C1"/>
                       </svg>
                       리뷰 쓰기
                     </button>
@@ -519,16 +516,14 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                     return (
                       <div key={review.reviewId} className="rv-item">
                         <div className="rv-item-header">
-                          <div className="rv-item-header-left">
-                            <span className="rv-nickname">{review.nickname}</span>
-                            {isEdited && <span className="rv-edited-badge">수정됨</span>}
-                          </div>
-                          <span className="rv-date">{formatDate(review.createdAt)}</span>
+                          <span className="rv-nickname">{review.nickname}</span>
+                          {isEdited && <span className="rv-edited-badge">수정됨</span>}
                         </div>
                         <StarRow score={review.scoreOverall} size={13} filledColor="#525760" />
                         {review.content && (
                           <p className="rv-content">{review.content}</p>
                         )}
+                        <span className="rv-date">{formatDate(review.createdAt)}</span>
                         {isAuthenticated && isOwn && (
                           <div className="rv-item-actions">
                             <button
