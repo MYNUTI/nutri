@@ -497,8 +497,8 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                       내 리뷰 수정
                     </button>
                   )}
-                  {/* canReview===true(작성 가능) 또는 비로그인(로그인 유도) → 쓰기 버튼 */}
-                  {!ownReview && (canReview === true || !isAuthenticated) && (
+                  {/* 활성 리뷰 없음 → 쓰기 버튼 (canReview===false면 클릭 시 팝업으로 차단) */}
+                  {!ownReview && (
                     <button type="button" className="rv-write-btn" onClick={handleWriteClick}>
                       <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#B0B8C1"/>
@@ -506,7 +506,6 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                       리뷰 쓰기
                     </button>
                   )}
-                  {/* canReview===false && 활성 리뷰 없음 → 버튼 미노출 */}
                 </div>
 
                 {/* 리뷰 목록 */}
@@ -552,11 +551,9 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               <div className="rv-empty">
                 <p className="rv-empty-text">아직 리뷰가 없어요</p>
                 <p className="rv-empty-sub">첫 번째 리뷰를 남겨보세요</p>
-                {(canReview === true || !isAuthenticated) && (
-                  <button type="button" className="rv-empty-write-btn" onClick={handleWriteClick}>
-                    리뷰 작성하기
-                  </button>
-                )}
+                <button type="button" className="rv-empty-write-btn" onClick={handleWriteClick}>
+                  리뷰 작성하기
+                </button>
               </div>
             )}
           </div>
