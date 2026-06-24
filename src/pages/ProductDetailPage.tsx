@@ -608,10 +608,9 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
       {/* 삭제 확인 */}
       {showDeleteConfirm != null && (
         <ConfirmModal
-          message={'삭제하면 이 상품에 리뷰를\n다시 작성할 수 없습니다.'}
+          message={'한 번 삭제하면 이 상품에\n다시 리뷰를 쓸 수 없어요.'}
           confirmText={deleteMutation.isPending ? '삭제 중...' : '삭제'}
           cancelText="취소"
-          isDanger
           onConfirm={handleDeleteConfirm}
           onCancel={() => setShowDeleteConfirm(null)}
         />

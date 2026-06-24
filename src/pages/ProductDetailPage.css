@@ -522,6 +522,7 @@
 .det-review {
   display: flex;
   flex-direction: column;
+  padding-top: 20px;
 }
 
 .det-review-loading {
@@ -544,6 +545,7 @@
   gap: 0;
   min-height: 96px;
   box-sizing: border-box;
+  margin-bottom: 16px;  /* summary→divider: 20px bottom padding + 16px margin ≈ SVG 37px */
 }
 
 .rv-summary-left {
@@ -617,16 +619,16 @@
   flex-shrink: 0;
 }
 
-/* ── 액션 행 (SVG: y=714, h=35) ─────────────────── */
+/* ── 액션 행 (SVG: divider bottom y=698 → pill top y=714.5 = 16px gap) ── */
 .rv-action-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
+  padding: 16px 24px 8px;
 }
 
 .rv-total-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: #525760;
   letter-spacing: -0.01em;
@@ -640,7 +642,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: #777F8A;
   cursor: pointer;
@@ -700,6 +702,7 @@
   line-height: 1.55;
   letter-spacing: -0.01em;
   word-break: keep-all;
+  white-space: pre-wrap;
 }
 
 .rv-item-actions {
