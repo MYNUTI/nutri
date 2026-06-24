@@ -14,6 +14,7 @@ export type ReviewListResponse = {
   total: number
   avgScoreOverall: number
   items: ReviewItem[]
+  canReview: boolean | null  // true: 작성 가능 / false: 이력 있어 불가 / null: 비로그인
 }
 
 export type ReviewPayload = {
@@ -23,10 +24,7 @@ export type ReviewPayload = {
 }
 
 export const getProductReviews = (productId: number, page = 1, size = 20) =>
-  apiFetch<ReviewListResponse>(
-    `/reviews/${productId}?page=${page}&size=${size}`,
-    { skipAuth: true },
-  )
+  apiFetch<ReviewListResponse>(`/reviews/${productId}?page=${page}&size=${size}`)
 
 export const postReview = (productId: number, payload: ReviewPayload) =>
   apiFetch<{}>(`/reviews/${productId}`, {
