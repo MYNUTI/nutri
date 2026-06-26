@@ -28,8 +28,8 @@ type Props = {
   submitLabel?: string
 }
 
-const DIET_GOALS = ['다이어트', '벌크업', '린매스업', '건강한식생활', '기타']
-const TOTAL_STEPS = 5
+const DIET_GOALS = ['다이어트', '벌크업']
+const TOTAL_STEPS = 4
 const TODAY = new Date().toISOString().split('T')[0]
 const AGE_LIMIT = (() => {
   const d = new Date()
@@ -86,13 +86,11 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
       const h = Number(profile.height)
       const w = Number(profile.weight)
       return !!(profile.height && !isNaN(h) && h >= 50 && h <= 250 &&
-        profile.weight && !isNaN(w) && w >= 10 && w <= 200)
+        profile.weight && !isNaN(w) && w >= 10 && w <= 200 &&
+        profile.diet_purpose)
     }
     if (step === 4) {
       return !!(profile.activity_type && profile.weekly_exercise_count && profile.exercise_intensity)
-    }
-    if (step === 5) {
-      return !!profile.diet_purpose
     }
     return false
   }
@@ -120,24 +118,11 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
       const w = Number(profile.weight)
       if (!profile.weight || isNaN(w) || w < 10 || w > 200)
         e.weight = '몸무게는 10~200kg 사이로 입력해 주세요'
-      if (profile.body_fat_rate) {
-        const bfr = Number(profile.body_fat_rate)
-        if (isNaN(bfr) || bfr < 1 || bfr > 70)
-          e.body_fat_rate = '체지방률은 1~70% 사이로 입력해 주세요'
-      }
-      if (profile.skeletal_muscle_mass) {
-        const smm = Number(profile.skeletal_muscle_mass)
-        if (isNaN(smm) || smm < 5 || smm > 100)
-          e.skeletal_muscle_mass = '골격근량은 5~100kg 사이로 입력해 주세요'
-      }
     }
     if (step === 4) {
       if (!profile.activity_type) e.activity_type = '활동 유형을 선택해 주세요'
       if (!profile.weekly_exercise_count) e.weekly_exercise_count = '주간 운동 횟수를 선택해 주세요'
       if (!profile.exercise_intensity) e.exercise_intensity = '운동 강도를 선택해 주세요'
-    }
-    if (step === 5) {
-      if (!profile.diet_purpose) e.diet_purpose = '식이 목적을 선택해 주세요'
     }
     return e
   }
@@ -162,12 +147,6 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
       const w = Number(profile.weight)
       if (!profile.weight || isNaN(w) || w < 10 || w > 200)
         msg = '몸무게는 10~200kg 사이로 입력해 주세요'
-    } else if (field === 'body_fat_rate' && profile.body_fat_rate) {
-      const v = Number(profile.body_fat_rate)
-      if (isNaN(v) || v < 1 || v > 70) msg = '체지방률은 1~70% 사이로 입력해 주세요'
-    } else if (field === 'skeletal_muscle_mass' && profile.skeletal_muscle_mass) {
-      const v = Number(profile.skeletal_muscle_mass)
-      if (isNaN(v) || v < 5 || v > 100) msg = '골격근량은 5~100kg 사이로 입력해 주세요'
     }
     setErrors(prev => {
       const next = { ...prev }
@@ -203,7 +182,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
       </button>
 
       <div className="ups-steps" aria-label={`단계 ${step}/${TOTAL_STEPS}`}>
-        {[1, 2, 3, 4, 5].map(n => (
+        {[1, 2, 3, 4].map(n => (
           <span key={n} className={`ups-step${n === step ? ' ups-step--on' : ''}`}>{n}</span>
         ))}
       </div>
@@ -297,7 +276,7 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
                 <table className="ups-consent-table">
                   <tbody>
                     <tr><td>수집 목적</td><td>체성분·활동량·식습관 기반 영양 필요량 산정 및 맞춤 식품 추천</td></tr>
-                    <tr><td>수집 항목</td><td>체지방률, 골격근량, 키, 몸무게, 직업 형태, 운동 빈도, 운동 강도, 하루 끼니 수, 간식 횟수, 식이 목적</td></tr>
+                    <tr><td>수집 항목</td><td>키, 몸무게, 직업 형태, 운동 빈도, 운동 강도, 식이 목적</td></tr>
                     <tr><td>보유·이용 기간</td><td>회원 탈퇴 시까지 (탈퇴 시 30일 이내 파기)</td></tr>
                     <tr><td>동의 거부 권리</td><td>거부하셔도 회원가입 및 기본 서비스 이용이 가능합니다.</td></tr>
                   </tbody>
@@ -348,19 +327,20 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
           </>
         )}
 
-        {/* ── Step 3: 신체정보 ───────────────────────── */}
+        {/* ── Step 3: 신체정보 + 식이목적 ──────────── */}
         {step === 3 && (
           <>
             <div className="ups-grid-2">
               <NumberField label="키" unit="cm" value={profile.height} onChange={set('height')} onBlur={() => validateField('height')} error={errors.height} />
               <NumberField label="몸무게" unit="kg" value={profile.weight} onChange={set('weight')} onBlur={() => validateField('weight')} error={errors.weight} />
             </div>
-            <p className="ups-required-hint">*필수</p>
-            <div className="ups-grid-2" style={{ marginTop: 4 }}>
-              <NumberField label="체지방률" unit="%" value={profile.body_fat_rate} onChange={set('body_fat_rate')} onBlur={() => validateField('body_fat_rate')} error={errors.body_fat_rate} />
-              <NumberField label="골격근량" unit="kg" value={profile.skeletal_muscle_mass} onChange={set('skeletal_muscle_mass')} onBlur={() => validateField('skeletal_muscle_mass')} error={errors.skeletal_muscle_mass} />
-            </div>
-            <p className="ups-optional-hint">*선택</p>
+            <OptionGroup
+              label="식이 목적"
+              options={DIET_GOALS}
+              value={profile.diet_purpose}
+              onChange={set('diet_purpose')}
+              error={errors.diet_purpose}
+            />
           </>
         )}
 
@@ -394,28 +374,6 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
           </>
         )}
 
-        {/* ── Step 5: 식습관 ────────────────────────── */}
-        {step === 5 && (
-          <>
-            <StepperField label="하루 끼니 수" value={profile.daily_meal_count} min={1} max={10} onChange={v => set('daily_meal_count')(v)} />
-            <StepperField label="간식 횟수" value={profile.daily_snack_count} min={0} max={10} onChange={v => set('daily_snack_count')(v)} />
-            <div className="ups-field">
-              <span className="ups-field-label">식이 목적</span>
-              <div className="ups-select-wrap">
-                <select
-                  className="ups-select"
-                  value={profile.diet_purpose}
-                  onChange={e => set('diet_purpose')(e.target.value)}
-                >
-                  <option value="" disabled>선택해 주세요</option>
-                  {DIET_GOALS.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
-                <span className="ups-select-arrow" aria-hidden="true">▾</span>
-              </div>
-              {errors.diet_purpose && <span className="ups-field-error">{errors.diet_purpose}</span>}
-            </div>
-          </>
-        )}
       </div>
 
       <button type="button" className={`ups-submit${isStepValid() ? ' ups-submit--on' : ''}`} onClick={handleNext} disabled={!isStepValid()}>
@@ -448,17 +406,6 @@ const NumberField = ({ label, unit, value, onChange, onBlur, error }: NumberFiel
   </div>
 )
 
-type StepperFieldProps = { label: string; value: number; min: number; max: number; onChange: (v: number) => void }
-const StepperField = ({ label, value, min, max, onChange }: StepperFieldProps) => (
-  <div className="ups-field">
-    <span className="ups-field-label">{label}</span>
-    <div className="ups-stepper">
-      <button type="button" className="ups-stepper-btn" onClick={() => onChange(Math.max(min, value - 1))} aria-label="감소">−</button>
-      <span className="ups-stepper-val">{value}</span>
-      <button type="button" className="ups-stepper-btn" onClick={() => onChange(Math.min(max, value + 1))} aria-label="증가">+</button>
-    </div>
-  </div>
-)
 
 type OptionGroupProps = { label: string; options: string[]; labels?: string[]; value: string; onChange: (v: string) => void; error?: string }
 const OptionGroup = ({ label, options, labels, value, onChange, error }: OptionGroupProps) => (
