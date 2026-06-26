@@ -334,13 +334,17 @@ export const UserProfileSetupModal = ({ onClose, onComplete, initialProfile, sub
               <NumberField label="키" unit="cm" value={profile.height} onChange={set('height')} onBlur={() => validateField('height')} error={errors.height} />
               <NumberField label="몸무게" unit="kg" value={profile.weight} onChange={set('weight')} onBlur={() => validateField('weight')} error={errors.weight} />
             </div>
-            <OptionGroup
-              label="식이 목적"
-              options={DIET_GOALS}
-              value={profile.diet_purpose}
-              onChange={set('diet_purpose')}
-              error={errors.diet_purpose}
-            />
+            <div className="ups-field">
+              <span className="ups-field-label">식이 목적</span>
+              <div className="ups-gender">
+                {DIET_GOALS.map(g => (
+                  <button key={g} type="button" className={`ups-gender-btn${profile.diet_purpose === g ? ' on' : ''}`} onClick={() => set('diet_purpose')(g)}>
+                    {g}
+                  </button>
+                ))}
+              </div>
+              {errors.diet_purpose && <span className="ups-field-error">{errors.diet_purpose}</span>}
+            </div>
           </>
         )}
 
