@@ -73,6 +73,7 @@ const makeProductFromId = (id: number): Product => ({
 function AppShell() {
   const [route, setRoute] = useState<RouteKey>(() => getRouteFromHash())
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('accessToken'))
+  const [sessionChecking, setSessionChecking] = useState(() => !!localStorage.getItem('accessToken'))
   const [isAdmin, setIsAdmin] = useState(false)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
@@ -104,6 +105,14 @@ function AppShell() {
   // 앱 시작 시 토큰 유효성 검증 — 만료 시 auth:logout 이벤트로 자동 로그아웃
   const myPageQuery = useMyPageQuery(isAuthenticated)
   const myNickname = myPageQuery.data?.nickname
+
+  // 앱 시작 시 저장된 토큰의 유효성을 /users/me 응답으로 확인 — 완료 전까지 UI 차단
+  useEffect(() => {
+    if (!sessionChecking) return
+    if (myPageQuery.isSuccess || myPageQuery.isError) {
+      setSessionChecking(false)
+    }
+  }, [sessionChecking, myPageQuery.isSuccess, myPageQuery.isError])
 
   // OAuth 콜백: URL ?code=xxx&provider=PROVIDER 감지 → /auth/oauth 호출
   useEffect(() => {
@@ -155,6 +164,7 @@ function AppShell() {
       setIsAuthenticated(false)
       setIsAdmin(false)
       setFavoriteIds([])
+      setSessionChecking(false)
       localStorage.removeItem('recentSearchKeywords')
     }
     window.addEventListener('auth:logout', handleForceLogout)
@@ -216,6 +226,7 @@ function AppShell() {
     setIsAuthenticated(false)
     setIsAdmin(false)
     setFavoriteIds([])
+    setSessionChecking(false)
     localStorage.removeItem('recentSearchKeywords')
     navigate('home')
   }
@@ -342,7 +353,7 @@ function AppShell() {
         return null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts, homeKeyword, homeSort, filterCategoryIds, filterBrandIds, filterNutrients])
+  }, [route, isAuthenticated, isAdmin, selectedProduct, compareProducts, homeKeyword, homeSort, filterCategoryIds, filterBrandIds, filterNutrients, myNickname])
 
   return (
     <main className="screen-wrap">
@@ -400,10 +411,10 @@ function AppShell() {
             />
           )}
           <section className="page-body">{currentPage}</section>
-          {oauthProcessing && (
+          {(oauthProcessing || sessionChecking) && (
             <div className="oauth-splash" role="status" aria-live="polite">
               <span className="oauth-splash-spinner" aria-hidden="true" />
-              <span className="oauth-splash-text">로그인 중...</span>
+              <span className="oauth-splash-text">{oauthProcessing ? '로그인 중...' : '불러오는 중...'}</span>
             </div>
           )}
         </section>

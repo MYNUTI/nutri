@@ -96,7 +96,7 @@ const LogoutModal = ({ phase, onCancel, onConfirm, onClose }: LogoutModalProps) 
 
 export const MyPage = ({ isAuthenticated, onBack, onLogin, onGoFavorites, onGoPasswordChange, onLogout, onEditNutrition, onWithdraw }: MyPageProps) => {
   const myPageQuery = useMyPageQuery(isAuthenticated)
-  const name = myPageQuery.data?.nickname ?? myPageQuery.data?.name ?? ''
+  const name = myPageQuery.data?.nickname || myPageQuery.data?.name || ''
   const queryClient = useQueryClient()
   const [logoutPhase, setLogoutPhase] = useState<null | 'confirm' | 'done'>(null)
   const [nickEdit, setNickEdit] = useState(false)
@@ -173,7 +173,9 @@ export const MyPage = ({ isAuthenticated, onBack, onLogin, onGoFavorites, onGoPa
                 </>
               ) : (
                 <>
-                  <strong className="mypage-name">{name}</strong>
+                  <strong className="mypage-name">
+                    {myPageQuery.isLoading ? ' ' : (name || '닉네임을 설정해 주세요')}
+                  </strong>
                   <button type="button" className="mypage-name-edit" aria-label="닉네임 변경" onClick={() => { setNickVal(name); setNickEdit(true) }}>
                     <PencilIcon />
                   </button>

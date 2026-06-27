@@ -10,4 +10,6 @@ export const useMyPageQuery = (enabled = true) =>
     queryKey: myPageKeys.me,
     queryFn: getMe,
     enabled,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
   })
