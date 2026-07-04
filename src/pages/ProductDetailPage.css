@@ -45,6 +45,12 @@
 }
 .det-icon-btn svg { width: 20px; height: 20px; }
 
+.det-header-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 /* ── 상품 이미지 ────────────────────────────────── */
 .det-img-wrap {
   width: 100%;
@@ -98,19 +104,6 @@
   letter-spacing: -0.01em;
 }
 
-.det-share-btn {
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.det-share-btn svg { width: 20px; height: 20px; }
-
 .det-name {
   margin: 0 0 2px;
   font-size: 17px;
@@ -137,16 +130,16 @@
 .det-grade-badge {
   display: inline-flex;
   align-items: center;
-  height: 27px;
+  height: 24px;
   padding: 0 12px;
-  border-radius: 13.5px;
-  background: #000;
+  border-radius: 12px;
+  background: #00B460;
   color: #fff;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: -0.01em;
   white-space: nowrap;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .det-price {
@@ -729,44 +722,31 @@
   color: #D9DCE0;
 }
 
-/* ── 리뷰 없음 ──────────────────────────────────── */
+/* ── 리뷰 없음 (SVG: 액션 행 하단 → 텍스트 상단 32px 간격, 2줄 중앙 정렬) ── */
 .rv-empty {
-  padding: 48px 24px;
+  padding: 32px 24px 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  text-align: center;
 }
 
 .rv-empty-text {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1f1f22;
+  font-size: 14px;
+  font-weight: 500;
+  color: #777F8A;
   letter-spacing: -0.01em;
 }
 
 .rv-empty-sub {
   margin: 0;
-  font-size: 13px;
-  color: #B0B8C1;
-  letter-spacing: -0.01em;
-}
-
-.rv-empty-write-btn {
-  margin-top: 16px;
-  height: 44px;
-  padding: 0 24px;
-  background: #525760;
-  color: #fff;
-  border: 0;
-  border-radius: 22px;
   font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+  font-weight: 400;
+  color: #A1A9B1;
   letter-spacing: -0.01em;
 }
-.rv-empty-write-btn:hover { background: #3e454e; }
 
 /* ── 리뷰 작성/수정 폼 (전체화면 오버레이) ─────────── */
 /* PC에서도 mobile-page(max-width:420px) 안에 갇히도록 oauth-splash 패턴 사용 */

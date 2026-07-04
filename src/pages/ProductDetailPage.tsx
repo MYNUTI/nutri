@@ -293,19 +293,40 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               <path d="M15.7 5.3a1 1 0 0 1 0 1.4L10.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="#1f1f22"/>
             </svg>
           </button>
-          <button
-            type="button"
-            className={`det-icon-btn${faved ? ' det-fav-on' : ''}`}
-            aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-            onClick={handleFav}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              {faved
-                ? <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ea4335"/>
-                : <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z" fill="#1f1f22"/>
-              }
-            </svg>
-          </button>
+          <div className="det-header-right">
+            <button
+              type="button"
+              className="det-icon-btn"
+              aria-label="공유"
+              onClick={() => {
+                const url = window.location.href
+                const title = detail?.name ?? product.name
+                if (navigator.share) navigator.share({ title, url }).catch(() => {})
+                else navigator.clipboard?.writeText(url).then(() => alert('링크가 복사되었어요')).catch(() => {})
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="18" cy="5"  r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <circle cx="6"  cy="12" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <circle cx="18" cy="19" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <line x1="8.59"  y1="13.51" x2="15.42" y2="17.49" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <line x1="15.41" y1="6.51"  x2="8.59"  y2="10.49" stroke="#8a8a8e" strokeWidth="1.8"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={`det-icon-btn${faved ? ' det-fav-on' : ''}`}
+              aria-label={faved ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+              onClick={handleFav}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                {faved
+                  ? <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ea4335"/>
+                  : <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z" fill="#1f1f22"/>
+                }
+              </svg>
+            </button>
+          </div>
         </header>
 
         <div className="det-img-wrap">
@@ -323,41 +344,18 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
         <div className="det-info">
           <div className="det-info-brand-row">
             <span className="det-brand">{detail?.brand?.name ?? product.brand.name}</span>
-            <button
-              type="button"
-              className="det-share-btn"
-              aria-label="공유"
-              onClick={() => {
-                const url = window.location.href
-                const title = detail?.name ?? product.name
-                if (navigator.share) navigator.share({ title, url }).catch(() => {})
-                else navigator.clipboard?.writeText(url).then(() => alert('링크가 복사되었어요')).catch(() => {})
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="18" cy="5"  r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <circle cx="6"  cy="12" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <circle cx="18" cy="19" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <line x1="8.59"  y1="13.51" x2="15.42" y2="17.49" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <line x1="15.41" y1="6.51"  x2="8.59"  y2="10.49" stroke="#8a8a8e" strokeWidth="1.8"/>
-              </svg>
-            </button>
+            {detail?.grade && (
+              <span className="det-grade-badge">{detail.grade}등급</span>
+            )}
           </div>
           <h1 className="det-name">{detail?.name ?? product.name}</h1>
           {detail?.coupang?.price != null && (
             <span className="det-price">₩{detail.coupang.price.toLocaleString('ko-KR')}</span>
           )}
-          {(detail?.grade || (reviewQuery.data && reviewQuery.data.total > 0)) && (
+          {!reviewQuery.isLoading && (
             <div className="det-info-rating-row">
-              {reviewQuery.data && reviewQuery.data.total > 0 && (
-                <>
-                  <StarRow score={reviewQuery.data.avgScoreOverall} size={22} filledColor="#525760" />
-                  <span className="det-info-rating-num">({reviewQuery.data.avgScoreOverall.toFixed(1)})</span>
-                </>
-              )}
-              {detail?.grade && (
-                <span className="det-grade-badge">{detail.grade}등급</span>
-              )}
+              <StarRow score={reviewQuery.data?.avgScoreOverall ?? 0} size={22} filledColor="#525760" />
+              <span className="det-info-rating-num">({(reviewQuery.data?.avgScoreOverall ?? 0).toFixed(1)})</span>
             </div>
           )}
         </div>
@@ -458,13 +456,13 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               <p className="det-review-loading">불러오는 중...</p>
             )}
 
-            {!reviewQuery.isLoading && reviewData && reviewData.total > 0 && (
+            {!reviewQuery.isLoading && (
               <>
-                {/* 별점 요약 */}
+                {/* 별점 요약 (리뷰 0건이어도 0.0 + 빈 별/막대로 표시) */}
                 <div className="rv-summary">
                   <div className="rv-summary-left">
-                    <span className="rv-avg-num">{reviewData.avgScoreOverall.toFixed(1)}</span>
-                    <StarRow score={reviewData.avgScoreOverall} size={16} filledColor="#525760" />
+                    <span className="rv-avg-num">{(reviewData?.avgScoreOverall ?? 0).toFixed(1)}</span>
+                    <StarRow score={reviewData?.avgScoreOverall ?? 0} size={16} filledColor="#525760" />
                   </div>
                   <div className="rv-summary-right">
                     {starCounts.map(({ star, count }) => (
@@ -487,7 +485,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
 
                 {/* 액션 행 */}
                 <div className="rv-action-row">
-                  <span className="rv-total-label">리뷰 {reviewData.total}개</span>
+                  <span className="rv-total-label">리뷰 {reviewData?.total ?? 0}개</span>
                   {/* 활성 리뷰 있음 → 수정 버튼 */}
                   {isAuthenticated && ownReview && (
                     <button type="button" className="rv-write-btn" onClick={() => handleEditClick(ownReview)}>
@@ -508,53 +506,50 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
                   )}
                 </div>
 
-                {/* 리뷰 목록 */}
-                <div className="rv-list">
-                  {reviewData.items.map(review => {
-                    const isOwn = myNickname ? review.nickname === myNickname : false
-                    const isEdited = review.updatedAt && review.createdAt !== review.updatedAt
-                    return (
-                      <div key={review.reviewId} className="rv-item">
-                        <div className="rv-item-header">
-                          <span className="rv-nickname">{review.nickname}</span>
-                          {isEdited && <span className="rv-edited-badge">수정됨</span>}
-                        </div>
-                        <StarRow score={review.scoreOverall} size={13} filledColor="#525760" />
-                        {review.content && (
-                          <p className="rv-content">{review.content}</p>
-                        )}
-                        <span className="rv-date">{formatDate(review.createdAt)}</span>
-                        {isAuthenticated && isOwn && (
-                          <div className="rv-item-actions">
-                            <button
-                              type="button"
-                              className="rv-action-btn"
-                              onClick={() => handleEditClick(review)}
-                            >수정</button>
-                            <span className="rv-action-sep">·</span>
-                            <button
-                              type="button"
-                              className="rv-action-btn rv-action-btn--delete"
-                              onClick={() => handleDeleteClick(review.reviewId)}
-                            >삭제</button>
+                {reviewData && reviewData.total > 0 ? (
+                  /* 리뷰 목록 */
+                  <div className="rv-list">
+                    {reviewData.items.map(review => {
+                      const isOwn = myNickname ? review.nickname === myNickname : false
+                      const isEdited = review.updatedAt && review.createdAt !== review.updatedAt
+                      return (
+                        <div key={review.reviewId} className="rv-item">
+                          <div className="rv-item-header">
+                            <span className="rv-nickname">{review.nickname}</span>
+                            {isEdited && <span className="rv-edited-badge">수정됨</span>}
                           </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
+                          <StarRow score={review.scoreOverall} size={13} filledColor="#525760" />
+                          {review.content && (
+                            <p className="rv-content">{review.content}</p>
+                          )}
+                          <span className="rv-date">{formatDate(review.createdAt)}</span>
+                          {isAuthenticated && isOwn && (
+                            <div className="rv-item-actions">
+                              <button
+                                type="button"
+                                className="rv-action-btn"
+                                onClick={() => handleEditClick(review)}
+                              >수정</button>
+                              <span className="rv-action-sep">·</span>
+                              <button
+                                type="button"
+                                className="rv-action-btn rv-action-btn--delete"
+                                onClick={() => handleDeleteClick(review.reviewId)}
+                              >삭제</button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  /* 리뷰 없을 때 */
+                  <div className="rv-empty">
+                    <p className="rv-empty-text">등록된 리뷰가 없습니다.</p>
+                    <p className="rv-empty-sub">첫 번째 리뷰를 작성해 보세요.</p>
+                  </div>
+                )}
               </>
-            )}
-
-            {/* 리뷰 없을 때 */}
-            {!reviewQuery.isLoading && (!reviewData || reviewData.total === 0) && (
-              <div className="rv-empty">
-                <p className="rv-empty-text">아직 리뷰가 없어요</p>
-                <p className="rv-empty-sub">첫 번째 리뷰를 남겨보세요</p>
-                <button type="button" className="rv-empty-write-btn" onClick={handleWriteClick}>
-                  리뷰 작성하기
-                </button>
-              </div>
             )}
           </div>
         )}
