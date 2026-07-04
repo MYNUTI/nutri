@@ -84,7 +84,7 @@
 
 /* ── 상품 정보 ─────────────────────────────────── */
 .det-info {
-  padding: 43px 24px 0;
+  padding: 16px 24px 0;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -133,7 +133,7 @@
   height: 24px;
   padding: 0 12px;
   border-radius: 12px;
-  background: #00B460;
+  background: #8a8a8e;
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -141,6 +141,13 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* 등급별 배경색 (홈 카드와 동일한 팔레트) */
+.det-grade-badge[data-grade="A"] { background: #4CAF50; }
+.det-grade-badge[data-grade="B"] { background: #8BC34A; }
+.det-grade-badge[data-grade="C"] { background: #FFC107; }
+.det-grade-badge[data-grade="D"] { background: #FF9800; }
+.det-grade-badge[data-grade="E"] { background: #F44336; }
 
 .det-price {
   font-size: 17px;
@@ -574,7 +581,7 @@
 
 .rv-bar-label {
   font-size: 11px;
-  color: #A1A9B1;
+  color: #525760;
   width: 26px;
   text-align: right;
   flex-shrink: 0;

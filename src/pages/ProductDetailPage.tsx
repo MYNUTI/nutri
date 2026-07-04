@@ -306,11 +306,11 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
               }}
             >
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="18" cy="5"  r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <circle cx="6"  cy="12" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <circle cx="18" cy="19" r="3" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <line x1="8.59"  y1="13.51" x2="15.42" y2="17.49" stroke="#8a8a8e" strokeWidth="1.8"/>
-                <line x1="15.41" y1="6.51"  x2="8.59"  y2="10.49" stroke="#8a8a8e" strokeWidth="1.8"/>
+                <circle cx="18" cy="5"  r="3" stroke="#1f1f22" strokeWidth="1.8"/>
+                <circle cx="6"  cy="12" r="3" stroke="#1f1f22" strokeWidth="1.8"/>
+                <circle cx="18" cy="19" r="3" stroke="#1f1f22" strokeWidth="1.8"/>
+                <line x1="8.59"  y1="13.51" x2="15.42" y2="17.49" stroke="#1f1f22" strokeWidth="1.8"/>
+                <line x1="15.41" y1="6.51"  x2="8.59"  y2="10.49" stroke="#1f1f22" strokeWidth="1.8"/>
               </svg>
             </button>
             <button
@@ -345,7 +345,7 @@ export const ProductDetailPage = ({ product, onBack, isAuthenticated, onNeedLogi
           <div className="det-info-brand-row">
             <span className="det-brand">{detail?.brand?.name ?? product.brand.name}</span>
             {detail?.grade && (
-              <span className="det-grade-badge">{detail.grade}등급</span>
+              <span className="det-grade-badge" data-grade={detail.grade.toUpperCase()}>{detail.grade}등급</span>
             )}
           </div>
           <h1 className="det-name">{detail?.name ?? product.name}</h1>
