@@ -5,6 +5,7 @@ export type MyMemberProfile = {
   nickname: string
   gender: 'MALE' | 'FEMALE' | string
   birthDate: string
+  role: 'USER' | 'ADMIN' | string
 }
 
 export type MyPageData = {

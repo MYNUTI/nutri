@@ -74,7 +74,6 @@ function AppShell() {
   const [route, setRoute] = useState<RouteKey>(() => getRouteFromHash())
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('accessToken'))
   const [sessionChecking, setSessionChecking] = useState(() => !!localStorage.getItem('accessToken'))
-  const [isAdmin, setIsAdmin] = useState(false)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
@@ -105,6 +104,7 @@ function AppShell() {
   // 앱 시작 시 토큰 유효성 검증 — 만료 시 auth:logout 이벤트로 자동 로그아웃
   const myPageQuery = useMyPageQuery(isAuthenticated)
   const myNickname = myPageQuery.data?.nickname
+  const isAdmin = isAuthenticated && myPageQuery.data?.role === 'ADMIN'
 
   // 앱 시작 시 저장된 토큰의 유효성을 /users/me 응답으로 확인 — 완료 전까지 UI 차단
   useEffect(() => {
@@ -162,7 +162,6 @@ function AppShell() {
   useEffect(() => {
     const handleForceLogout = () => {
       setIsAuthenticated(false)
-      setIsAdmin(false)
       setFavoriteIds([])
       setSessionChecking(false)
       localStorage.removeItem('recentSearchKeywords')
@@ -215,16 +214,14 @@ function AppShell() {
     setHashRoute(r, productId)
   }
 
-  const handleLogin = (nextAdmin = false) => {
+  const handleLogin = () => {
     setIsAuthenticated(true)
-    setIsAdmin(nextAdmin)
     setShowProfileSetup(true)
     navigate('home')
   }
 
   const handleLogout = () => {
     setIsAuthenticated(false)
-    setIsAdmin(false)
     setFavoriteIds([])
     setSessionChecking(false)
     localStorage.removeItem('recentSearchKeywords')
@@ -233,7 +230,6 @@ function AppShell() {
 
   const handleWithdraw = () => {
     setIsAuthenticated(false)
-    setIsAdmin(false)
     setFavoriteIds([])
     navigate('home')
   }
@@ -305,7 +301,7 @@ function AppShell() {
       case 'login':
         return (
           <LoginPage
-            onLogin={(nextAdmin) => handleLogin(nextAdmin)}
+            onLogin={handleLogin}
           />
         )
       case 'favorites':
@@ -329,9 +325,9 @@ function AppShell() {
           />
         )
       case 'admin':
-        return isAuthenticated && isAdmin
+        return isAdmin
           ? <AdminPage />
-          : <LoginPage onLogin={() => { setIsAuthenticated(true); setIsAdmin(true) }} />
+          : <LoginPage onLogin={handleLogin} />
       case 'compare': {
         let p0: Product, p1: Product
         if (compareProducts.length >= 2) {
