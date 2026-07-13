@@ -8,5 +8,6 @@ export const mockMyPageData: MyPageData = {
     nickname: '길동',
     gender: 'MALE',
     birthDate: '2000-03-12',
+    role: 'USER',
   },
 }
