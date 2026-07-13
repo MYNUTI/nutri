@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { logFilter } from '../api/logging'
+import { logFilter, logSearch } from '../api/logging'
 import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '../components/icons'
@@ -88,6 +88,7 @@ export const HomePage = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
   const scrollReadyRef = useRef(false)
+  const loggedSearchRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (catOpen || !catsScrollRef.current) return
@@ -110,6 +111,16 @@ export const HomePage = ({
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteProductListQuery(condition)
   const products = data?.pages.flatMap(p => p.items) ?? []
+
+  useEffect(() => {
+    const trimmed = keyword?.trim()
+    if (!trimmed || !data?.pages[0]) return
+    const total = data.pages[0].total
+    const logKey = `${trimmed}:${total}`
+    if (loggedSearchRef.current === logKey) return
+    loggedSearchRef.current = logKey
+    logSearch(trimmed, total)
+  }, [keyword, data?.pages])
 
   useEffect(() => {
     scrollReadyRef.current = false
