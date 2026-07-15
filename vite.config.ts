@@ -9,6 +9,7 @@ export default defineConfig({
       '/api': {
         target: 'https://api.nutriuniv.co.kr',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
