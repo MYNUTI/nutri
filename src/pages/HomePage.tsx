@@ -3,6 +3,7 @@ import { logFilter, logSearch } from '../api/logging'
 import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { FilterIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '../components/icons'
+import { useImpressionTracking } from '../hooks/useImpressionTracking'
 import { useInfiniteProductListQuery } from '../queries/productQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
@@ -111,6 +112,9 @@ export const HomePage = ({
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteProductListQuery(condition)
   const products = data?.pages.flatMap(p => p.items) ?? []
+
+  const trimmedKeyword = keyword?.trim()
+  const { observe } = useImpressionTracking(trimmedKeyword ? 'SEARCH' : 'LIST', trimmedKeyword)
 
   useEffect(() => {
     const trimmed = keyword?.trim()
@@ -360,11 +364,16 @@ export const HomePage = ({
         )}
 
         <section className="home-grid" aria-label="상품 목록">
-          {products.map(item => {
+          {products.map((item, index) => {
             const product = mapToProduct(item)
             const faved = isFavorite(item.id)
             return (
-              <article key={item.id} className="home-card" onClick={() => onProductClick?.(product)}>
+              <article
+                key={item.id}
+                ref={el => observe(el, item.id, index + 1)}
+                className="home-card"
+                onClick={() => onProductClick?.(product)}
+              >
                 <div className="home-card-img-wrap">
                   {item.imageUrl
                     ? <img className="home-card-img" src={item.imageUrl} alt={item.name} loading="lazy" />

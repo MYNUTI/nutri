@@ -13,3 +13,11 @@ export const logFilter = (filterType: string, filterValue?: string) =>
 
 export const logCta = (productId: number) =>
   silent(apiFetch('/logging/cta', { method: 'POST', body: JSON.stringify({ productId }) }))
+
+export type ImpressionSurface = 'LIST' | 'RECOMMENDATION' | 'SEARCH'
+export type ImpressionItem = { productId: number; position: number }
+
+export const logImpression = (surface: ImpressionSurface, items: ImpressionItem[], keyword?: string) => {
+  if (items.length === 0) return
+  silent(apiFetch('/logging/impression', { method: 'POST', body: JSON.stringify({ surface, keyword, items }) }))
+}
