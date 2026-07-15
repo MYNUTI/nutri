@@ -6,7 +6,7 @@ const OAUTH_BASE = window.location.hostname === 'localhost'
   ? 'http://localhost:8080'
   : 'https://api.nutriuniv.co.kr'
 
-function buildOAuthUrl(provider: string): string {
+function buildOAuthUrl(provider: string): string | null {
   if (provider === 'GOOGLE' && GOOGLE_CLIENT_ID) {
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
@@ -33,7 +33,7 @@ function buildOAuthUrl(provider: string): string {
     })
     return `https://nid.naver.com/oauth2.0/authorize?${params}`
   }
-  return `#login`
+  return null
 }
 
 type LoginPageProps = {
@@ -61,7 +61,14 @@ const GoogleIcon = () => (
   </svg>
 )
 
-export const LoginPage = ({ onLogin: _onLogin }: LoginPageProps) => (
+export const LoginPage = ({ onLogin: _onLogin }: LoginPageProps) => {
+  // 설정(client_id) 누락 시 buildOAuthUrl은 null → 아무 동작 안 함 (기존 #login no-op과 동일)
+  const startOAuth = (provider: string) => {
+    const url = buildOAuthUrl(provider)
+    if (url) window.location.href = url
+  }
+
+  return (
   <section className="login-page">
     <div className="login-top">
       <h1 className="login-title">
@@ -72,19 +79,20 @@ export const LoginPage = ({ onLogin: _onLogin }: LoginPageProps) => (
 
     <div className="login-social">
       <div className="social-btn-list">
-        <button type="button" className="social-btn social-btn--kakao" onClick={() => { window.location.href = buildOAuthUrl('KAKAO') }}>
+        <button type="button" className="social-btn social-btn--kakao" onClick={() => startOAuth('KAKAO')}>
           <KakaoIcon />
           <span>카카오로 로그인</span>
         </button>
-        <button type="button" className="social-btn social-btn--naver" onClick={() => { window.location.href = buildOAuthUrl('NAVER') }}>
+        <button type="button" className="social-btn social-btn--naver" onClick={() => startOAuth('NAVER')}>
           <NaverIcon />
           <span>네이버로 로그인</span>
         </button>
-        <button type="button" className="social-btn social-btn--google" onClick={() => { window.location.href = buildOAuthUrl('GOOGLE') }}>
+        <button type="button" className="social-btn social-btn--google" onClick={() => startOAuth('GOOGLE')}>
           <GoogleIcon />
           <span>구글로 로그인</span>
         </button>
       </div>
     </div>
   </section>
-)
+  )
+}

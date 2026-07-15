@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://api.nutriuniv.co.kr/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
