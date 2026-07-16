@@ -213,31 +213,25 @@ export const HomePage = ({
       {/* 카테고리 가로 스크롤 바 */}
       <div className="home-cats-area">
         <div className="home-cats-scroll" role="list" aria-label="카테고리" ref={catsScrollRef}>
-          {catOpen ? (
-            <span className="home-cats-open-label">카테고리 전체보기</span>
-          ) : (
-            <>
-              <button
-                type="button"
-                role="listitem"
-                className={`home-cat-chip${selectedCategoryIds.length === 0 ? ' home-cat-chip--on' : ''}`}
-                onClick={() => onCategoryChange([])}
-              >
-                전체
-              </button>
-              {categories.map(c => (
-                <button
-                  key={c.id}
-                  type="button"
-                  role="listitem"
-                  className={`home-cat-chip${selectedCategoryIds.includes(c.id) ? ' home-cat-chip--on' : ''}`}
-                  onClick={() => onCategoryChange(selectedCategoryIds.includes(c.id) ? [] : [c.id])}
-                >
-                  {c.name}
-                </button>
-              ))}
-            </>
-          )}
+          <button
+            type="button"
+            role="listitem"
+            className={`home-cat-chip${selectedCategoryIds.length === 0 ? ' home-cat-chip--on' : ''}`}
+            onClick={() => onCategoryChange([])}
+          >
+            전체
+          </button>
+          {categories.map(c => (
+            <button
+              key={c.id}
+              type="button"
+              role="listitem"
+              className={`home-cat-chip${selectedCategoryIds.includes(c.id) ? ' home-cat-chip--on' : ''}`}
+              onClick={() => onCategoryChange(selectedCategoryIds.includes(c.id) ? [] : [c.id])}
+            >
+              {c.name}
+            </button>
+          ))}
         </div>
         <button
           type="button"
@@ -257,7 +251,9 @@ export const HomePage = ({
                 className={`home-cat-panel-item${selectedCategoryIds.length === 0 ? ' home-cat-panel-item--on' : ''}`}
                 onClick={() => { onCategoryChange([]); setCatOpen(false) }}
               >
-                <span className="home-cat-panel-icon">전체</span>
+                <span className="home-cat-panel-icon">
+                  <img src={'/categories/all.png'} alt="" className="home-cat-panel-img" />
+                </span>
                 <span className="home-cat-panel-label">전체</span>
               </button>
               {categories.map(c => {
