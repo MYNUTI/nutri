@@ -1602,7 +1602,10 @@
 
 /* ── 정렬 패널 (칩 선택형, 오버레이) ──────────────── */
 .home-sort-panel {
-  position: fixed;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   z-index: 20;
   background: #fff;
   display: flex;
@@ -1691,14 +1694,6 @@
 }
 
 .home-sort-apply:hover { background: #3a4353; }
-
-.home-sort-apply--off {
-  background: #F2F3F5;
-  color: #777F8A;
-  cursor: default;
-}
-
-.home-sort-apply--off:hover { background: #f2f3f5; }
 
 /* ── 정렬 드롭다운 (단일 선택 리스트) ───────────── */
 .home-dropdown-list {

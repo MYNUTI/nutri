@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { logFilter, logSearch } from '../api/logging'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import { ChevronDownIcon, ChevronUpIcon, FilterIcon, UserIcon } from '../components/icons'
@@ -83,17 +83,12 @@ export const HomePage = ({
   const [catOpen, setCatOpen] = useState(false)
   const [openChip, setOpenChip] = useState<ChipKey | null>(null)
   const [showScrollTop, setShowScrollTop] = useState(false)
-  const [catInFilter, setCatInFilter] = useState(false)
-  const [tempSort, setTempSort] = useState<SortKey | null>(selectedSort)
-  const [panelBox, setPanelBox] = useState({ top: 0, left: 0, width: 0 })
+  const [tempSort, setTempSort] = useState<SortKey>(selectedSort)
 
   const { toggle, isFavorite } = useFavorites()
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
-  const topbarRef = useRef<HTMLDivElement | null>(null)
-  const catsAreaRef = useRef<HTMLDivElement | null>(null)
-  const chipsWrapRef = useRef<HTMLDivElement | null>(null)
   const scrollReadyRef = useRef(false)
   const loggedSearchRef = useRef<string | null>(null)
 
@@ -156,11 +151,6 @@ export const HomePage = ({
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300)
-      const cats = catsAreaRef.current
-      const topbar = topbarRef.current
-      if (cats && topbar) {
-        setCatInFilter(cats.getBoundingClientRect().bottom <= topbar.getBoundingClientRect().bottom)
-      }
     }
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -192,25 +182,6 @@ export const HomePage = ({
     if (!catOpen) setOpenChip(null)
     setCatOpen(prev => !prev)
   }
-
-  // 필터바 아래에 fixed로 뜨는 패널의 위치를 필터바 실측으로 계산
-  const measurePanel = () => {
-    const el = chipsWrapRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    setPanelBox({ top: r.bottom, left: r.left, width: r.width })
-  }
-
-  const handleCatChipClick = () => {
-    window.scrollTo({ top: 0 })
-    setOpenChip(null)
-    setCatOpen(true)
-  }
-
-  const selectedCatName =
-    selectedCategoryIds.length > 0
-      ? categories.find(c => c.id === selectedCategoryIds[0])?.name ?? '카테고리'
-      : '카테고리'
 
   const categoryPanelGrid = (
     <div className="home-cat-panel-grid">
@@ -250,7 +221,7 @@ export const HomePage = ({
       className={`home-page${catOpen ? ' home-page--catopen' : ''}`}
       ref={scrollContainerRef}
     >
-      <div className="home-topbar" ref={topbarRef}>
+      <div className="home-topbar">
         <header className="home-header">
           <button
             type="button"
@@ -294,7 +265,7 @@ export const HomePage = ({
       </div>
 
       {/* 카테고리 가로 스크롤 바 */}
-      <div className="home-cats-area" ref={catsAreaRef}>
+      <div className="home-cats-area">
         <div className="home-cats-scroll" role="list" aria-label="카테고리" ref={catsScrollRef}>
           <button
             type="button"
@@ -334,7 +305,7 @@ export const HomePage = ({
       </div>
 
       {/* 필터 칩 */}
-      <div className="home-chips-wrap" ref={chipsWrapRef}>
+      <div className="home-chips-wrap">
         <div className="home-chips">
           <button className="home-chip-icon" type="button" aria-label="필터" onClick={() => onMoveToFilter()}>
             <FilterIcon />
@@ -347,50 +318,32 @@ export const HomePage = ({
               (label === '성분' && selectedNutrients.length > 0)
 
             return (
-              <Fragment key={label}>
-                <button
-                  type="button"
-                  className={`home-chip${hasFilter ? ' home-chip--on' : ''}${isSort && isOpen ? ' home-chip--active' : ''}`}
-                  onClick={() => {
-                    if (isSort) {
-                      if (openChip !== '정렬') { setCatOpen(false); setTempSort(selectedSort); measurePanel() }
-                      setOpenChip(openChip === '정렬' ? null : '정렬')
-                    } else {
-                      setCatOpen(false)
-                      onMoveToFilter(label === '성분' ? 'nutrient' : 'brand')
-                    }
-                  }}
-                  aria-expanded={isSort ? isOpen : undefined}
-                >
-                  {label}
-                  <span className="home-chip-chevron" aria-hidden="true">
-                    {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                  </span>
-                </button>
-                {isSort && catInFilter && (
-                  <button
-                    type="button"
-                    className={`home-chip${selectedCategoryIds.length > 0 ? ' home-chip--on' : ''}`}
-                    onClick={handleCatChipClick}
-                  >
-                    {selectedCatName}
-                    <span className="home-chip-chevron" aria-hidden="true">
-                      <ChevronDownIcon />
-                    </span>
-                  </button>
-                )}
-              </Fragment>
+              <button
+                key={label}
+                type="button"
+                className={`home-chip${hasFilter ? ' home-chip--on' : ''}${isSort && isOpen ? ' home-chip--active' : ''}`}
+                onClick={() => {
+                  if (isSort) {
+                    if (openChip !== '정렬') { setCatOpen(false); setTempSort(selectedSort) }
+                    setOpenChip(openChip === '정렬' ? null : '정렬')
+                  } else {
+                    setCatOpen(false)
+                    onMoveToFilter(label === '성분' ? 'nutrient' : 'brand')
+                  }
+                }}
+                aria-expanded={isSort ? isOpen : undefined}
+              >
+                {label}
+                <span className="home-chip-chevron" aria-hidden="true">
+                  {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                </span>
+              </button>
             )
           })}
         </div>
 
         {openChip === '정렬' && (
-          <div
-            className="home-sort-panel"
-            role="dialog"
-            aria-label="정렬"
-            style={{ top: panelBox.top, left: panelBox.left, width: panelBox.width }}
-          >
+          <div className="home-sort-panel" role="dialog" aria-label="정렬">
             <div className="home-sort-options">
               {SORT_OPTIONS.map(opt => (
                 <button
@@ -404,22 +357,20 @@ export const HomePage = ({
               ))}
             </div>
             <div className="home-sort-footer">
-              <button type="button" className="home-sort-reset" onClick={() => setTempSort(null)}>
+              <button type="button" className="home-sort-reset" onClick={() => setTempSort('추천순')}>
                 <img src="/common/reset.svg" alt="" width="16" height="16" aria-hidden="true" />
                 초기화
               </button>
               <button
                 type="button"
-                className={`home-sort-apply${tempSort ? '' : ' home-sort-apply--off'}`}
-                disabled={!tempSort}
+                className="home-sort-apply"
                 onClick={() => {
-                  if (!tempSort) return
                   onSortChange(tempSort)
                   logFilter('SORT', tempSort)
                   setOpenChip(null)
                 }}
               >
-                적용하기{tempSort ? ' (1)' : ''}
+                적용하기 (1)
               </button>
             </div>
           </div>
