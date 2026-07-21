@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useBrandsQuery, useCategoryBrandsQuery } from '../queries/brandsQueries'
+import { useCategoriesQuery } from '../queries/categoriesQueries'
 import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 import { logFilter } from '../api/logging'
 import './FilterPage.css'
@@ -8,7 +9,6 @@ type FilterPageProps = {
   initialCategoryIds?: number[]
   initialBrandIds?: number[]
   initialNutrients?: string[]
-  initialOpenSection?: 'nutrient' | 'brand'
   onClose: () => void
   onApply?: (selection: { categoryIds: number[]; brandIds: number[]; nutrients: string[] }) => void
 }
@@ -30,23 +30,28 @@ export const FilterPage = ({
   initialCategoryIds = [],
   initialBrandIds = [],
   initialNutrients = [],
-  initialOpenSection,
   onClose,
   onApply,
 }: FilterPageProps) => {
-  // 카테고리가 선택돼 있으면 해당 카테고리 브랜드만, 아니면 전체 브랜드
-  const categoryId = initialCategoryIds[0]
-  const { data: allBrands } = useBrandsQuery()
-  const { data: categoryBrands } = useCategoryBrandsQuery(categoryId)
-  const brandList = categoryId != null ? (categoryBrands ?? []) : (allBrands ?? [])
-  const { data: claimsData } = useNutrientClaimsQuery()
-  const claimOptions = claimsData ?? []
+  const { data: categoriesData } = useCategoriesQuery()
+  const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
 
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(initialCategoryIds[0] ?? null)
   const [selectedBrandIds, setSelectedBrandIds] = useState<Set<number>>(new Set(initialBrandIds))
   const [selectedNutrients, setSelectedNutrients] = useState<Set<string>>(new Set(initialNutrients))
 
-  const [nutrientOpen, setNutrientOpen] = useState(!initialOpenSection || initialOpenSection === 'nutrient')
-  const [brandOpen, setBrandOpen] = useState(!initialOpenSection || initialOpenSection === 'brand')
+  // 카테고리가 선택돼 있으면 해당 카테고리 브랜드만, 아니면 전체 브랜드
+  const categoryId = selectedCategoryId ?? undefined
+  const { data: allBrands, isLoading: allBrandsLoading } = useBrandsQuery(categoryId == null)
+  const { data: categoryBrands, isLoading: categoryBrandsLoading } = useCategoryBrandsQuery(categoryId)
+  const brandList = categoryId != null ? (categoryBrands ?? []) : (allBrands ?? [])
+  const brandsLoading = categoryId != null ? categoryBrandsLoading : allBrandsLoading
+  const { data: claimsData } = useNutrientClaimsQuery()
+  const claimOptions = claimsData ?? []
+
+  const [categoryOpen, setCategoryOpen] = useState(true)
+  const [nutrientOpen, setNutrientOpen] = useState(true)
+  const [brandOpen, setBrandOpen] = useState(true)
 
   const toggleNum = (set: Set<number>, item: number): Set<number> => {
     const next = new Set(set)
@@ -61,22 +66,27 @@ export const FilterPage = ({
   }
 
   const handleReset = () => {
+    setSelectedCategoryId(null)
     setSelectedBrandIds(new Set())
     setSelectedNutrients(new Set())
   }
 
   const handleApply = () => {
+    if (selectedCategoryId != null) logFilter('CATEGORY', String(selectedCategoryId))
     if (selectedBrandIds.size > 0) logFilter('BRAND', Array.from(selectedBrandIds).join(','))
     if (selectedNutrients.size > 0) logFilter('NUTRIENT', Array.from(selectedNutrients).join(','))
     onApply?.({
-      categoryIds: initialCategoryIds,
+      categoryIds: selectedCategoryId != null ? [selectedCategoryId] : [],
       brandIds: Array.from(selectedBrandIds),
       nutrients: Array.from(selectedNutrients),
     })
     onClose()
   }
 
-  const totalSelected = selectedBrandIds.size + selectedNutrients.size
+  const totalSelected = (selectedCategoryId != null ? 1 : 0) + selectedBrandIds.size + selectedNutrients.size
+  const initialCount = initialCategoryIds.length + initialBrandIds.length + initialNutrients.length
+  // 선택도 없고 기존 적용값도 없으면 누를 이유가 없음. 선택만 비었으면 "해제 적용"으로 동작
+  const applyInert = totalSelected === 0 && initialCount === 0
 
   return (
     <div className="fil-page">
@@ -88,6 +98,31 @@ export const FilterPage = ({
       </header>
 
       <div className="fil-body">
+        <section className="fil-section">
+          <button type="button" className="fil-section-head" onClick={() => setCategoryOpen(v => !v)}>
+            <span className="fil-section-label">카테고리</span>
+            <ChevronIcon className={`fil-chevron${categoryOpen ? ' fil-chevron--up' : ''}`} />
+          </button>
+          {categoryOpen && (
+            <div className="fil-chips">
+              {categories.map(c => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className={`fil-chip${selectedCategoryId === c.id ? ' fil-chip--on' : ''}`}
+                  onClick={() => {
+                    // 브랜드 목록이 카테고리 종속이라 카테고리를 바꾸면 브랜드 선택도 초기화
+                    setSelectedCategoryId(selectedCategoryId === c.id ? null : c.id)
+                    setSelectedBrandIds(new Set())
+                  }}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
         <section className="fil-section">
           <button type="button" className="fil-section-head" onClick={() => setNutrientOpen(v => !v)}>
             <span className="fil-section-label">영양성분</span>
@@ -130,7 +165,9 @@ export const FilterPage = ({
               </div>
             ) : (
               <p className="fil-empty">
-                {categoryId != null ? '이 카테고리에 등록된 브랜드가 없어요.' : '브랜드를 불러오는 중...'}
+                {brandsLoading
+                  ? '브랜드를 불러오는 중...'
+                  : categoryId != null ? '이 카테고리에 등록된 브랜드가 없어요.' : '등록된 브랜드가 없어요.'}
               </p>
             )
           )}
@@ -140,9 +177,15 @@ export const FilterPage = ({
 
       <footer className="fil-footer">
         <button type="button" className="fil-btn-reset" onClick={handleReset}>
+          <img src="/common/reset.svg" alt="" width="16" height="16" aria-hidden="true" />
           초기화
         </button>
-        <button type="button" className="fil-btn-apply" onClick={handleApply}>
+        <button
+          type="button"
+          className={`fil-btn-apply${applyInert ? ' fil-btn-apply--off' : ''}`}
+          disabled={applyInert}
+          onClick={handleApply}
+        >
           적용하기{totalSelected > 0 ? ` (${totalSelected})` : ''}
         </button>
       </footer>
