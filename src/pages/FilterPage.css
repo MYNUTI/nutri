@@ -135,21 +135,22 @@
 /* ── 하단 버튼 바 ────────────────────────────── */
 .fil-footer {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 16px;
   padding: 11px 20px;
-  border-top: 1px solid #E8EAEC;
   background: #fff;
   flex-shrink: 0;
 }
 
 .fil-btn-reset {
-  width: 120px;
-  height: 52px;
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
   border: 0;
-  background: #F2F3F5;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 6px 8px;
+  font-size: 15px;
+  font-weight: 500;
   color: #777F8A;
   cursor: pointer;
   flex-shrink: 0;
@@ -157,15 +158,15 @@
   letter-spacing: -0.01em;
 }
 
-.fil-btn-reset:hover { background: #e6e8ea; }
+.fil-btn-reset:hover { color: #5a6069; }
 
 .fil-btn-apply {
   flex: 1;
   height: 52px;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 0;
   background: #525760;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #fff;
   cursor: pointer;
@@ -174,6 +175,14 @@
 }
 
 .fil-btn-apply:hover { background: #666a74; }
+
+.fil-btn-apply--off {
+  background: #F2F3F5;
+  color: #777F8A;
+  cursor: default;
+}
+
+.fil-btn-apply--off:hover { background: #F2F3F5; }
 
 .fil-btn-reset:focus-visible,
 .fil-btn-apply:focus-visible {

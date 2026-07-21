@@ -37,7 +37,6 @@ function App() {
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
-  const [filterInitialSection, setFilterInitialSection] = useState<'nutrient' | 'brand' | undefined>(undefined)
   const [compareProducts, setCompareProducts] = useState<Product[]>([])
 
   const auth = useAuthSession({ go, setFavoriteIds })
@@ -109,8 +108,7 @@ function App() {
               initialCategoryIds={search.state.categoryIds}
               initialBrandIds={search.state.brandIds}
               initialNutrients={search.state.nutrients}
-              initialOpenSection={filterInitialSection}
-              onClose={() => { setShowFilter(false); setFilterInitialSection(undefined) }}
+              onClose={() => setShowFilter(false)}
               onApply={(sel) => search.applyFilter(sel)}
             />
           )}
@@ -135,7 +133,8 @@ function App() {
                 setHomeSort={search.setSort}
                 onCategoryChange={search.setCategories}
                 resetHomeFilters={search.reset}
-                onMoveToFilter={(section) => { setFilterInitialSection(section); setShowFilter(true) }}
+                onMoveToFilter={() => setShowFilter(true)}
+                onApplyFilter={(sel) => search.applyFilter(sel)}
                 onAddToCompare={handleAddToCompare}
                 compareProducts={compareProducts}
                 onEditNutrition={() => setShowNutritionEdit(true)}

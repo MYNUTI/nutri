@@ -1,11 +1,13 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { logFilter, logSearch } from '../api/logging'
 import type { ProductResponse, ProductSearchCondition, SortType } from '../api/products/types'
 import { ChevronDownIcon, ChevronUpIcon, FilterIcon, UserIcon } from '../components/icons'
 import { LoginPromptModal } from '../components/LoginPromptModal'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useImpressionTracking } from '../hooks/useImpressionTracking'
+import { useBrandsQuery, useCategoryBrandsQuery } from '../queries/brandsQueries'
 import { useCategoriesQuery } from '../queries/categoriesQueries'
+import { useNutrientClaimsQuery } from '../queries/nutrientClaimsQueries'
 import { useInfiniteProductListQuery } from '../queries/productQueries'
 import type { Product } from '../types/product'
 
@@ -18,7 +20,8 @@ type HomePageProps = {
   onCategoryChange: (ids: number[]) => void
   selectedSort: SortKey
   onSortChange: (sort: SortKey) => void
-  onMoveToFilter: (section?: 'nutrient' | 'brand') => void
+  onMoveToFilter: () => void
+  onApplyFilter: (sel: { categoryIds: number[]; brandIds: number[]; nutrients: string[] }) => void
   onMoveToMyPage: () => void
   onMoveToSearch?: () => void
   onGoHome?: () => void
@@ -28,8 +31,7 @@ type HomePageProps = {
   onNeedLogin?: () => void
 }
 
-const FILTER_CHIPS = ['정렬', '성분', '브랜드'] as const
-type ChipKey = typeof FILTER_CHIPS[number]
+type FilterKind = 'nutrient' | 'brand'
 
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
 export type SortKey = typeof SORT_OPTIONS[number]
@@ -58,6 +60,9 @@ const CATEGORY_IMAGES: Record<string, string> = {
   '식물성 단백질':   '/categories/veget_prot.png',
 }
 
+const toggleItem = <T,>(list: T[], item: T): T[] =>
+  list.includes(item) ? list.filter(v => v !== item) : [...list, item]
+
 function mapToProduct(p: ProductResponse): Product {
   return {
     id: p.id,
@@ -74,26 +79,32 @@ export const HomePage = ({
   keyword, onClearKeyword,
   selectedCategoryIds, selectedBrandIds, selectedNutrients,
   onCategoryChange, selectedSort, onSortChange,
-  onMoveToFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick,
+  onMoveToFilter, onApplyFilter, onMoveToMyPage, onMoveToSearch, onGoHome, onProductClick,
   isAuthenticated, onNeedLogin,
 }: HomePageProps) => {
   const { data: categoriesData } = useCategoriesQuery()
   const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
 
   const [catOpen, setCatOpen] = useState(false)
-  const [openChip, setOpenChip] = useState<ChipKey | null>(null)
+  const [sortOpen, setSortOpen] = useState(false)
+  const [openFilter, setOpenFilter] = useState<FilterKind | null>(null)
+
+  // 카테고리가 선택돼 있으면 해당 카테고리 브랜드만, 아니면 전체 브랜드.
+  // 패널을 열기 전엔 조회하지 않되, 적용된 필터가 있으면 칩 라벨용으로 조회
+  const categoryId = selectedCategoryIds[0]
+  const { data: allBrands } = useBrandsQuery(openFilter === 'brand' || selectedBrandIds.length > 0)
+  const { data: categoryBrands } = useCategoryBrandsQuery(categoryId)
+  const brandList = categoryId != null ? (categoryBrands ?? []) : (allBrands ?? [])
+  const { data: claimsData } = useNutrientClaimsQuery(openFilter === 'nutrient' || selectedNutrients.length > 0)
+  const claimOptions = claimsData ?? []
+  const [tempNutrients, setTempNutrients] = useState<string[]>([])
+  const [tempBrandIds, setTempBrandIds] = useState<number[]>([])
   const [showScrollTop, setShowScrollTop] = useState(false)
-  const [catInFilter, setCatInFilter] = useState(false)
-  const [tempSort, setTempSort] = useState<SortKey | null>(selectedSort)
-  const [panelBox, setPanelBox] = useState({ top: 0, left: 0, width: 0 })
 
   const { toggle, isFavorite } = useFavorites()
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const catsScrollRef = useRef<HTMLDivElement | null>(null)
-  const topbarRef = useRef<HTMLDivElement | null>(null)
-  const catsAreaRef = useRef<HTMLDivElement | null>(null)
-  const chipsWrapRef = useRef<HTMLDivElement | null>(null)
   const scrollReadyRef = useRef(false)
   const loggedSearchRef = useRef<string | null>(null)
 
@@ -156,11 +167,6 @@ export const HomePage = ({
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300)
-      const cats = catsAreaRef.current
-      const topbar = topbarRef.current
-      if (cats && topbar) {
-        setCatInFilter(cats.getBoundingClientRect().bottom <= topbar.getBoundingClientRect().bottom)
-      }
     }
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -168,11 +174,23 @@ export const HomePage = ({
   }, [])
 
   useEffect(() => {
-    const locked = catOpen || openChip !== null
+    if (!sortOpen && openFilter === null) return
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target?.closest('.home-sort-menu, .home-meta-sort, .home-filter-panel, .home-chips .home-chip')) return
+      setSortOpen(false)
+      setOpenFilter(null)
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [sortOpen, openFilter])
+
+  useEffect(() => {
+    const locked = catOpen || sortOpen || openFilter !== null
     if (!locked) return
     const prevent = (e: Event) => {
       const target = e.target as HTMLElement | null
-      if (target?.closest('.home-cat-panel, .home-sort-panel')) return
+      if (target?.closest('.home-cat-panel, .home-sort-menu, .home-filter-panel')) return
       e.preventDefault()
     }
     window.addEventListener('wheel', prevent, { passive: false })
@@ -181,7 +199,7 @@ export const HomePage = ({
       window.removeEventListener('wheel', prevent)
       window.removeEventListener('touchmove', prevent)
     }
-  }, [catOpen, openChip])
+  }, [catOpen, sortOpen, openFilter])
 
   const handleCatSelect = (id: number) => {
     onCategoryChange(selectedCategoryIds[0] === id ? [] : [id])
@@ -189,28 +207,54 @@ export const HomePage = ({
   }
 
   const handleExpandClick = () => {
-    if (!catOpen) setOpenChip(null)
+    if (!catOpen) { setSortOpen(false); setOpenFilter(null) }
     setCatOpen(prev => !prev)
   }
 
-  // 필터바 아래에 fixed로 뜨는 패널의 위치를 필터바 실측으로 계산
-  const measurePanel = () => {
-    const el = chipsWrapRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    setPanelBox({ top: r.bottom, left: r.left, width: r.width })
+  const handleFilterChipClick = (kind: FilterKind) => {
+    if (openFilter === kind) { setOpenFilter(null); return }
+    setCatOpen(false)
+    setSortOpen(false)
+    setTempNutrients(selectedNutrients)
+    setTempBrandIds(selectedBrandIds)
+    setOpenFilter(kind)
   }
 
-  const handleCatChipClick = () => {
-    window.scrollTo({ top: 0 })
-    setOpenChip(null)
-    setCatOpen(true)
+  const handleFilterApply = () => {
+    if (openFilter === 'nutrient' && tempNutrients.length > 0) logFilter('NUTRIENT', tempNutrients.join(','))
+    if (openFilter === 'brand' && tempBrandIds.length > 0) logFilter('BRAND', tempBrandIds.join(','))
+    onApplyFilter({
+      categoryIds: selectedCategoryIds,
+      brandIds: openFilter === 'brand' ? tempBrandIds : selectedBrandIds,
+      nutrients: openFilter === 'nutrient' ? tempNutrients : selectedNutrients,
+    })
+    setOpenFilter(null)
   }
 
-  const selectedCatName =
-    selectedCategoryIds.length > 0
-      ? categories.find(c => c.id === selectedCategoryIds[0])?.name ?? '카테고리'
-      : '카테고리'
+  const handleFilterClear = (kind: FilterKind) => {
+    onApplyFilter({
+      categoryIds: selectedCategoryIds,
+      brandIds: kind === 'brand' ? [] : selectedBrandIds,
+      nutrients: kind === 'nutrient' ? [] : selectedNutrients,
+    })
+    if (openFilter === kind) setOpenFilter(null)
+  }
+
+  const nutrientChipLabel = (() => {
+    const n = selectedNutrients.length
+    if (n === 0) return '영양성분'
+    const first = claimOptions.find(c => c.code === selectedNutrients[0])?.label
+    if (!first) return `영양성분 ${n}`
+    return n > 1 ? `${first} 외 ${n - 1}` : first
+  })()
+
+  const brandChipLabel = (() => {
+    const n = selectedBrandIds.length
+    if (n === 0) return '브랜드'
+    const first = brandList.find(b => b.id === selectedBrandIds[0])?.name
+    if (!first) return `브랜드 ${n}`
+    return n > 1 ? `${first} 외 ${n - 1}` : first
+  })()
 
   const categoryPanelGrid = (
     <div className="home-cat-panel-grid">
@@ -250,7 +294,7 @@ export const HomePage = ({
       className={`home-page${catOpen ? ' home-page--catopen' : ''}`}
       ref={scrollContainerRef}
     >
-      <div className="home-topbar" ref={topbarRef}>
+      <div className="home-topbar">
         <header className="home-header">
           <button
             type="button"
@@ -294,7 +338,7 @@ export const HomePage = ({
       </div>
 
       {/* 카테고리 가로 스크롤 바 */}
-      <div className="home-cats-area" ref={catsAreaRef}>
+      <div className="home-cats-area">
         <div className="home-cats-scroll" role="list" aria-label="카테고리" ref={catsScrollRef}>
           <button
             type="button"
@@ -334,94 +378,151 @@ export const HomePage = ({
       </div>
 
       {/* 필터 칩 */}
-      <div className="home-chips-wrap" ref={chipsWrapRef}>
+      <div className="home-chips-wrap">
         <div className="home-chips">
-          <button className="home-chip-icon" type="button" aria-label="필터" onClick={() => onMoveToFilter()}>
+          <button
+            className="home-chip-icon"
+            type="button"
+            aria-label="필터"
+            onClick={() => { setCatOpen(false); setSortOpen(false); setOpenFilter(null); onMoveToFilter() }}
+          >
             <FilterIcon />
           </button>
-          {FILTER_CHIPS.map(label => {
-            const isSort = label === '정렬'
-            const isOpen = isSort && openChip === '정렬'
-            const hasFilter =
-              (label === '브랜드' && selectedBrandIds.length > 0) ||
-              (label === '성분' && selectedNutrients.length > 0)
-
-            return (
-              <Fragment key={label}>
+          {([
+            { kind: 'nutrient' as const, label: nutrientChipLabel, applied: selectedNutrients.length > 0 },
+            { kind: 'brand' as const, label: brandChipLabel, applied: selectedBrandIds.length > 0 },
+          ]).map(({ kind, label, applied }) => (
+            applied ? (
+              <div key={kind} className={`home-chip home-chip--filled${openFilter === kind ? ' home-chip--active' : ''}`}>
                 <button
                   type="button"
-                  className={`home-chip${hasFilter ? ' home-chip--on' : ''}${isSort && isOpen ? ' home-chip--active' : ''}`}
-                  onClick={() => {
-                    if (isSort) {
-                      if (openChip !== '정렬') { setCatOpen(false); setTempSort(selectedSort); measurePanel() }
-                      setOpenChip(openChip === '정렬' ? null : '정렬')
-                    } else {
-                      setCatOpen(false)
-                      onMoveToFilter(label === '성분' ? 'nutrient' : 'brand')
-                    }
-                  }}
-                  aria-expanded={isSort ? isOpen : undefined}
+                  className="home-chip-label"
+                  aria-expanded={openFilter === kind}
+                  onClick={() => handleFilterChipClick(kind)}
                 >
                   {label}
-                  <span className="home-chip-chevron" aria-hidden="true">
-                    {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                  </span>
                 </button>
-                {isSort && catInFilter && (
-                  <button
-                    type="button"
-                    className={`home-chip${selectedCategoryIds.length > 0 ? ' home-chip--on' : ''}`}
-                    onClick={handleCatChipClick}
-                  >
-                    {selectedCatName}
-                    <span className="home-chip-chevron" aria-hidden="true">
-                      <ChevronDownIcon />
-                    </span>
-                  </button>
-                )}
-              </Fragment>
+                <button
+                  type="button"
+                  className="home-chip-clear"
+                  aria-label="필터 해제"
+                  onClick={() => handleFilterClear(kind)}
+                >
+                  <img src="/common/cancel.svg" alt="" width="14" height="14" />
+                </button>
+              </div>
+            ) : (
+              <button
+                key={kind}
+                type="button"
+                className={`home-chip${openFilter === kind ? ' home-chip--active' : ''}`}
+                aria-expanded={openFilter === kind}
+                onClick={() => handleFilterChipClick(kind)}
+              >
+                {label}
+                <span className="home-chip-chevron" aria-hidden="true">
+                  {openFilter === kind ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                </span>
+              </button>
             )
-          })}
+          ))}
         </div>
 
-        {openChip === '정렬' && (
-          <div
-            className="home-sort-panel"
-            role="dialog"
-            aria-label="정렬"
-            style={{ top: panelBox.top, left: panelBox.left, width: panelBox.width }}
-          >
-            <div className="home-sort-options">
-              {SORT_OPTIONS.map(opt => (
+        {openFilter && (
+          <div className="home-filter-panel" role="dialog" aria-label={openFilter === 'nutrient' ? '영양성분 필터' : '브랜드 필터'}>
+            <div className="home-filter-options">
+              {openFilter === 'nutrient' && claimOptions.map(c => (
                 <button
-                  key={opt}
+                  key={c.code}
                   type="button"
-                  className={`home-sort-chip${tempSort === opt ? ' home-sort-chip--on' : ''}`}
-                  onClick={() => setTempSort(opt)}
+                  className={`home-filter-chip${tempNutrients.includes(c.code) ? ' home-filter-chip--on' : ''}`}
+                  onClick={() => setTempNutrients(toggleItem(tempNutrients, c.code))}
                 >
-                  {opt}
+                  {c.label}
                 </button>
               ))}
+              {openFilter === 'brand' && (
+                brandList.length > 0 ? brandList.map(b => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    className={`home-filter-chip${tempBrandIds.includes(b.id) ? ' home-filter-chip--on' : ''}`}
+                    onClick={() => setTempBrandIds(toggleItem(tempBrandIds, b.id))}
+                  >
+                    {b.name}
+                  </button>
+                )) : (
+                  <p className="home-filter-empty">
+                    {categoryId != null ? '이 카테고리에 등록된 브랜드가 없어요.' : '브랜드를 불러오는 중...'}
+                  </p>
+                )
+              )}
             </div>
-            <div className="home-sort-footer">
-              <button type="button" className="home-sort-reset" onClick={() => setTempSort(null)}>
+            <div className="home-filter-footer">
+              <button
+                type="button"
+                className="home-filter-reset"
+                onClick={() => openFilter === 'nutrient' ? setTempNutrients([]) : setTempBrandIds([])}
+              >
                 <img src="/common/reset.svg" alt="" width="16" height="16" aria-hidden="true" />
                 초기화
               </button>
+              {(() => {
+                const count = openFilter === 'nutrient' ? tempNutrients.length : tempBrandIds.length
+                const appliedCount = openFilter === 'nutrient' ? selectedNutrients.length : selectedBrandIds.length
+                // temp도 비고 적용된 필터도 없으면 누를 이유가 없음. temp만 비었으면 "해제 적용"으로 동작
+                const inert = count === 0 && appliedCount === 0
+                return (
+                  <button
+                    type="button"
+                    className={`home-filter-apply${inert ? ' home-filter-apply--off' : ''}`}
+                    disabled={inert}
+                    onClick={handleFilterApply}
+                  >
+                    적용하기{count > 0 ? ` (${count})` : ''}
+                  </button>
+                )
+              })()}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 상품 개수 + 정렬 */}
+      <div className="home-meta">
+        <p className="home-meta-count">상품 <span className="home-meta-total">{data?.pages[0]?.total ?? 0}</span></p>
+        <button
+          type="button"
+          className="home-meta-sort"
+          aria-expanded={sortOpen}
+          aria-haspopup="menu"
+          onClick={() => {
+            if (!sortOpen) { setCatOpen(false); setOpenFilter(null) }
+            setSortOpen(prev => !prev)
+          }}
+        >
+          {selectedSort}
+          <img src="/common/sort.svg" alt="" width="22" height="20" aria-hidden="true" />
+        </button>
+
+        {sortOpen && (
+          <div className="home-sort-menu" role="menu" aria-label="정렬">
+            {SORT_OPTIONS.map(opt => (
               <button
+                key={opt}
                 type="button"
-                className={`home-sort-apply${tempSort ? '' : ' home-sort-apply--off'}`}
-                disabled={!tempSort}
+                role="menuitemradio"
+                aria-checked={selectedSort === opt}
+                className={`home-sort-menu-item${selectedSort === opt ? ' home-sort-menu-item--on' : ''}`}
                 onClick={() => {
-                  if (!tempSort) return
-                  onSortChange(tempSort)
-                  logFilter('SORT', tempSort)
-                  setOpenChip(null)
+                  onSortChange(opt)
+                  logFilter('SORT', opt)
+                  setSortOpen(false)
                 }}
               >
-                적용하기{tempSort ? ' (1)' : ''}
+                {opt}
               </button>
-            </div>
+            ))}
           </div>
         )}
 
@@ -436,10 +537,10 @@ export const HomePage = ({
             aria-hidden="true"
           />
         )}
-        {openChip === '정렬' && (
+        {openFilter && (
           <div
             className="home-cat-dim"
-            onClick={() => setOpenChip(null)}
+            onClick={() => setOpenFilter(null)}
             aria-hidden="true"
           />
         )}

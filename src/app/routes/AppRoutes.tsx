@@ -30,7 +30,8 @@ export type AppRoutesProps = {
   setHomeSort: (s: SortKey) => void
   onCategoryChange: (ids: number[]) => void
   resetHomeFilters: () => void
-  onMoveToFilter: (section?: 'nutrient' | 'brand') => void
+  onMoveToFilter: () => void
+  onApplyFilter: (sel: { categoryIds: number[]; brandIds: number[]; nutrients: string[] }) => void
   onAddToCompare: (p: Product) => void
   compareProducts: Product[]
   onEditNutrition: () => void
@@ -57,6 +58,7 @@ export function AppRoutes(props: AppRoutesProps) {
             selectedSort={props.homeSort}
             onSortChange={props.setHomeSort}
             onMoveToFilter={props.onMoveToFilter}
+            onApplyFilter={props.onApplyFilter}
             onMoveToMyPage={() => go('/mypage')}
             onMoveToSearch={() => go('/search')}
             onGoHome={() => { props.resetHomeFilters(); go('/', { replace: true }) }}
