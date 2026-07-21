@@ -28,8 +28,7 @@ type HomePageProps = {
   onNeedLogin?: () => void
 }
 
-const FILTER_CHIPS = ['정렬', '성분', '브랜드'] as const
-type ChipKey = typeof FILTER_CHIPS[number]
+const FILTER_CHIPS = ['성분', '브랜드'] as const
 
 const SORT_OPTIONS = ['추천순', '영양점수순', '인기순', '정확도순'] as const
 export type SortKey = typeof SORT_OPTIONS[number]
@@ -81,9 +80,8 @@ export const HomePage = ({
   const categories = useMemo(() => (categoriesData ?? []).filter(c => c.depth === 1), [categoriesData])
 
   const [catOpen, setCatOpen] = useState(false)
-  const [openChip, setOpenChip] = useState<ChipKey | null>(null)
+  const [sortOpen, setSortOpen] = useState(false)
   const [showScrollTop, setShowScrollTop] = useState(false)
-  const [tempSort, setTempSort] = useState<SortKey>(selectedSort)
 
   const { toggle, isFavorite } = useFavorites()
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
@@ -158,11 +156,22 @@ export const HomePage = ({
   }, [])
 
   useEffect(() => {
-    const locked = catOpen || openChip !== null
+    if (!sortOpen) return
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target?.closest('.home-sort-menu, .home-meta-sort')) return
+      setSortOpen(false)
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [sortOpen])
+
+  useEffect(() => {
+    const locked = catOpen || sortOpen
     if (!locked) return
     const prevent = (e: Event) => {
       const target = e.target as HTMLElement | null
-      if (target?.closest('.home-cat-panel, .home-sort-panel')) return
+      if (target?.closest('.home-cat-panel, .home-sort-menu')) return
       e.preventDefault()
     }
     window.addEventListener('wheel', prevent, { passive: false })
@@ -171,7 +180,7 @@ export const HomePage = ({
       window.removeEventListener('wheel', prevent)
       window.removeEventListener('touchmove', prevent)
     }
-  }, [catOpen, openChip])
+  }, [catOpen, sortOpen])
 
   const handleCatSelect = (id: number) => {
     onCategoryChange(selectedCategoryIds[0] === id ? [] : [id])
@@ -179,7 +188,7 @@ export const HomePage = ({
   }
 
   const handleExpandClick = () => {
-    if (!catOpen) setOpenChip(null)
+    if (!catOpen) setSortOpen(false)
     setCatOpen(prev => !prev)
   }
 
@@ -307,12 +316,15 @@ export const HomePage = ({
       {/* 필터 칩 */}
       <div className="home-chips-wrap">
         <div className="home-chips">
-          <button className="home-chip-icon" type="button" aria-label="필터" onClick={() => onMoveToFilter()}>
+          <button
+            className="home-chip-icon"
+            type="button"
+            aria-label="필터"
+            onClick={() => { setCatOpen(false); setSortOpen(false); onMoveToFilter() }}
+          >
             <FilterIcon />
           </button>
           {FILTER_CHIPS.map(label => {
-            const isSort = label === '정렬'
-            const isOpen = isSort && openChip === '정렬'
             const hasFilter =
               (label === '브랜드' && selectedBrandIds.length > 0) ||
               (label === '성분' && selectedNutrients.length > 0)
@@ -321,58 +333,58 @@ export const HomePage = ({
               <button
                 key={label}
                 type="button"
-                className={`home-chip${hasFilter ? ' home-chip--on' : ''}${isSort && isOpen ? ' home-chip--active' : ''}`}
+                className={`home-chip${hasFilter ? ' home-chip--on' : ''}`}
                 onClick={() => {
-                  if (isSort) {
-                    if (openChip !== '정렬') { setCatOpen(false); setTempSort(selectedSort) }
-                    setOpenChip(openChip === '정렬' ? null : '정렬')
-                  } else {
-                    setCatOpen(false)
-                    onMoveToFilter(label === '성분' ? 'nutrient' : 'brand')
-                  }
+                  setCatOpen(false)
+                  setSortOpen(false)
+                  onMoveToFilter(label === '성분' ? 'nutrient' : 'brand')
                 }}
-                aria-expanded={isSort ? isOpen : undefined}
               >
                 {label}
                 <span className="home-chip-chevron" aria-hidden="true">
-                  {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                  <ChevronDownIcon />
                 </span>
               </button>
             )
           })}
         </div>
+      </div>
 
-        {openChip === '정렬' && (
-          <div className="home-sort-panel" role="dialog" aria-label="정렬">
-            <div className="home-sort-options">
-              {SORT_OPTIONS.map(opt => (
-                <button
-                  key={opt}
-                  type="button"
-                  className={`home-sort-chip${tempSort === opt ? ' home-sort-chip--on' : ''}`}
-                  onClick={() => setTempSort(opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            <div className="home-sort-footer">
-              <button type="button" className="home-sort-reset" onClick={() => setTempSort('추천순')}>
-                <img src="/common/reset.svg" alt="" width="16" height="16" aria-hidden="true" />
-                초기화
-              </button>
+      {/* 상품 개수 + 정렬 */}
+      <div className="home-meta">
+        <p className="home-meta-count">상품 <span className="home-meta-total">{data?.pages[0]?.total ?? 0}</span></p>
+        <button
+          type="button"
+          className="home-meta-sort"
+          aria-expanded={sortOpen}
+          aria-haspopup="menu"
+          onClick={() => {
+            if (!sortOpen) setCatOpen(false)
+            setSortOpen(prev => !prev)
+          }}
+        >
+          {selectedSort}
+          <img src="/common/sort.svg" alt="" width="22" height="20" aria-hidden="true" />
+        </button>
+
+        {sortOpen && (
+          <div className="home-sort-menu" role="menu" aria-label="정렬">
+            {SORT_OPTIONS.map(opt => (
               <button
+                key={opt}
                 type="button"
-                className="home-sort-apply"
+                role="menuitemradio"
+                aria-checked={selectedSort === opt}
+                className={`home-sort-menu-item${selectedSort === opt ? ' home-sort-menu-item--on' : ''}`}
                 onClick={() => {
-                  onSortChange(tempSort)
-                  logFilter('SORT', tempSort)
-                  setOpenChip(null)
+                  onSortChange(opt)
+                  logFilter('SORT', opt)
+                  setSortOpen(false)
                 }}
               >
-                적용하기 (1)
+                {opt}
               </button>
-            </div>
+            ))}
           </div>
         )}
 
@@ -384,13 +396,6 @@ export const HomePage = ({
           <div
             className="home-cat-dim"
             onClick={() => setCatOpen(false)}
-            aria-hidden="true"
-          />
-        )}
-        {openChip === '정렬' && (
-          <div
-            className="home-cat-dim"
-            onClick={() => setOpenChip(null)}
             aria-hidden="true"
           />
         )}
