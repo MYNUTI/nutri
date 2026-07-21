@@ -1457,7 +1457,6 @@
 
 .home-chip {
   flex-shrink: 0;
-  height: 35px;
   border-radius: 999px;
   border: 1px solid #e8eaec;
   background: #fff;
@@ -1471,12 +1470,14 @@
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
 }
 
 .home-chip-chevron {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .home-chip-chevron svg,
@@ -1489,10 +1490,144 @@
 
 .home-chip:hover,
 .home-chip--active,
-.home-chip-icon:hover,
-.home-chip--on {
+.home-chip-icon:hover {
   border-color: #777F8A;
 }
+
+.home-chip--filled {
+  background: #525760;
+  border-color: #525760;
+  color: #fff;
+  font-weight: 500;
+}
+
+.home-chip--filled:hover { border-color: #525760; }
+
+.home-chip-label {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.home-chip-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* ── 영양성분/브랜드 인라인 필터 패널 ─────────── */
+.home-filter-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 14px 16px;
+}
+
+.home-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.home-filter-chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #eaecef;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5a6069;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.home-filter-chip:hover { border-color: #777F8A; }
+
+.home-filter-chip--on {
+  background: #525760;
+  border-color: #525760;
+  color: #fff;
+  font-weight: 600;
+}
+
+.home-filter-empty {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #777F8A;
+}
+
+.home-filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-filter-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  padding: 6px 14px 6px 16px;
+  font-size: 15px;
+  color: #777F8A;
+  cursor: pointer;
+  font-weight: 500;
+  line-height: 130%;
+  letter-spacing: -0.5px;
+}
+
+.home-filter-reset:hover { color: #5a6069; }
+
+.home-filter-apply {
+  display: flex;
+  min-width: 101px;
+  height: 42px;
+  padding: 0 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: #525760;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 130%;
+  letter-spacing: -0.5px;
+  color: #FFF;
+  cursor: pointer;
+}
+
+.home-filter-apply:hover { background: #3a4353; }
+
+.home-filter-apply--off {
+  background: #F2F3F5;
+  color: #777F8A;
+  cursor: default;
+}
+
+.home-filter-apply--off:hover { background: #F2F3F5; }
 
 /* ── 칩 드롭다운 (성분/브랜드 필터) ───────────── */
 .home-dropdown {

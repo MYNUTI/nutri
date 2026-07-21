@@ -11,11 +11,12 @@ const ALLOWED_CLAIMS: { match: string; label: string }[] = [
   { match: '무열량', label: '제로칼로리' },
 ]
 
-export const useNutrientClaimsQuery = () =>
+export const useNutrientClaimsQuery = (enabled = true) =>
   useQuery({
     queryKey: ['nutrient-claims'],
     queryFn: getNutrientClaims,
     staleTime: Infinity,
+    enabled,
     select: (claims: NutrientClaim[]) =>
       ALLOWED_CLAIMS.flatMap(({ match, label }) => {
         const found = claims.find(c => c.label === match)
