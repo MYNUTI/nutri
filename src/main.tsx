@@ -6,6 +6,7 @@ import './index.css'
 import App from './App.tsx'
 import { FavoritesProvider } from './contexts/FavoritesContext'
 import { normalizeLegacyLocation } from './app/normalizeLegacyLocation'
+import { PageViewTracker } from './app/PageViewTracker'
 
 normalizeLegacyLocation()
 
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <FavoritesProvider>
         <BrowserRouter>
+          <PageViewTracker />
           <App />
         </BrowserRouter>
       </FavoritesProvider>

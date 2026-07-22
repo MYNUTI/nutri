@@ -7,6 +7,13 @@ t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
 y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 })(window, document, "clarity", "script", "xmxois7qx1");`
 
+const GA_ID = 'G-09KBLJZP86'
+
+const gaScript = `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}', { send_page_view: false });`
+
 const trackingScripts = (): Plugin => ({
   name: 'inject-tracking-scripts',
   apply: 'build',
@@ -17,6 +24,16 @@ const trackingScripts = (): Plugin => ({
         tag: 'script',
         attrs: { type: 'text/javascript' },
         children: clarityScript,
+        injectTo: 'head',
+      },
+      {
+        tag: 'script',
+        attrs: { async: true, src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}` },
+        injectTo: 'head',
+      },
+      {
+        tag: 'script',
+        children: gaScript,
         injectTo: 'head',
       },
     ]
